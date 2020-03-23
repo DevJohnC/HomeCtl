@@ -4,11 +4,13 @@ namespace homectl_api_server.Resources
 {
 	public class ResourceKind : Resource
 	{
+		public new static readonly ResourceKind Nothing = new ResourceKind(string.Empty, string.Empty, string.Empty);
+
 		public ResourceKind(string group, string apiVersion, string kindName)
 		{
-			Group = group ?? throw new ArgumentNullException(nameof(group));
-			ApiVersion = apiVersion ?? throw new ArgumentNullException(nameof(apiVersion));
-			KindName = kindName ?? throw new ArgumentNullException(nameof(kindName));
+			Group = group;
+			ApiVersion = apiVersion;
+			KindName = kindName;
 		}
 
 		public string Group { get; }
@@ -20,9 +22,9 @@ namespace homectl_api_server.Resources
 		public Resource Create(ResourceMetadata metadata, ResourceSpec desiredSpec)
 		{
 			if (!Spec.Validate(desiredSpec))
-				return default;
+				return Resource.Nothing;
 
-			return default;
+			return Resource.Nothing;
 		}
 	}
 }

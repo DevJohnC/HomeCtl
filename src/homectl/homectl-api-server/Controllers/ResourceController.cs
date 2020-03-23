@@ -28,19 +28,16 @@ namespace homectl_api_server.Controllers
 			var resourceKind = resourceManager.GetKind(
 				group, apiVersion, kind);
 
-			if (resourceKind == default)
+			if (resourceKind == KindManager.Nothing)
 				return NotFound();
 
 			var resources = resourceKind.GetAll();
 
-			return resources.Select(q => new ResourceDetails
-			{
-				ApiVersion = $"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
-				Kind = resourceKind.Kind.KindName,
-				Metadata = q.Metadata,
-				Spec = q.Spec,
-				State = q.State
-			}).ToList();
+			return resources.Select(q => new ResourceDetails(
+				$"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
+				resourceKind.Kind.KindName, q.Metadata,
+				q.Spec, q.State
+			)).ToList();
 		}
 
 		[HttpGet("{identifier:guid}")]
@@ -58,21 +55,19 @@ namespace homectl_api_server.Controllers
 			var resourceKind = resourceManager.GetKind(
 				group, apiVersion, kind);
 
-			if (resourceKind == default)
+			if (resourceKind == KindManager.Nothing)
 				return NotFound();
 
 			var resource = resourceKind.GetSingle(identifier);
-			if (resource == default)
+			if (resource == Resource.Nothing)
 				return NotFound();
 
 			return new ResourceDetails
-			{
-				ApiVersion = $"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
-				Kind = resourceKind.Kind.KindName,
-				Metadata = resource.Metadata,
-				Spec = resource.Spec,
-				State = resource.State
-			};
+			(
+				$"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
+				resourceKind.Kind.KindName, resource.Metadata,
+				resource.Spec, resource.State
+			);
 		}
 
 		[HttpPost]
@@ -91,7 +86,7 @@ namespace homectl_api_server.Controllers
 			var resourceKind = resourceManager.GetKind(
 				group, apiVersion, kind);
 
-			if (resourceKind == default)
+			if (resourceKind == KindManager.Nothing)
 				return NotFound();
 
 			//  todo: get valiation and creation errors out of this API call and return them to the caller on failure
@@ -99,17 +94,14 @@ namespace homectl_api_server.Controllers
 				return BadRequest();
 
 			var resource = resourceKind.Create(manifest.Metadata, manifest.Spec);
-			if (resource == default)
+			if (resource == Resource.Nothing)
 				return NotFound();
 
-			return CreatedAtAction(nameof(GetSingle), new { identifier = resource.Metadata.Id }, new ResourceDetails
-			{
-				ApiVersion = $"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
-				Kind = resourceKind.Kind.KindName,
-				Metadata = resource.Metadata,
-				Spec = resource.Spec,
-				State = resource.State
-			});
+			return CreatedAtAction(nameof(GetSingle), new { identifier = resource.Metadata.Id }, new ResourceDetails(
+				$"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
+				resourceKind.Kind.KindName, resource.Metadata,
+				resource.Spec, resource.State
+			));
 		}
 
 		[HttpPut("{identifier:guid}")]
@@ -128,11 +120,11 @@ namespace homectl_api_server.Controllers
 			var resourceKind = resourceManager.GetKind(
 				group, apiVersion, kind);
 
-			if (resourceKind == default)
+			if (resourceKind == KindManager.Nothing)
 				return NotFound();
 
 			var resource = resourceKind.GetSingle(identifier);
-			if (resource == default)
+			if (resource == Resource.Nothing)
 				return NotFound();
 
 			if (!resourceKind.Kind.Spec.Validate(manifest.Spec))
@@ -140,14 +132,9 @@ namespace homectl_api_server.Controllers
 
 			resourceKind.UpdateSpec(resource, manifest.Metadata, manifest.Spec);
 
-			return new ResourceDetails
-			{
-				ApiVersion = $"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
-				Kind = resourceKind.Kind.KindName,
-				Metadata = resource.Metadata,
-				Spec = resource.Spec,
-				State = resource.State
-			};
+			return new ResourceDetails($"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
+				resourceKind.Kind.KindName, resource.Metadata, resource.Spec,
+				resource.State);
 		}
 
 		[HttpPatch("{identifier:guid}")]
@@ -166,11 +153,11 @@ namespace homectl_api_server.Controllers
 			var resourceKind = resourceManager.GetKind(
 				group, apiVersion, kind);
 
-			if (resourceKind == default)
+			if (resourceKind == KindManager.Nothing)
 				return NotFound();
 
 			var resource = resourceKind.GetSingle(identifier);
-			if (resource == default)
+			if (resource == Resource.Nothing)
 				return NotFound();
 
 			var manifest = new ResourceManifest
@@ -184,14 +171,8 @@ namespace homectl_api_server.Controllers
 
 			resourceKind.UpdateSpec(resource, manifest.Metadata, manifest.Spec);
 
-			return new ResourceDetails
-			{
-				ApiVersion = $"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
-				Kind = resourceKind.Kind.KindName,
-				Metadata = resource.Metadata,
-				Spec = resource.Spec,
-				State = resource.State
-			};
+			return new ResourceDetails($"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}", resourceKind.Kind.KindName,
+				resource.Metadata, resource.Spec, resource.State);
 		}
 
 		[HttpDelete("{identifier:guid}")]
@@ -208,11 +189,11 @@ namespace homectl_api_server.Controllers
 			var resourceKind = resourceManager.GetKind(
 				group, apiVersion, kind);
 
-			if (resourceKind == default)
+			if (resourceKind == KindManager.Nothing)
 				return NotFound();
 
 			var resource = resourceKind.GetSingle(identifier);
-			if (resource == default)
+			if (resource == Resource.Nothing)
 				return NotFound();
 
 			resourceKind.Remove(resource);
@@ -222,6 +203,15 @@ namespace homectl_api_server.Controllers
 
 		public class ResourceDetails
 		{
+			public ResourceDetails(string apiVersion, string kind, ResourceMetadata metadata, ResourceSpec spec, ResourceState state)
+			{
+				ApiVersion = apiVersion;
+				Kind = kind;
+				Metadata = metadata;
+				Spec = spec;
+				State = state;
+			}
+
 			public string ApiVersion { get; set; }
 
 			public string Kind { get; set; }
@@ -235,9 +225,9 @@ namespace homectl_api_server.Controllers
 
 		public class ResourceManifest
 		{
-			public ResourceMetadata Metadata { get; set; }
+			public ResourceMetadata Metadata { get; set; } = new ResourceMetadata();
 
-			public ResourceSpec Spec { get; set; }
+			public ResourceSpec Spec { get; set; } = new ResourceSpec();
 		}
 	}
 }

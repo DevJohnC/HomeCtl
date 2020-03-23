@@ -43,8 +43,9 @@ namespace homectl_api_server.Application
 		public KindManager GetKind(string group, string apiVersion, string kindName)
 		{
 			var key = (group, apiVersion, kindName);
-			_kinds.TryGetValue(key, out var kind);
-			return kind;
+			if (_kinds.TryGetValue(key, out var kind))
+				return kind;
+			return KindManager.Nothing;
 		}
 	}
 }

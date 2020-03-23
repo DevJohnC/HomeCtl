@@ -7,6 +7,8 @@ namespace homectl_api_server.Application
 {
 	public class KindManager
 	{
+		public static readonly KindManager Nothing = new KindManager(ResourceKind.Nothing);
+
 		public KindManager(ResourceKind kind)
 		{
 			Kind = kind ?? throw new ArgumentNullException(nameof(kind));
@@ -18,7 +20,7 @@ namespace homectl_api_server.Application
 
 		public virtual Resource Create(ResourceMetadata metadata, ResourceSpec spec)
 		{
-			return default;
+			return Resource.Nothing;
 		}
 
 		public IReadOnlyList<Resource> GetAll()
@@ -28,7 +30,8 @@ namespace homectl_api_server.Application
 
 		public Resource GetSingle(Guid id)
 		{
-			return _resources.FirstOrDefault(q => q.Metadata.Id == id);
+			return _resources.FirstOrDefault(q => q.Metadata.Id == id) ??
+				Resource.Nothing;
 		}
 
 		public void UpdateSpec(Resource resource, ResourceMetadata metadata, ResourceSpec spec)

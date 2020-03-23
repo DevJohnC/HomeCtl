@@ -2,5 +2,6 @@
 {
 	public class ResourceState
 	{
+		public static readonly ResourceState Nothing = new ResourceState();
 	}
 }

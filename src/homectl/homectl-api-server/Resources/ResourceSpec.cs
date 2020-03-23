@@ -2,6 +2,8 @@
 {
 	public class ResourceSpec
 	{
+		public static readonly ResourceSpec Nothing = new ResourceSpec();
+
 		public bool Validate(ResourceSpec desiredStateSpec)
 		{
 			return false;
