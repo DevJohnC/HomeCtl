@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-api-server", "homectl-api-server\homectl-api-server.csproj", "{EFFCF133-E47F-494E-86B3-B6714E974399}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-api-server", "homectl-api-server\homectl-api-server.csproj", "{EFFCF133-E47F-494E-86B3-B6714E974399}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "IntegrationTests", "{FBFE8A6E-0F70-4D90-ADDA-C5DB5B00EF4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-api-server-IntegrationTests", "homectl-api-server-IntegrationTests\homectl-api-server-IntegrationTests.csproj", "{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +19,16 @@ Global
 		{EFFCF133-E47F-494E-86B3-B6714E974399}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFFCF133-E47F-494E-86B3-B6714E974399}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFFCF133-E47F-494E-86B3-B6714E974399}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E} = {FBFE8A6E-0F70-4D90-ADDA-C5DB5B00EF4D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {84ADA937-A738-4247-A437-DEFC9D1023FF}

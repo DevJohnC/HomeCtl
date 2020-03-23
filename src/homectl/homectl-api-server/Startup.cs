@@ -1,4 +1,5 @@
 using homectl_api_server.Application;
+using homectl_api_server.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +24,11 @@ namespace homectl_api_server
 				.AddSingleton<ResourceManager>()
 				.AddGrpc()
 				.Services.AddControllers()
-					.AddNewtonsoftJson();
+					.AddNewtonsoftJson(jsonConfig =>
+					{
+						foreach (var converter in ResourceController.JsonConverters)
+							jsonConfig.SerializerSettings.Converters.Add(converter);
+					});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

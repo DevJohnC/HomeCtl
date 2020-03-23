@@ -3,6 +3,8 @@ using homectl_api_server.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +16,11 @@ namespace homectl_api_server.Controllers
 	[Route("~/apis/{group}/{apiVersion}/{kind}")]
 	public class ResourceController : Microsoft.AspNetCore.Mvc.Controller
 	{
+		public readonly static JsonConverter[] JsonConverters = new JsonConverter[]
+		{
+			new ResourceManifestJsonConverter()
+		};
+
 		[HttpGet]
 		[Consumes(MediaTypeNames.Application.Json)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
@@ -160,11 +167,7 @@ namespace homectl_api_server.Controllers
 			if (resource == Resource.Nothing)
 				return NotFound();
 
-			var manifest = new ResourceManifest
-			{
-				Metadata = resource.Metadata,
-				Spec = resource.Spec
-			};
+			var manifest = new ResourceManifest(resource.Metadata, resource.Spec);
 			patchDocument.ApplyTo(manifest, ModelState);
 			if (!ModelState.IsValid || !resourceKind.Kind.Spec.Validate(manifest.Spec))
 				return BadRequest(ModelState);
@@ -225,9 +228,31 @@ namespace homectl_api_server.Controllers
 
 		public class ResourceManifest
 		{
-			public ResourceMetadata Metadata { get; set; } = new ResourceMetadata();
+			public ResourceManifest(ResourceMetadata metadata, ResourceSpec spec)
+			{
+				Metadata = metadata;
+				Spec = spec;
+			}
 
-			public ResourceSpec Spec { get; set; } = new ResourceSpec();
+			public ResourceMetadata Metadata { get; set; }
+
+			public ResourceSpec Spec { get; set; } 
+		}
+
+		public class ResourceManifestJsonConverter : JsonConverter<ResourceManifest>
+		{
+			public override ResourceManifest ReadJson(JsonReader reader, Type objectType, ResourceManifest existingValue, bool hasExistingValue, JsonSerializer serializer)
+			{
+				var jsonObj = JToken.ReadFrom(reader);
+				return new ResourceManifest(
+					ResourceMetadata.FromJson(jsonObj["metadata"]),
+					ResourceSpec.FromJson(jsonObj["spec"]));
+			}
+
+			public override void WriteJson(JsonWriter writer, ResourceManifest value, JsonSerializer serializer)
+			{
+				throw new NotImplementedException();
+			}
 		}
 	}
 }
