@@ -20,12 +20,15 @@ namespace homectl_api_server.Application
 
 		public readonly static ResourceKind DeviceKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "device");
 
+		public readonly static ResourceKind NodeKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "node");
+
 		public ResourceManager()
 		{
 			CreateKind(ResourceKind, new KindManager(ResourceKind));
 			CreateKind(KindKind, new KindResourceManager(KindKind, this));
 			CreateKind(ControllerKind, new ControllerResourceManager(ControllerKind));
 			CreateKind(DeviceKind, new DeviceResourceManager(DeviceKind));
+			CreateKind(NodeKind, new KindManager(NodeKind));
 		}
 
 		private readonly Dictionary<(string group, string apiVersion, string kindName), KindManager> _kinds =
