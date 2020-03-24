@@ -19,12 +19,10 @@ namespace homectl_api_server_IntegrationTests
 		id: ""FBEF67E3-6AFA-4345-9286-69FA24FA9862""
 	},
 	spec: {
-		selector: {
-			matchNode: ""C090D5DC-962F-41FD-882E-7C77D52271B2""
-		}
+		hostname: ""my-hostname""
 	}
 }", Encoding.UTF8, "application/json");
-				var response = await client.PostAsync("/apis/core/v1alpha1/controller", content);
+				var response = await client.PostAsync("/apis/core/v1alpha1/node", content);
 
 				response.EnsureSuccessStatusCode();
 			}

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace homectl_api_server.Extensions
 {
@@ -78,7 +79,7 @@ namespace homectl_api_server.Extensions
 					var found = false;
 					foreach (JProperty property in json)
 					{
-						if (propertyName == requiredPropertyName)
+						if (property.Name == requiredPropertyName)
 						{
 							found = true;
 							break;
@@ -104,7 +105,24 @@ namespace homectl_api_server.Extensions
 				return false;
 			}
 
+			if (!string.IsNullOrWhiteSpace(schema.Format) && !ValidateStringFormat(json.Value<string>(), schema.Format))
+			{
+				modelState.AddModelError(propertyName, "Invalid string format");
+				return false;
+			}
+
 			return true;
+		}
+
+		private static bool ValidateStringFormat(string value, string format)
+		{
+			switch (format)
+			{
+				case "uuid":
+					return Guid.TryParse(value, out var _);
+				default:
+					return false;
+			}
 		}
 
 		private static bool ValidateProperty(this OpenApiSchema schema, JProperty property, ModelStateDictionary modelState,

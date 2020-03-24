@@ -17,11 +17,15 @@ namespace homectl_api_server.Resources
 
 		public static T FromJson(JToken jsonObject)
 		{
-			return new T { _json = jsonObject };
+			var obj = new T { _json = jsonObject };
+			obj.PopulateMembers(jsonObject ?? _emptyJson);
+			return obj;
 		}
 
 		private JToken _json = _emptyJson;
 
-		JToken IJsonDocument.Json => _json;
+		JToken IJsonDocument.Json => _json ?? _emptyJson;
+
+		protected abstract void PopulateMembers(JToken jsonObject);
 	}
 }
