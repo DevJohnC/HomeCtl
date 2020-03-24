@@ -25,6 +25,8 @@ namespace homectl_api_server_IntegrationTests
 				var response = await client.PostAsync("/apis/core/v1alpha1/node", content);
 
 				response.EnsureSuccessStatusCode();
+
+				var fullData = await response.Content.ReadAsStringAsync();
 			}
 		}
 	}

@@ -1,4 +1,5 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using homectl_api_server.Application;
+using Microsoft.OpenApi.Models;
 using System.Collections.Generic;
 
 namespace homectl_api_server.Resources
@@ -37,5 +38,10 @@ namespace homectl_api_server.Resources
 					}
 				}
 			});
+
+		public Controller(ResourceMetadata metadata, ResourceSpec spec, ResourceState state) :
+			base(ResourceManager.ControllerKind, metadata, spec, state)
+		{
+		}
 	}
 }

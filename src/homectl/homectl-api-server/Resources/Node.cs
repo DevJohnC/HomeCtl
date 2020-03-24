@@ -1,4 +1,5 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using homectl_api_server.Application;
+using Microsoft.OpenApi.Models;
 using System.Collections.Generic;
 
 namespace homectl_api_server.Resources
@@ -25,5 +26,10 @@ namespace homectl_api_server.Resources
 				},
 				Required = new SortedSet<string>(new[] { "hostname" })
 			});
+
+		public Node(ResourceMetadata metadata, ResourceSpec spec, ResourceState state) :
+			base(ResourceManager.NodeKind, metadata, spec, state)
+		{
+		}
 	}
 }

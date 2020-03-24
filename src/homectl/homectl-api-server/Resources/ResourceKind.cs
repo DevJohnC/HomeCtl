@@ -1,11 +1,14 @@
-﻿namespace homectl_api_server.Resources
+﻿using homectl_api_server.Application;
+
+namespace homectl_api_server.Resources
 {
 	public class ResourceKind : Resource
 	{
 		public new static readonly ResourceKind Nothing = new ResourceKind(string.Empty, string.Empty, string.Empty, ResourceSchema.Nothing);
 
 		public ResourceKind(string group, string apiVersion, string kindName,
-			ResourceSchema schema)
+			ResourceSchema schema) :
+			base(ResourceManager.KindKind, ResourceMetadata.Nothing, ResourceSpec.Nothing, ResourceState.Nothing)
 		{
 			Group = group;
 			ApiVersion = apiVersion;

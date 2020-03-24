@@ -18,6 +18,11 @@ namespace homectl_api_server.Application
 
 		private readonly List<Resource> _resources = new List<Resource>();
 
+		protected void Add(Resource resource)
+		{
+			_resources.Add(resource);
+		}
+
 		public virtual Resource Create(ResourceMetadata metadata, ResourceSpec spec)
 		{
 			return Resource.Nothing;

@@ -19,7 +19,8 @@ namespace homectl_api_server.Controllers
 	{
 		public readonly static JsonConverter[] JsonConverters = new JsonConverter[]
 		{
-			new ResourceManifestJsonConverter()
+			new ResourceManifestJsonConverter(),
+			new ResourceDetailsJsonConverter()
 		};
 
 		[HttpGet]
@@ -106,10 +107,12 @@ namespace homectl_api_server.Controllers
 			if (resource == Resource.Nothing)
 				return NotFound();
 
-			return CreatedAtAction(nameof(GetSingle), new { identifier = resource.Metadata.Id }, new ResourceDetails(
-				$"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
-				resourceKind.Kind.KindName, resource.Metadata,
-				resource.Spec, resource.State
+			return CreatedAtAction(nameof(GetSingle),
+				new { group = group, apiVersion = apiVersion, kind = kind, identifier = resource.Metadata.Id },
+				new ResourceDetails(
+					$"{resourceKind.Kind.Group}/{resourceKind.Kind.ApiVersion}",
+					resourceKind.Kind.KindName, resource.Metadata,
+					resource.Spec, resource.State
 			));
 		}
 
@@ -248,7 +251,7 @@ namespace homectl_api_server.Controllers
 			public ResourceSpec Spec { get; set; } 
 		}
 
-		public class ResourceManifestJsonConverter : JsonConverter<ResourceManifest>
+		private class ResourceManifestJsonConverter : JsonConverter<ResourceManifest>
 		{
 			public override ResourceManifest ReadJson(JsonReader reader, Type objectType, ResourceManifest existingValue, bool hasExistingValue, JsonSerializer serializer)
 			{
@@ -261,6 +264,36 @@ namespace homectl_api_server.Controllers
 			public override void WriteJson(JsonWriter writer, ResourceManifest value, JsonSerializer serializer)
 			{
 				throw new NotImplementedException();
+			}
+		}
+
+		private class ResourceDetailsJsonConverter : JsonConverter<ResourceDetails>
+		{
+			public override ResourceDetails ReadJson(JsonReader reader, Type objectType, ResourceDetails existingValue, bool hasExistingValue, JsonSerializer serializer)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override void WriteJson(JsonWriter writer, ResourceDetails value, JsonSerializer serializer)
+			{
+				writer.WriteStartObject();
+
+				writer.WritePropertyName(nameof(value.ApiVersion));
+				writer.WriteValue(value.ApiVersion);
+
+				writer.WritePropertyName(nameof(value.Kind));
+				writer.WriteValue(value.Kind);
+
+				writer.WritePropertyName(nameof(value.Metadata));
+				writer.WriteRawValue(((IJsonDocument)value.Metadata).Json.ToString());
+
+				writer.WritePropertyName(nameof(value.Spec));
+				writer.WriteRawValue(((IJsonDocument)value.Spec).Json.ToString());
+
+				writer.WritePropertyName(nameof(value.State));
+				writer.WriteRawValue(((IJsonDocument)value.State).Json.ToString());
+
+				writer.WriteEndObject();
 			}
 		}
 	}

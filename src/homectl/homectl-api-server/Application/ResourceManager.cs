@@ -28,7 +28,7 @@ namespace homectl_api_server.Application
 			CreateKind(KindKind, new KindResourceManager(KindKind, this));
 			CreateKind(ControllerKind, new ControllerResourceManager(ControllerKind));
 			CreateKind(DeviceKind, new DeviceResourceManager(DeviceKind));
-			CreateKind(NodeKind, new KindManager(NodeKind));
+			CreateKind(NodeKind, new NodeResourceManager(NodeKind));
 		}
 
 		private readonly Dictionary<(string group, string apiVersion, string kindName), KindManager> _kinds =
