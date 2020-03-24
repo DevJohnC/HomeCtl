@@ -12,15 +12,15 @@ namespace homectl_api_server.Application
 		public const string CoreKindGroup = "core";
 		public const string AlphaKindVersion = "v1alpha1";
 
-		public readonly static ResourceKind ResourceKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "resource");
+		public readonly static ResourceKind ResourceKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "resource", ResourceSchema.Nothing);
 
-		public readonly static ResourceKind KindKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "kind");
+		public readonly static ResourceKind KindKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "kind", ResourceSchema.Nothing);
 
-		public readonly static ResourceKind ControllerKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "controller");
+		public readonly static ResourceKind ControllerKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "controller", Controller.SCHEMA);
 
-		public readonly static ResourceKind DeviceKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "device");
+		public readonly static ResourceKind DeviceKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "device", ResourceSchema.Nothing);
 
-		public readonly static ResourceKind NodeKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "node");
+		public readonly static ResourceKind NodeKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "node", Node.SCHEMA);
 
 		public ResourceManager()
 		{

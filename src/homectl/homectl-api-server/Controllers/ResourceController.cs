@@ -1,4 +1,5 @@
 ﻿using homectl_api_server.Application;
+using homectl_api_server.Extensions;
 using homectl_api_server.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -97,8 +98,8 @@ namespace homectl_api_server.Controllers
 				return NotFound();
 
 			//  todo: get valiation and creation errors out of this API call and return them to the caller on failure
-			if (!resourceKind.Kind.Spec.Validate(manifest.Spec))
-				return BadRequest();
+			if (!resourceKind.Kind.Schema.Spec.Validate(manifest.Spec, ModelState))
+				return BadRequest(ModelState);
 
 			var resource = resourceKind.Create(manifest.Metadata, manifest.Spec);
 			if (resource == Resource.Nothing)
@@ -134,8 +135,8 @@ namespace homectl_api_server.Controllers
 			if (resource == Resource.Nothing)
 				return NotFound();
 
-			if (!resourceKind.Kind.Spec.Validate(manifest.Spec))
-				return BadRequest();
+			if (!resourceKind.Kind.Schema.Spec.Validate(manifest.Spec, ModelState))
+				return BadRequest(ModelState);
 
 			resourceKind.UpdateSpec(resource, manifest.Metadata, manifest.Spec);
 
@@ -169,7 +170,7 @@ namespace homectl_api_server.Controllers
 
 			var manifest = new ResourceManifest(resource.Metadata, resource.Spec);
 			patchDocument.ApplyTo(manifest, ModelState);
-			if (!ModelState.IsValid || !resourceKind.Kind.Spec.Validate(manifest.Spec))
+			if (!ModelState.IsValid || !resourceKind.Kind.Schema.Spec.Validate(manifest.Spec, ModelState))
 				return BadRequest(ModelState);
 
 			resourceKind.UpdateSpec(resource, manifest.Metadata, manifest.Spec);

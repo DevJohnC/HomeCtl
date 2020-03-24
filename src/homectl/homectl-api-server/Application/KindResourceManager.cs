@@ -1,4 +1,5 @@
 ﻿using homectl_api_server.Resources;
+using Microsoft.OpenApi.Models;
 
 namespace homectl_api_server.Application
 {
@@ -17,7 +18,7 @@ namespace homectl_api_server.Application
 
 		public override Resource Create(ResourceMetadata metadata, ResourceSpec spec)
 		{
-			var kind = new ResourceKind(string.Empty, string.Empty, string.Empty);
+			var kind = new ResourceKind(string.Empty, string.Empty, string.Empty, ResourceSchema.Nothing);
 			var manager = new KindManager(kind);
 			_resourceManager.CreateKind(kind, manager);
 			return kind;
