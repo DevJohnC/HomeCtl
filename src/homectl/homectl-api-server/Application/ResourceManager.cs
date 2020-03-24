@@ -24,8 +24,10 @@ namespace homectl_api_server.Application
 
 		public ResourceManager()
 		{
+			_kindResourceManager = new KindResourceManager(KindKind, this);
+
 			CreateKind(ResourceKind, new KindManager(ResourceKind));
-			CreateKind(KindKind, new KindResourceManager(KindKind, this));
+			CreateKind(KindKind, _kindResourceManager);
 			CreateKind(ControllerKind, new ControllerResourceManager(ControllerKind));
 			CreateKind(DeviceKind, new DeviceResourceManager(DeviceKind));
 			CreateKind(NodeKind, new NodeResourceManager(NodeKind));
@@ -33,6 +35,7 @@ namespace homectl_api_server.Application
 
 		private readonly Dictionary<(string group, string apiVersion, string kindName), KindManager> _kinds =
 			new Dictionary<(string group, string apiVersion, string kindName), KindManager>();
+		private readonly KindResourceManager _kindResourceManager;
 
 		public void CreateKind(ResourceKind resourceKind, KindManager manager)
 		{
@@ -41,6 +44,7 @@ namespace homectl_api_server.Application
 
 			var key = (resourceKind.Group, resourceKind.ApiVersion, resourceKind.KindName);
 			_kinds.Add(key, manager);
+			_kindResourceManager.Add(manager.Kind);
 		}
 
 		public KindManager GetKind(string group, string apiVersion, string kindName)
