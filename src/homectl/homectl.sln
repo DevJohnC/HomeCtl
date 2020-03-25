@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "Integra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-api-server-IntegrationTests", "homectl-api-server-IntegrationTests\homectl-api-server-IntegrationTests.csproj", "{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-api-client", "homectl-api-client\homectl-api-client.csproj", "{DF2229FE-4764-401A-934F-1E0F6EDCC6DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF2229FE-4764-401A-934F-1E0F6EDCC6DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF2229FE-4764-401A-934F-1E0F6EDCC6DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF2229FE-4764-401A-934F-1E0F6EDCC6DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF2229FE-4764-401A-934F-1E0F6EDCC6DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
