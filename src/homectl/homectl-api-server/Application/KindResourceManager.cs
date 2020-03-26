@@ -1,7 +1,7 @@
-﻿using homectl_api_server.Resources;
+﻿using homectl.Resources;
 using Microsoft.OpenApi.Models;
 
-namespace homectl_api_server.Application
+namespace homectl.Application
 {
 	/// <summary>
 	/// Manages kind resources.

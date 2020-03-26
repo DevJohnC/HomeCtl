@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.Net.Client" Version="2.28.0-pre2" />
+    <ProjectReference Include="..\homectl-api-client\homectl-api-client.csproj" />
   </ItemGroup>
 
 </Project>

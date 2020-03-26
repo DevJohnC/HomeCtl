@@ -1,8 +1,8 @@
-﻿using homectl_api_server.Application;
+﻿using homectl.Application;
 using Microsoft.OpenApi.Models;
 using System.Collections.Generic;
 
-namespace homectl_api_server.Resources
+namespace homectl.Resources
 {
 	/// <summary>
 	/// A controller is responsible for applying state changes to resources.

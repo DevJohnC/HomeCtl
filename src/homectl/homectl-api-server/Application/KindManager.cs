@@ -1,9 +1,9 @@
-﻿using homectl_api_server.Resources;
+﻿using homectl.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace homectl_api_server.Application
+namespace homectl.Application
 {
 	public class KindManager
 	{

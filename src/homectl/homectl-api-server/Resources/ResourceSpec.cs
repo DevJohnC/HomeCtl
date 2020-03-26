@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace homectl_api_server.Resources
+namespace homectl.Resources
 {
 	public class ResourceSpec : ResourceDocument<ResourceSpec>
 	{

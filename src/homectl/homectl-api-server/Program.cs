@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace homectl_api_server
+namespace homectl
 {
 	public class Program
 	{

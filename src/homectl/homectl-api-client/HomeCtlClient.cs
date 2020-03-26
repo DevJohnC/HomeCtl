@@ -1,7 +1,7 @@
 ﻿using Grpc.Net.Client;
 using System.Net.Http;
 
-namespace homectl_api_client
+namespace homectl
 {
 	public class HomeCtlClient
 	{

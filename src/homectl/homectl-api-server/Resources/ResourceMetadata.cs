@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 
-namespace homectl_api_server.Resources
+namespace homectl.Resources
 {
 	public class ResourceMetadata : ResourceDocument<ResourceMetadata>
 	{

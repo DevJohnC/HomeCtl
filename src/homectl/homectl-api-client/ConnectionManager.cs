@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace homectl_api_client
+namespace homectl
 {
 	public class ConnectionManager
 	{

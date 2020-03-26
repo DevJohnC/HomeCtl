@@ -1,6 +1,6 @@
-﻿using homectl_api_server.Resources;
+﻿using homectl.Resources;
 
-namespace homectl_api_server.Application
+namespace homectl.Application
 {
 	/// <summary>
 	/// Specialization of KindManager for managing devices.

@@ -1,4 +1,4 @@
-﻿namespace homectl_api_server.Resources
+﻿namespace homectl.Resources
 {
 	public class Resource
 	{

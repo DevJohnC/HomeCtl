@@ -1,6 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 
-namespace homectl_api_server.Resources
+namespace homectl.Resources
 {
 	public class ResourceSchema
 	{

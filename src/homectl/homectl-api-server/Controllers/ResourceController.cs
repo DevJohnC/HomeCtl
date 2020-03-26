@@ -1,6 +1,6 @@
-﻿using homectl_api_server.Application;
-using homectl_api_server.Extensions;
-using homectl_api_server.Resources;
+﻿using homectl.Application;
+using homectl.Extensions;
+using homectl.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 
-namespace homectl_api_server.Controllers
+namespace homectl.Controllers
 {
 	[ApiController]
 	[Route("~/apis/{group}/{apiVersion}/{kind}")]

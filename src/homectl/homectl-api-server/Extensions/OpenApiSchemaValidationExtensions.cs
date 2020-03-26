@@ -1,10 +1,10 @@
-﻿using homectl_api_server.Resources;
+﻿using homectl.Resources;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Linq;
 using System;
 
-namespace homectl_api_server.Extensions
+namespace homectl.Extensions
 {
 	public static class OpenApiSchemaValidationExtensions
 	{

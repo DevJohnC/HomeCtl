@@ -1,6 +1,6 @@
-﻿using homectl_api_server.Application;
+﻿using homectl.Application;
 
-namespace homectl_api_server.Resources
+namespace homectl.Resources
 {
 	public class ResourceKind : Resource
 	{

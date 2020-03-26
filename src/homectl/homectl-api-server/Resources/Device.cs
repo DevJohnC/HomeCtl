@@ -1,4 +1,4 @@
-﻿namespace homectl_api_server.Resources
+﻿namespace homectl.Resources
 {
 	/// <summary>
 	/// Devices are hardware and software with state we want to control.

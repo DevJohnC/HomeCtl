@@ -1,6 +1,6 @@
-﻿using homectl_api_server.Resources;
+﻿using homectl.Resources;
 
-namespace homectl_api_server.Application
+namespace homectl.Application
 {
 	public class NodeResourceManager : KindManager
 	{

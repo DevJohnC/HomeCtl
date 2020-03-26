@@ -1,8 +1,8 @@
-﻿using homectl_api_server.Resources;
+﻿using homectl.Resources;
 using System;
 using System.Collections.Generic;
 
-namespace homectl_api_server.Application
+namespace homectl.Application
 {
 	/// <summary>
 	/// Manages instances of resources.

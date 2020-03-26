@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace homectl_api_client
+namespace homectl
 {
 	public class Host
 	{

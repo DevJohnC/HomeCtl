@@ -1,4 +1,4 @@
-﻿namespace homectl_api_client.Controllers
+﻿namespace homectl.Controllers
 {
 	public class SpecChangeRequest
 	{
