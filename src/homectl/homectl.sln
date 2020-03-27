@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-host", "homectl-hos
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-client", "homectl-client\homectl-client.csproj", "{8CE4DE30-8F67-4A36-A610-AEFCB631E7CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-host-testing", "homectl-host-testing\homectl-host-testing.csproj", "{1A86FFE0-A1FA-4F4F-8F28-16DCEC4C01EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-host-testing", "homectl-host-testing\homectl-host-testing.csproj", "{1A86FFE0-A1FA-4F4F-8F28-16DCEC4C01EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-host-IntegrationTests", "homectl-host-IntegrationTests\homectl-host-IntegrationTests.csproj", "{E8355757-7FBE-4335-8BC7-78B441D516EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,12 +49,17 @@ Global
 		{1A86FFE0-A1FA-4F4F-8F28-16DCEC4C01EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A86FFE0-A1FA-4F4F-8F28-16DCEC4C01EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A86FFE0-A1FA-4F4F-8F28-16DCEC4C01EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8355757-7FBE-4335-8BC7-78B441D516EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8355757-7FBE-4335-8BC7-78B441D516EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8355757-7FBE-4335-8BC7-78B441D516EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8355757-7FBE-4335-8BC7-78B441D516EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1FEBE35B-C777-422D-BDE9-F2ACAF1DD39E} = {FBFE8A6E-0F70-4D90-ADDA-C5DB5B00EF4D}
+		{E8355757-7FBE-4335-8BC7-78B441D516EE} = {FBFE8A6E-0F70-4D90-ADDA-C5DB5B00EF4D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {84ADA937-A738-4247-A437-DEFC9D1023FF}

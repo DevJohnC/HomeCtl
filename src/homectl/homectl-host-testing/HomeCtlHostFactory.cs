@@ -3,7 +3,7 @@
 namespace homectl
 {
 	public class HomeCtlHostFactory<TStartup> : IDisposable
-		where TStartup : HomeCtlStartup
+		where TStartup : HomeCtlStartup, new()
 	{
 		public HomeCtlHostFactory()
 		{
@@ -12,11 +12,16 @@ namespace homectl
 
 		private readonly HomeCtlHost _host;
 
+		protected virtual void Configure(HomeCtlHostBuilder builder)
+		{
+		}
+
 		private HomeCtlHost BuildHost()
 		{
-			return HomeCtlHost.CreateBuilder()
-				.UseStartup<TStartup>()
-				.Build();
+			var builder = HomeCtlHost.CreateBuilder()
+				.UseStartup<TStartup>();
+			Configure(builder);
+			return builder.Build();
 		}
 
 		#region IDisposable Support

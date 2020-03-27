@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace homectl.Devices
 {
@@ -6,7 +7,7 @@ namespace homectl.Devices
 	{
 		event EventHandler<DeviceAvailabilityChangeEventArgs> AvailableDevicesChanged;
 
-		Device AvailableDevices { get; }
+		IReadOnlyList<Device> AvailableDevices { get; }
 	}
 
 	public class DeviceAvailabilityChangeEventArgs : EventArgs
@@ -23,8 +24,8 @@ namespace homectl.Devices
 
 		public enum OperationType
 		{
-			Added,
-			Removed
+			DeviceAdded,
+			DeviceRemoved
 		}
 	}
 }

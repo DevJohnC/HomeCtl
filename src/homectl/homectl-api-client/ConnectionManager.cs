@@ -1,10 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace homectl
 {
 	public class ConnectionManager : IDisposable
 	{
-		public event EventHandler<ConnectionEventArgs> Connected;
+		public event EventHandler<ConnectionEventArgs>? Connected;
+
+		public ConnectionManager(params ApiServerEndpoint[] serverEndpoints)
+		{
+			_serverEndpoints = serverEndpoints;
+		}
+
+		public ConnectionManager(IEnumerable<ApiServerEndpoint> serverEndpoints) :
+			this(serverEndpoints.ToArray())
+		{
+		}
+
+		private readonly ApiServerEndpoint[] _serverEndpoints;
 
 		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls

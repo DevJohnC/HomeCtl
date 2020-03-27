@@ -1,5 +1,5 @@
-using homectl_api_server.Application;
-using homectl_api_server.Controllers;
+using homectl.Application;
+using homectl.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

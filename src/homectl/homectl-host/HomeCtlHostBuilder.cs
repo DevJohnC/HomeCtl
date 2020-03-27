@@ -15,6 +15,11 @@ namespace homectl
 			return this;
 		}
 
+		public HomeCtlHostBuilder UseServerEndpoint(ApiServerEndpoint serverEndpoint)
+		{
+			return this;
+		}
+
 		public HomeCtlHostBuilder AddDevices(IDeviceProvider deviceProvider)
 		{
 			_deviceProviders.Add(deviceProvider);
