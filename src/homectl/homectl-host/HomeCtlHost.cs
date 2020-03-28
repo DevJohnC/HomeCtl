@@ -1,18 +1,15 @@
 ﻿using homectl.Controllers;
 using homectl.Devices;
-using System;
+using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace homectl
 {
-	public class HomeCtlHost : IDisposable
+	public class HomeCtlHost : IHostedService
 	{
-		public static HomeCtlHostBuilder CreateBuilder()
-		{
-			return new HomeCtlHostBuilder();
-		}
-
 		public HomeCtlHost(
 			ConnectionManager connectionManager,
 			IEnumerable<Controller> controllers,
@@ -22,8 +19,20 @@ namespace homectl
 			ConnectionManager = connectionManager;
 			Controllers = controllers?.ToArray() ?? new Controller[0];
 			DeviceProviders = deviceProviders?.ToArray() ?? new IDeviceProvider[0];
+		}
 
+		public ConnectionManager ConnectionManager { get; }
+		public Controller[] Controllers { get; }
+		public IDeviceProvider[] DeviceProviders { get; }
+
+		public async Task StartAsync(CancellationToken cancellationToken = default)
+		{
 			AttachEventHandlers(ConnectionManager);
+		}
+
+		public async Task StopAsync(CancellationToken cancellationToken = default)
+		{
+			DetachEventHandlers(ConnectionManager);
 		}
 
 		private void AttachEventHandlers(ConnectionManager connectionManager)
@@ -40,39 +49,5 @@ namespace homectl
 		{
 			//  connect to grpc event stream
 		}
-
-		public ConnectionManager ConnectionManager { get; }
-		public Controller[] Controllers { get; }
-		public IDeviceProvider[] DeviceProviders { get; }
-
-		#region IDisposable Support
-		private bool disposedValue = false; // To detect redundant calls
-
-		private void DisposeManagedResources()
-		{
-			DetachEventHandlers(ConnectionManager);
-			ConnectionManager.Dispose();
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (!disposedValue)
-			{
-				if (disposing)
-				{
-					DisposeManagedResources();
-				}
-
-				disposedValue = true;
-			}
-		}
-
-		// This code added to correctly implement the disposable pattern.
-		public void Dispose()
-		{
-			// Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-			Dispose(true);
-		}
-		#endregion
 	}
 }

@@ -1,10 +1,13 @@
 ﻿using homectl;
 using homectl.Devices;
+using homectl.Testing;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace homectl_host_IntegrationTests.Devices
 {
@@ -26,7 +29,7 @@ namespace homectl_host_IntegrationTests.Devices
 
 		private class FakeDeviceProvider : IDeviceProvider
 		{
-			private readonly List<Device> _devices;
+			private readonly List<Device> _devices = new List<Device>();
 
 			public IReadOnlyList<Device> AvailableDevices => _devices;
 
@@ -41,7 +44,7 @@ namespace homectl_host_IntegrationTests.Devices
 			}
 		}
 
-		private class DeviceHost : HomeCtlHostFactory<DeviceHost.HostStartup>
+		private class DeviceHost : HomeCtlHostFactory<object>
 		{
 			private readonly HttpClient _httpClient;
 			private readonly FakeDeviceProvider _deviceProvider;
@@ -52,16 +55,23 @@ namespace homectl_host_IntegrationTests.Devices
 				_deviceProvider = deviceProvider;
 			}
 
-			protected override void Configure(HomeCtlHostBuilder builder)
+			protected override void ConfigureWebHost(IWebHostBuilder builder)
 			{
-				builder
-					.UseServerEndpoint(new ConfiguredHttpClientEndpoint(_httpClient))
-					.AddDevices(_deviceProvider);
+				base.ConfigureWebHost(builder);
+
+				builder.ConfigureServices(services =>
+				{
+					services.AddSingleton<ApiServerEndpoint>(new ConfiguredHttpClientEndpoint(_httpClient));
+					services.AddSingleton<IDeviceProvider>(_deviceProvider);
+				});
 			}
 
-			public class HostStartup : HomeCtlStartup
-			{
-			}
+			//protected override void Configure(HomeCtlHostBuilder builder)
+			//{
+			//	builder
+			//		.UseServerEndpoint(new ConfiguredHttpClientEndpoint(_httpClient))
+			//		.AddDevices(_deviceProvider);
+			//}
 		}
 	}
 }
