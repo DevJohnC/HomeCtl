@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\homectl-api-server\homectl-api-server.csproj" />
-    <ProjectReference Include="..\homectl-host-testing\homectl-host-testing.csproj" />
     <ProjectReference Include="..\homectl-host\homectl-host.csproj" />
   </ItemGroup>
 

@@ -19,7 +19,7 @@ namespace homectl
 		{
 			_grpcChannel = GrpcChannel.ForAddress(
 				HttpClient.BaseAddress,
-				new GrpcChannelOptions { HttpClient = HttpClient }
+				new GrpcChannelOptions { HttpClient = HttpClient, DisposeHttpClient = false }
 				);
 			return _grpcChannel;
 		}

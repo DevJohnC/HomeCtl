@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace homectl
 {
@@ -18,7 +20,32 @@ namespace homectl
 		{
 		}
 
+		public async Task Run(CancellationToken cancellationToken = default)
+		{
+			while (!cancellationToken.IsCancellationRequested)
+			{
+				if (!_isConnected)
+				{
+					foreach (var serverEndpoint in _serverEndpoints)
+					{
+						var result = await serverEndpoint.AttemptConnection(cancellationToken);
+						if (result.Success && result.HttpClient != null)
+						{
+							Connected?.Invoke(this, new ConnectionEventArgs(
+								new HomeCtlClient(result.HttpClient)
+								));
+							_isConnected = true;
+						}
+					}
+				}
+
+				await Task.Delay(1000);
+			}
+		}
+
 		private readonly ApiServerEndpoint[] _serverEndpoints;
+
+		private bool _isConnected;
 
 		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls

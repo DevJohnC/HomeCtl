@@ -18,7 +18,7 @@ namespace homectl
 					{
 						options.ConfigureEndpointDefaults(listenOpts =>
 						{
-							listenOpts.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2;
+							listenOpts.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
 						});
 					});
 					webBuilder.UseStartup<Startup>();

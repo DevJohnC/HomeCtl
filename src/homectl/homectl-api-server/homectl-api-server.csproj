@@ -14,4 +14,8 @@
     <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.2.0-preview.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\homectl-api-shared\homectl-api-shared.csproj" />
+  </ItemGroup>
+
 </Project>
