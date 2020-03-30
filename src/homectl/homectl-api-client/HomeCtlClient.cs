@@ -12,8 +12,13 @@ namespace homectl
 
 		public HttpClient HttpClient { get; }
 
-		private GrpcChannel _grpcChannel;
+		private GrpcChannel? _grpcChannel;
 		public GrpcChannel GrpcChannel => _grpcChannel ?? CreateGrpcChannel();
+
+		public ResourceClient<TResource> GetResourceClient<TResource>(ResourceType<TResource> resourceType)
+		{
+			return default;
+		}
 
 		private GrpcChannel CreateGrpcChannel()
 		{

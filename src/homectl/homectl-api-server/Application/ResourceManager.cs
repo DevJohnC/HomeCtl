@@ -22,6 +22,8 @@ namespace homectl.Application
 
 		public readonly static ResourceKind NodeKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "node", Node.SCHEMA);
 
+		public readonly static ResourceKind HostKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "host", ResourceSchema.Nothing);
+
 		public ResourceManager()
 		{
 			_kindResourceManager = new KindResourceManager(KindKind, this);
@@ -31,6 +33,7 @@ namespace homectl.Application
 			CreateKind(ControllerKind, new ControllerResourceManager(ControllerKind));
 			CreateKind(DeviceKind, new DeviceResourceManager(DeviceKind));
 			CreateKind(NodeKind, new NodeResourceManager(NodeKind));
+			CreateKind(HostKind, new NodeResourceManager(HostKind));
 		}
 
 		private readonly Dictionary<(string group, string apiVersion, string kindName), KindManager> _kinds =

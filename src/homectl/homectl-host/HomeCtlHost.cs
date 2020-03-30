@@ -1,5 +1,6 @@
 ﻿using homectl.Controllers;
 using homectl.Devices;
+using homectl.Resources;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,8 @@ namespace homectl
 {
 	public class HomeCtlHost : IHostedService
 	{
+		private readonly HostResource _hostRecord = new HostResource();
+
 		public HomeCtlHost(
 			ConnectionManager connectionManager,
 			IEnumerable<Controller> controllers,
@@ -51,9 +54,9 @@ namespace homectl
 		{
 			try
 			{
-				//  request our own IP as the server sees it
 				var myIpAddress = await GetMyIpAddress(e.Client);
-				//  upsert our host record, complete with our own IP address
+				var resourceClient = e.Client.GetResourceClient(ResourceType.Host);
+				await resourceClient.Save(_hostRecord);
 				//  connect to grpc event stream
 			}
 			catch (Exception ex)
