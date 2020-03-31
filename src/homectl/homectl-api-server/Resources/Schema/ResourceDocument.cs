@@ -13,18 +13,18 @@ namespace homectl.Resources
 	public abstract class ResourceDocument<T> : IJsonDocument
 		where T : ResourceDocument<T>, new()
 	{
-		private readonly static JToken _emptyJson = new JObject();
-
 		public static T FromJson(JToken jsonObject)
 		{
 			var obj = new T { _json = jsonObject };
-			obj.PopulateMembers(jsonObject ?? _emptyJson);
+			obj.PopulateMembers(jsonObject);
 			return obj;
 		}
 
-		private JToken _json = _emptyJson;
+		private JToken _json = new JObject();
 
-		JToken IJsonDocument.Json => _json ?? _emptyJson;
+		JToken IJsonDocument.Json => Json;
+
+		protected JToken Json => _json;
 
 		protected abstract void PopulateMembers(JToken jsonObject);
 	}

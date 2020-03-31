@@ -21,7 +21,7 @@ namespace homectl
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services
-				.AddSingleton<ResourceManager>()
+				.AddSingleton<KindManager>()
 				.AddGrpc()
 				.Services.AddControllers()
 					.AddNewtonsoftJson(jsonConfig =>

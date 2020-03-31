@@ -5,7 +5,7 @@
 	/// </summary>
 	public class Device : Resource
 	{
-		public Device(ResourceKind kind, ResourceMetadata metadata, ResourceSpec spec, ResourceState state) : base(kind, metadata, spec, state)
+		public Device(Kind kind, ResourceRecord record, ResourceMetadata metadata, ResourceSpec spec, ResourceState state) : base(kind, record, metadata, spec, state)
 		{
 		}
 	}

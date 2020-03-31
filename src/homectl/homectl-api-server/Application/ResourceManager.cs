@@ -1,61 +1,54 @@
 ﻿using homectl.Resources;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace homectl.Application
 {
-	/// <summary>
-	/// Manages instances of resources.
-	/// </summary>
-	public class ResourceManager
+	public abstract class ResourceManager
 	{
-		public const string CoreKindGroup = "core";
-		public const string AlphaKindVersion = "v1alpha1";
-
-		public readonly static ResourceKind ResourceKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "resource", ResourceSchema.Nothing);
-
-		public readonly static ResourceKind KindKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "kind", ResourceSchema.Nothing);
-
-		public readonly static ResourceKind ControllerKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "controller", Controller.SCHEMA);
-
-		public readonly static ResourceKind DeviceKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "device", ResourceSchema.Nothing);
-
-		public readonly static ResourceKind NodeKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "node", Node.SCHEMA);
-
-		public readonly static ResourceKind HostKind = new ResourceKind(CoreKindGroup, AlphaKindVersion, "host", ResourceSchema.Nothing);
-
-		public ResourceManager()
+		public ResourceManager(Kind kind)
 		{
-			_kindResourceManager = new KindResourceManager(KindKind, this);
-
-			CreateKind(ResourceKind, new KindManager(ResourceKind));
-			CreateKind(KindKind, _kindResourceManager);
-			CreateKind(ControllerKind, new ControllerResourceManager(ControllerKind));
-			CreateKind(DeviceKind, new DeviceResourceManager(DeviceKind));
-			CreateKind(NodeKind, new NodeResourceManager(NodeKind));
-			CreateKind(HostKind, new NodeResourceManager(HostKind));
+			Kind = kind ?? throw new ArgumentNullException(nameof(kind));
 		}
 
-		private readonly Dictionary<(string group, string apiVersion, string kindName), KindManager> _kinds =
-			new Dictionary<(string group, string apiVersion, string kindName), KindManager>();
-		private readonly KindResourceManager _kindResourceManager;
+		public Kind Kind { get; }
 
-		public void CreateKind(ResourceKind resourceKind, KindManager manager)
+		private readonly List<Resource> _resources = new List<Resource>();
+
+		protected void Add(Resource resource)
 		{
-			if (manager == null)
-				throw new ArgumentNullException(nameof(manager));
-
-			var key = (resourceKind.Group, resourceKind.ApiVersion, resourceKind.KindName);
-			_kinds.Add(key, manager);
-			_kindResourceManager.Add(manager.Kind);
+			_resources.Add(resource);
 		}
 
-		public KindManager GetKind(string group, string apiVersion, string kindName)
+		public virtual Resource? Create(ResourceMetadata metadata, ResourceSpec spec, Guid? resourceIdentifier)
 		{
-			var key = (group, apiVersion, kindName);
-			if (_kinds.TryGetValue(key, out var kind))
-				return kind;
-			return KindManager.Nothing;
+			return default;
+		}
+
+		public IReadOnlyList<Resource> GetAll()
+		{
+			return _resources;
+		}
+
+		public Resource? GetSingle(Guid id)
+		{
+			return _resources.FirstOrDefault(q => q.Record.Id == id);
+		}
+
+		public Resource? GetSingle(ResourceMetadata metadata)
+		{
+			return _resources.FirstOrDefault(q => q.Metadata.Equals(metadata));
+		}
+
+		public virtual Resource? Update(Resource resource, ResourceMetadata metadata, ResourceSpec spec)
+		{
+			return default;
+		}
+
+		public void Remove(Resource resource)
+		{
+			_resources.Remove(resource);
 		}
 	}
 }

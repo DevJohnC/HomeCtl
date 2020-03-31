@@ -5,9 +5,9 @@ namespace homectl.Application
 	/// <summary>
 	/// Specialization of KindManager for managing controllers.
 	/// </summary>
-	public class ControllerResourceManager : KindManager
+	public class ControllerResourceManager : ResourceManager
 	{
-		public ControllerResourceManager(ResourceKind kind) : base(kind)
+		public ControllerResourceManager(Kind kind) : base(kind)
 		{
 		}
 	}

@@ -5,9 +5,9 @@ namespace homectl.Application
 	/// <summary>
 	/// Specialization of KindManager for managing devices.
 	/// </summary>
-	public class DeviceResourceManager : KindManager
+	public class DeviceResourceManager : ResourceManager
 	{
-		public DeviceResourceManager(ResourceKind kind) : base(kind)
+		public DeviceResourceManager(Kind kind) : base(kind)
 		{
 		}
 	}

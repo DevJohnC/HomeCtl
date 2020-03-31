@@ -1,24 +1,30 @@
 ﻿namespace homectl.Resources
 {
-	public class Resource
+	public abstract class Resource
 	{
-		public static readonly Resource Nothing = new Resource(
-			ResourceKind.Nothing, ResourceMetadata.Nothing,
-			ResourceSpec.Nothing, ResourceState.Nothing
-			);
-
-		public Resource(ResourceKind kind, ResourceMetadata metadata, ResourceSpec spec, ResourceState state)
+		internal Resource(ResourceRecord record, ResourceMetadata metadata, ResourceSpec spec, ResourceState state)
 		{
-			Kind = kind;
 			Metadata = metadata;
 			Spec = spec;
 			State = state;
+			Record = record;
+		}
+
+		public Resource(Kind kind, ResourceRecord record, ResourceMetadata metadata, ResourceSpec spec, ResourceState state) :
+			this(record, metadata, spec, state)
+		{
+			Kind = kind;
 		}
 
 		/// <summary>
 		/// Gets the kind of the resource.
 		/// </summary>
-		public ResourceKind Kind { get; }
+		public Kind Kind { get; internal set; }
+
+		/// <summary>
+		/// Gets the resource record.
+		/// </summary>
+		public ResourceRecord Record { get; }
 
 		/// <summary>
 		/// Gets metadata for the resource.

@@ -16,13 +16,13 @@ namespace homectl_api_server_IntegrationTests
 			{
 				var content = new StringContent(@"{
 	metadata: {
-		id: ""FBEF67E3-6AFA-4345-9286-69FA24FA9862""
+		hostname: ""test-host""
 	},
 	spec: {
-		hostname: ""my-hostname""
+		endpoint: ""http://localhost/""
 	}
 }", Encoding.UTF8, "application/json");
-				var response = await client.PostAsync("/apis/core/v1alpha1/node", content);
+				var response = await client.PutAsync("/apis/core/v1alpha1/host/FEED0527-5081-4440-A318-D30E1FECBA91", content);
 
 				response.EnsureSuccessStatusCode();
 

@@ -1,52 +1,65 @@
 ﻿using homectl.Resources;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace homectl.Application
 {
-	public class KindManager
+	/// <summary>
+	/// Manages kind resources.
+	/// </summary>
+	public class KindManager : ResourceManager
 	{
-		public static readonly KindManager Nothing = new KindManager(ResourceKind.Nothing);
+		public const string KIND_GROUP_CORE = "core";
+		public const string KIND_VERSION_V1ALPHA1 = "v1alpha1";
 
-		public KindManager(ResourceKind kind)
+		public KindManager() :
+			base(Kind.CreateKindKind())
 		{
-			Kind = kind ?? throw new ArgumentNullException(nameof(kind));
+			Add(Kind, this);
+			CreateCoreKinds();
 		}
 
-		public ResourceKind Kind { get; }
+		private readonly Dictionary<(string group, string apiVersion, string kindName), ResourceManager> _kinds =
+			new Dictionary<(string group, string apiVersion, string kindName), ResourceManager>();
 
-		private readonly List<Resource> _resources = new List<Resource>();
-
-		protected void Add(Resource resource)
+		private void CreateCoreKinds()
 		{
-			_resources.Add(resource);
+			CreateHostKind();
 		}
 
-		public virtual Resource Create(ResourceMetadata metadata, ResourceSpec spec)
+		private void CreateHostKind()
 		{
-			return Resource.Nothing;
+			var kind = new Kind(Kind, new ResourceRecord(Host.KIND_RECORD_ID), Host.DESCRIPTOR, ResourceState.Nothing);
+			var manager = new HostResourceManager(kind);
+			Add(kind, manager);
 		}
 
-		public IReadOnlyList<Resource> GetAll()
+		private (string group, string apiVersion, string kindName) CreateKey(Kind kind)
 		{
-			return _resources;
+			return CreateKey(kind.Group, kind.ApiVersion, kind.KindName);
 		}
 
-		public Resource GetSingle(Guid id)
+		private (string group, string apiVersion, string kindName) CreateKey(string group, string apiVersion, string kindName)
 		{
-			return _resources.FirstOrDefault(q => q.Metadata.Id == id) ??
-				Resource.Nothing;
+			return (group, apiVersion, kindName);
 		}
 
-		public void UpdateSpec(Resource resource, ResourceMetadata metadata, ResourceSpec spec)
+		private void Add(Kind kind, ResourceManager manager)
 		{
-
+			var key = CreateKey(kind);
+			_kinds.Add(key, manager);
+			Add(kind);
 		}
 
-		public void Remove(Resource resource)
+		public bool TryGetKind(string group, string apiVersion, string kindName, out ResourceManager? resourceManager)
 		{
-			_resources.Remove(resource);
+			var key = CreateKey(group, apiVersion, kindName);
+			return _kinds.TryGetValue(key, out resourceManager);
+		}
+
+		public override Resource? Update(Resource resource, ResourceMetadata metadata, ResourceSpec spec)
+		{
+			throw new NotSupportedException("Updating kinds is not permitted.");
 		}
 	}
 }
