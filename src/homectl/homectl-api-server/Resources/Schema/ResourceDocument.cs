@@ -1,31 +1,31 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace homectl.Resources
 {
-	public interface IJsonDocument
+	public interface IExpandoDocument
 	{
-		JToken Json { get; }
+		Dictionary<string, object> Document { get; }
 	}
 
 	/// <summary>
 	/// Resource document backed by a JSON object.
 	/// </summary>
-	public abstract class ResourceDocument<T> : IJsonDocument
+	public abstract class ResourceDocument<T> : IExpandoDocument
 		where T : ResourceDocument<T>, new()
 	{
 		public static T FromJson(JToken jsonObject)
 		{
-			var obj = new T { _json = jsonObject };
-			obj.PopulateMembers(jsonObject);
-			return obj;
+			//var obj = new T { _document = jsonObject };
+			//obj.PopulateMembers(jsonObject);
+			//return obj;
+			return default;
 		}
 
-		private JToken _json = new JObject();
+		private Dictionary<string, object> _document = new Dictionary<string, object>();
 
-		JToken IJsonDocument.Json => Json;
+		Dictionary<string, object> IExpandoDocument.Document => Document;
 
-		protected JToken Json => _json;
-
-		protected abstract void PopulateMembers(JToken jsonObject);
+		protected Dictionary<string, object> Document => _document;
 	}
 }

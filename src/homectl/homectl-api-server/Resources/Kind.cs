@@ -1,7 +1,5 @@
 ﻿using homectl.Application;
 using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Writers;
-using Newtonsoft.Json.Linq;
 using System;
 
 namespace homectl.Resources
@@ -84,32 +82,32 @@ namespace homectl.Resources
 		{
 			public string Group
 			{
-				get => Json.Value<string>(nameof(Group));
-				set => Json[nameof(Group)] = value;
+				get => (string)Document[nameof(Group)];
+				set => Document[nameof(Group)] = value;
 			}
 
 			public string ApiVersion
 			{
-				get => Json.Value<string>(nameof(ApiVersion));
-				set => Json[nameof(ApiVersion)] = value;
+				get => (string)Document[nameof(ApiVersion)];
+				set => Document[nameof(ApiVersion)] = value;
 			}
 
 			public string KindName
 			{
-				get => Json.Value<string>(nameof(KindName));
-				set => Json[nameof(KindName)] = value;
+				get => (string)Document[nameof(KindName)];
+				set => Document[nameof(KindName)] = value;
 			}
 
 			public string KindNamePlural
 			{
-				get => Json.Value<string>(nameof(KindNamePlural));
-				set => Json[nameof(KindNamePlural)] = value;
+				get => (string)Document[nameof(KindNamePlural)];
+				set => Document[nameof(KindNamePlural)] = value;
 			}
 
 			public string Extends
 			{
-				get => Json.Value<string>(nameof(Extends));
-				set => Json[nameof(Extends)] = value;
+				get => (string)Document[nameof(Extends)];
+				set => Document[nameof(Extends)] = value;
 			}
 
 			public static KindMetadata FromDescriptor(KindDescriptor descriptor)
@@ -126,46 +124,36 @@ namespace homectl.Resources
 
 		public class KindSpec : ResourceSpec
 		{
-			public JToken MetadataSchema
+			public OpenApiSchema MetadataSchema
 			{
-				get => Json.Value<JToken>(nameof(MetadataSchema));
-				set => Json[nameof(MetadataSchema)] = value;
+				get => (OpenApiSchema)Document[nameof(MetadataSchema)];
+				set => Document[nameof(MetadataSchema)] = value;
 			}
 
-			public JToken SpecSchema
+			public OpenApiSchema SpecSchema
 			{
-				get => Json.Value<JToken>(nameof(SpecSchema));
-				set => Json[nameof(SpecSchema)] = value;
+				get => (OpenApiSchema)Document[nameof(SpecSchema)];
+				set => Document[nameof(SpecSchema)] = value;
 			}
 
-			public JToken? StateSchema
+			public OpenApiSchema? StateSchema
 			{
-				get => Json.Value<JToken>(nameof(StateSchema));
-				set => Json[nameof(StateSchema)] = value;
+				get => Document[nameof(StateSchema)] as OpenApiSchema;
+				set => Document[nameof(StateSchema)] = value;
 			}
 
 			public static KindSpec FromDescriptor(KindDescriptor descriptor)
 			{
 				var result = new KindSpec
 				{
-					MetadataSchema = ConvertToJson(descriptor.Schema.MetadataSchema),
-					SpecSchema = ConvertToJson(descriptor.Schema.SpecSchema)
+					MetadataSchema = descriptor.Schema.MetadataSchema,
+					SpecSchema = descriptor.Schema.SpecSchema
 				};
 
 				if (descriptor.Schema.HasStateSchema)
-					result.StateSchema = ConvertToJson(descriptor.Schema.StateSchema);
+					result.StateSchema = descriptor.Schema.StateSchema;
 
 				return result;
-			}
-
-			private static JToken ConvertToJson(OpenApiSchema schema)
-			{
-				using (var textWriter = new System.IO.StringWriter())
-				{
-					var writer = new OpenApiJsonWriter(textWriter);
-					schema.SerializeAsV3WithoutReference(writer);
-					return JToken.Parse(textWriter.ToString());
-				}
 			}
 		}
 	}

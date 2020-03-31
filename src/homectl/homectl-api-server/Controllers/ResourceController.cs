@@ -299,15 +299,15 @@ namespace homectl.Controllers
 				serializer.Serialize(writer, value.Record);
 
 				writer.WritePropertyName(nameof(value.Metadata));
-				serializer.Serialize(writer, ((IJsonDocument)value.Metadata).Json);
+				serializer.Serialize(writer, ((IExpandoDocument)value.Metadata).Document);
 
 				writer.WritePropertyName(nameof(value.Spec));
-				serializer.Serialize(writer, ((IJsonDocument)value.Spec).Json);
+				serializer.Serialize(writer, ((IExpandoDocument)value.Spec).Document);
 
 				if (value.State != null)
 				{
 					writer.WritePropertyName(nameof(value.State));
-					serializer.Serialize(writer, ((IJsonDocument)value.State).Json);
+					serializer.Serialize(writer, ((IExpandoDocument)value.State).Document);
 				}
 
 				writer.WriteEndObject();
