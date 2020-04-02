@@ -1,4 +1,5 @@
 ﻿using homectl.Resources;
+using Newtonsoft.Json.Linq;
 using System;
 
 namespace homectl.Application
@@ -16,6 +17,20 @@ namespace homectl.Application
 			//	metadata, spec, ResourceState.Nothing);
 			//Add(host);
 			//return host;
+		}
+
+		public override bool TryCreate(JObject metadata, JObject spec, Guid? resourceIdentifier, out ResourceRecordPair resourceRecordPair)
+		{
+			var record = new ResourceRecord(resourceIdentifier ?? Guid.NewGuid());
+			var host = new HostResource
+			{
+				Metadata = HostResource.HostMetadata.FromJson(metadata),
+				Spec = HostResource.HostSpec.FromJson(spec),
+				State = new HostResource.HostState()
+			};
+			Add(record, host);
+			resourceRecordPair = new ResourceRecordPair(record, host);
+			return true;
 		}
 	}
 }
