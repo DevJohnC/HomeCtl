@@ -1,9 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>homectl</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Protos\APIServer\Devices.proto" />
+    <None Remove="Protos\Controllers.proto" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.11.4" />
@@ -12,9 +17,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.OpenApi" Version="1.2.0-preview.2" />
-    <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.2.0-preview.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\APIServer\Devices.proto" GrpcServices="Server,Client" />
+    <Protobuf Include="Protos\Host\Controllers.proto" GrpcServices="Server,Client" />
   </ItemGroup>
 
 </Project>

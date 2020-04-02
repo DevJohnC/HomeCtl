@@ -1,0 +1,16 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "homectl.Protocol.Server.Host";
+
+package homectl;
+
+service Controllers {
+	//  Attempts to set the specified device spec changes.
+	rpc ChangeDeviceSpec (SetDeviceSpecRequest) returns (SetDeviceSpecResponse);
+}
+
+message SetDeviceSpecRequest {
+}
+
+message SetDeviceSpecResponse {
+}

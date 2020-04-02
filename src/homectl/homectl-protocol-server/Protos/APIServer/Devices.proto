@@ -1,0 +1,16 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "homectl.Protocol.Server.APIServer";
+
+package homectl;
+
+service Devices {
+	//  Informs the API server that a device has changed state.
+	rpc ChangeDeviceState (ChangeDeviceStateRequest) returns (ChangeDeviceStateResponse);
+}
+
+message ChangeDeviceStateRequest {
+}
+
+message ChangeDeviceStateResponse {
+}

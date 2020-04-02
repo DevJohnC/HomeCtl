@@ -17,7 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-client", "homectl-c
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-host-IntegrationTests", "homectl-host-IntegrationTests\homectl-host-IntegrationTests.csproj", "{E8355757-7FBE-4335-8BC7-78B441D516EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-api-shared", "homectl-api-shared\homectl-api-shared.csproj", "{38A94C68-A424-4B2E-A661-C10491FBC9A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-api-shared", "homectl-api-shared\homectl-api-shared.csproj", "{38A94C68-A424-4B2E-A661-C10491FBC9A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-protocol-server", "homectl-protocol-server\homectl-protocol-server.csproj", "{BC243D46-7317-4B60-A091-A4A78142151C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-protocol-client", "homectl-protocol-client\homectl-protocol-client.csproj", "{422833C4-2CFE-4CBC-9533-F21E8363030D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +57,14 @@ Global
 		{38A94C68-A424-4B2E-A661-C10491FBC9A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38A94C68-A424-4B2E-A661-C10491FBC9A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38A94C68-A424-4B2E-A661-C10491FBC9A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC243D46-7317-4B60-A091-A4A78142151C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC243D46-7317-4B60-A091-A4A78142151C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC243D46-7317-4B60-A091-A4A78142151C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC243D46-7317-4B60-A091-A4A78142151C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{422833C4-2CFE-4CBC-9533-F21E8363030D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{422833C4-2CFE-4CBC-9533-F21E8363030D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{422833C4-2CFE-4CBC-9533-F21E8363030D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{422833C4-2CFE-4CBC-9533-F21E8363030D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
