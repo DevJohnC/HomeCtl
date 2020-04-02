@@ -27,8 +27,6 @@ namespace homectl
 					.AddNewtonsoftJson(jsonConfig =>
 					{
 						jsonConfig.SerializerSettings.Converters.Add(new JsonConverters.OpenApiSchemaConverter());
-						foreach (var converter in ResourceController.JsonConverters)
-							jsonConfig.SerializerSettings.Converters.Add(converter);
 					});
 		}
 

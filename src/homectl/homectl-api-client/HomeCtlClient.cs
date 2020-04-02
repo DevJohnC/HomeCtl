@@ -1,4 +1,5 @@
 ﻿using Grpc.Net.Client;
+using homectl.Resources;
 using System.Net.Http;
 
 namespace homectl
@@ -15,7 +16,8 @@ namespace homectl
 		private GrpcChannel? _grpcChannel;
 		public GrpcChannel GrpcChannel => _grpcChannel ?? CreateGrpcChannel();
 
-		public ResourceClient<TResource> GetResourceClient<TResource>(ResourceType<TResource> resourceType)
+		public ResourceClient<TResource> GetResourceClient<TResource>(TypeDescriptor<TResource> resourceType)
+			where TResource : class
 		{
 			return default;
 		}

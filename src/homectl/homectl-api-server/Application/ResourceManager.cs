@@ -1,54 +1,68 @@
 ﻿using homectl.Resources;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace homectl.Application
 {
 	public abstract class ResourceManager
 	{
-		public ResourceManager(Kind kind)
+		public ResourceManager(KindDescriptor kind)
 		{
 			Kind = kind ?? throw new ArgumentNullException(nameof(kind));
 		}
 
-		public Kind Kind { get; }
+		public KindDescriptor Kind { get; }
 
-		private readonly List<Resource> _resources = new List<Resource>();
+		private readonly Dictionary<Guid, ResourceRecordPair> _resources = new Dictionary<Guid, ResourceRecordPair>();
 
-		protected void Add(Resource resource)
+		protected void Add(ResourceRecord record, IResource resource)
 		{
-			_resources.Add(resource);
+			_resources.Add(
+				record.Id,
+				new ResourceRecordPair(record, resource)
+				);
 		}
 
-		public virtual Resource? Create(ResourceMetadata metadata, ResourceSpec spec, Guid? resourceIdentifier)
+		public virtual bool TryCreate(JObject metadata, JObject spec, Guid? resourceIdentifier,
+			out ResourceRecordPair resourceRecordPair)
 		{
-			return default;
+			resourceRecordPair = default;
+			return false;
 		}
 
-		public IReadOnlyList<Resource> GetAll()
+		public IReadOnlyCollection<ResourceRecordPair> GetAll()
 		{
-			return _resources;
+			return _resources.Values;
 		}
 
-		public Resource? GetSingle(Guid id)
+		public bool TryGetSingle(Guid id, out ResourceRecordPair resourceRecordPair)
 		{
-			return _resources.FirstOrDefault(q => q.Record.Id == id);
+			return _resources.TryGetValue(id, out resourceRecordPair);
 		}
 
-		public Resource? GetSingle(ResourceMetadata metadata)
+		public virtual bool TryUpdate(ResourceRecordPair resource, JObject metadata, JObject spec, out ResourceRecordPair resourceRecordPair)
 		{
-			return _resources.FirstOrDefault(q => q.Metadata.Equals(metadata));
+			resourceRecordPair = default;
+			return false;
 		}
 
-		public virtual Resource? Update(Resource resource, ResourceMetadata metadata, ResourceSpec spec)
+		public void Remove(ResourceRecord record)
 		{
-			return default;
+			_resources.Remove(record.Id);
 		}
 
-		public void Remove(Resource resource)
+		public struct ResourceRecordPair
 		{
-			_resources.Remove(resource);
+			public ResourceRecordPair(ResourceRecord record, IResource resource)
+			{
+				Record = record;
+				Resource = resource;
+			}
+
+			public ResourceRecord Record { get; }
+
+			public IResource Resource { get; }
 		}
 	}
 }

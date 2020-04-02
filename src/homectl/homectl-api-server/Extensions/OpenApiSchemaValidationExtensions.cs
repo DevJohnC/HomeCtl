@@ -8,11 +8,9 @@ namespace homectl.Extensions
 {
 	public static class OpenApiSchemaValidationExtensions
 	{
-		public static bool Validate(this OpenApiSchema schema, IExpandoDocument document, ModelStateDictionary modelState)
+		public static bool Validate(this OpenApiSchema schema, JObject document, ModelStateDictionary modelState)
 		{
-			//  todo: perform validation
-			return true;
-			//return schema.Validate(document.Document, modelState);
+			return schema.Validate(document, modelState, "");
 		}
 
 		private static bool Validate(this OpenApiSchema schema, JToken json, ModelStateDictionary modelState,

@@ -12,7 +12,10 @@ namespace homectl
 {
 	public class HomeCtlHost : IHostedService
 	{
-		private readonly HostResource _hostRecord = new HostResource();
+		private readonly HostResource _hostRecord = new HostResource
+		{
+			Metadata = new HostResource.HostMetadata { Hostname = Environment.MachineName }
+		};
 
 		public HomeCtlHost(
 			ConnectionManager connectionManager,
@@ -55,7 +58,8 @@ namespace homectl
 			try
 			{
 				var myIpAddress = await GetMyIpAddress(e.Client);
-				var resourceClient = e.Client.GetResourceClient(ResourceType.Host);
+				_hostRecord.Spec = new HostResource.HostSpec { Endpoint = $"http://{myIpAddress}:27891/" };
+				var resourceClient = e.Client.GetResourceClient(CoreKinds.Host);
 				await resourceClient.Save(_hostRecord);
 				//  connect to grpc event stream
 			}

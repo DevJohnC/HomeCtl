@@ -4,7 +4,6 @@ using homectl.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -17,31 +16,23 @@ namespace homectl.Controllers
 	[Route("~/apis/{group}/{apiVersion}/{kind}")]
 	public class ResourceController : Microsoft.AspNetCore.Mvc.Controller
 	{
-		public readonly static JsonConverter[] JsonConverters = new JsonConverter[]
-		{
-			new ResourceManifestJsonConverter(),
-			new ResourceDetailsJsonConverter()
-		};
-
 		private ActionResult<ResourceDetails> CreateNewResource(ResourceManager resourceKind, ResourceManifest manifest, Guid? resourceIdentifier)
 		{
-			var resource = resourceKind.Create(manifest.Metadata, manifest.Spec, resourceIdentifier);
-			if (resource == null)
+			if (!resourceKind.TryCreate(manifest.Metadata, manifest.Spec, resourceIdentifier, out var resource))
 				return new StatusCodeResult(StatusCodes.Status500InternalServerError);
 
 			return CreatedAtAction(
 				nameof(GetSingle),
-				new { group = resource.Kind.Group, apiVersion = resource.Kind.ApiVersion, kind = resource.Kind.KindName, identifier = resource.Record.Id },
-				new ResourceDetails(resource));
+				new { group = resourceKind.Kind.Group, apiVersion = resourceKind.Kind.ApiVersion, kind = resourceKind.Kind.KindName, identifier = resource.Record.Id },
+				new ResourceDetails(resource, resourceKind.Kind));
 		}
 
-		private ActionResult<ResourceDetails> UpdateResource(Resource resource, ResourceManager resourceKind, ResourceManifest manifest)
+		private ActionResult<ResourceDetails> UpdateResource(ResourceManager.ResourceRecordPair resource, ResourceManager resourceKind, ResourceManifest manifest)
 		{
-			var updatedResource = resourceKind.Update(resource, manifest.Metadata, manifest.Spec);
-			if (updatedResource == null)
+			if (resourceKind.TryUpdate(resource, manifest.Metadata, manifest.Spec, out var updatedResource))
 				return new StatusCodeResult(StatusCodes.Status500InternalServerError);
 
-			return new ResourceDetails(resource);
+			return new ResourceDetails(resource, resourceKind.Kind);
 		}
 
 		[HttpGet]
@@ -61,7 +52,7 @@ namespace homectl.Controllers
 
 			var resources = resourceKind.GetAll();
 
-			return resources.Select(q => new ResourceDetails(q)).ToList();
+			return resources.Select(q => new ResourceDetails(q, resourceKind.Kind)).ToList();
 		}
 
 		[HttpGet("{identifier:guid}")]
@@ -80,20 +71,19 @@ namespace homectl.Controllers
 				resourceKind == null)
 				return NotFound();
 
-			var resource = resourceKind.GetSingle(identifier);
-			if (resource == null)
+			if (!resourceKind.TryGetSingle(identifier, out var resource))
 				return NotFound();
 
-			return new ResourceDetails(resource);
+			return new ResourceDetails(resource, resourceKind.Kind);
 		}
 
-		[HttpPut]
+		[HttpPost]
 		[Consumes(MediaTypeNames.Application.Json)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status201Created)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public ActionResult<ResourceDetails> Save(
+		public ActionResult<ResourceDetails> Create(
 			[FromRoute] string group,
 			[FromRoute] string apiVersion,
 			[FromRoute] string kind,
@@ -110,16 +100,7 @@ namespace homectl.Controllers
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			var resource = resourceKind.GetSingle(manifest.Metadata);
-
-			if (resource == null)
-			{
-				return CreateNewResource(resourceKind, manifest, resourceIdentifier: null);
-			}
-			else
-			{
-				return UpdateResource(resource, resourceKind, manifest);
-			}
+			return CreateNewResource(resourceKind, manifest, resourceIdentifier: null);
 		}
 
 		[HttpPut("{identifier:guid}")]
@@ -147,15 +128,13 @@ namespace homectl.Controllers
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			var resource = resourceKind.GetSingle(identifier);
-
-			if (resource == null)
+			if (resourceKind.TryGetSingle(identifier, out var resource))
 			{
-				return CreateNewResource(resourceKind, manifest, identifier);
+				return UpdateResource(resource, resourceKind, manifest);
 			}
 			else
 			{
-				return UpdateResource(resource, resourceKind, manifest);
+				return CreateNewResource(resourceKind, manifest, identifier);
 			}
 		}
 
@@ -178,21 +157,28 @@ namespace homectl.Controllers
 				resourceKind == null)
 				return NotFound();
 
-			var resource = resourceKind.GetSingle(identifier);
-			if (resource == null)
+			if (!resourceKind.TryGetSingle(identifier, out var resource))
 				return NotFound();
 
-			var manifest = new ResourceManifest(resource.Metadata, resource.Spec);
-			patchDocument.ApplyTo(manifest, ModelState);
+			if (!resourceKind.Kind.TryGetMetadata(resource.Resource, out var metadata) ||
+				!resourceKind.Kind.TryGetSpec(resource.Resource, out var spec))
+				return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+
+			//var manifest = new ResourceManifest
+			//{
+			//	Manifest = metadata,
+			//	Spec = spec
+			//};
+			//patchDocument.ApplyTo(manifest, ModelState);
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			resourceKind.Kind.Schema.MetadataSchema.Validate(manifest.Metadata, ModelState);
-			resourceKind.Kind.Schema.SpecSchema.Validate(manifest.Spec, ModelState);
+			//resourceKind.Kind.Schema.MetadataSchema.Validate(manifest.Metadata, ModelState);
+			//resourceKind.Kind.Schema.SpecSchema.Validate(manifest.Spec, ModelState);
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
-
-			return UpdateResource(resource, resourceKind, manifest);
+			throw new NotImplementedException();
+			//return UpdateResource(resource, resourceKind, manifest);
 		}
 
 		[HttpDelete("{identifier:guid}")]
@@ -210,28 +196,41 @@ namespace homectl.Controllers
 				resourceKind == null)
 				return NotFound();
 
-			var resource = resourceKind.GetSingle(identifier);
-			if (resource == null)
+			if (!resourceKind.TryGetSingle(identifier, out var resource))
 				return NotFound();
 
-			resourceKind.Remove(resource);
+			resourceKind.Remove(resource.Record);
 
 			return Ok();
 		}
 
 		public class ResourceDetails
 		{
-			public ResourceDetails(Resource resource)
+			public ResourceDetails(ResourceManager.ResourceRecordPair resource,
+				KindDescriptor kind)
 			{
-				Group = resource.Kind.Group;
-				ApiVersion = resource.Kind.ApiVersion;
-				KindName = resource.Kind.KindName;
+				Group = kind.Group;
+				ApiVersion = kind.ApiVersion;
+				KindName = kind.KindName;
 				Record = resource.Record;
-				Metadata = resource.Metadata;
-				Spec = resource.Spec;
 
-				if (resource.Kind.Schema.HasStateSchema)
-					State = resource.State;
+				if (kind.TryGetMetadata(resource.Resource, out var metadata))
+					Metadata = metadata;
+				else
+					Metadata = new object();
+
+				if (kind.TryGetSpec(resource.Resource, out var spec))
+					Spec = spec;
+				else
+					Spec = new object();
+
+				if (kind.Schema.HasStateSchema)
+				{
+					if (kind.TryGetState(resource.Resource, out var state))
+						State = state;
+					else
+						State = new object();
+				}
 			}
 
 			public string Group { get; set; }
@@ -242,76 +241,18 @@ namespace homectl.Controllers
 
 			public ResourceRecord Record { get; set; }
 
-			public ResourceMetadata Metadata { get; set; }
+			public object Metadata { get; set; }
 
-			public ResourceSpec Spec { get; set; }
+			public object Spec { get; set; }
 
-			public ResourceState? State { get; set; }
+			public object? State { get; set; }
 		}
 
 		public class ResourceManifest
 		{
-			public ResourceManifest(ResourceMetadata metadata, ResourceSpec spec)
-			{
-				Metadata = metadata;
-				Spec = spec;
-			}
+			public JObject Metadata { get; set; } = new JObject();
 
-			public ResourceMetadata Metadata { get; set; }
-
-			public ResourceSpec Spec { get; set; } 
-		}
-
-		private class ResourceManifestJsonConverter : JsonConverter<ResourceManifest>
-		{
-			public override ResourceManifest ReadJson(JsonReader reader, Type objectType, ResourceManifest existingValue, bool hasExistingValue, JsonSerializer serializer)
-			{
-				var jsonObj = JToken.ReadFrom(reader);
-				return new ResourceManifest(
-					ResourceMetadata.FromJson(jsonObj["metadata"]),
-					ResourceSpec.FromJson(jsonObj["spec"]));
-			}
-
-			public override void WriteJson(JsonWriter writer, ResourceManifest value, JsonSerializer serializer)
-			{
-				throw new NotImplementedException();
-			}
-		}
-
-		private class ResourceDetailsJsonConverter : JsonConverter<ResourceDetails>
-		{
-			public override ResourceDetails ReadJson(JsonReader reader, Type objectType, ResourceDetails existingValue, bool hasExistingValue, JsonSerializer serializer)
-			{
-				throw new NotImplementedException();
-			}
-
-			public override void WriteJson(JsonWriter writer, ResourceDetails value, JsonSerializer serializer)
-			{
-				writer.WriteStartObject();
-
-				writer.WritePropertyName(nameof(value.ApiVersion));
-				writer.WriteValue(value.ApiVersion);
-
-				writer.WritePropertyName(nameof(value.KindName));
-				writer.WriteValue(value.KindName);
-
-				writer.WritePropertyName(nameof(value.Record));
-				serializer.Serialize(writer, value.Record);
-
-				writer.WritePropertyName(nameof(value.Metadata));
-				serializer.Serialize(writer, ((IExpandoDocument)value.Metadata).Document);
-
-				writer.WritePropertyName(nameof(value.Spec));
-				serializer.Serialize(writer, ((IExpandoDocument)value.Spec).Document);
-
-				if (value.State != null)
-				{
-					writer.WritePropertyName(nameof(value.State));
-					serializer.Serialize(writer, ((IExpandoDocument)value.State).Document);
-				}
-
-				writer.WriteEndObject();
-			}
+			public JObject Spec { get; set; } = new JObject();
 		}
 	}
 }

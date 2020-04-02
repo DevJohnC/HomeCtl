@@ -12,10 +12,9 @@ namespace homectl.Application
 		public const string KIND_GROUP_CORE = "core";
 		public const string KIND_VERSION_V1ALPHA1 = "v1alpha1";
 
-		public KindManager() :
-			base(Kind.CreateKindKind())
+		public KindManager() : base(CoreKinds.Kind)
 		{
-			Add(Kind, this);
+			Add(this);
 			CreateCoreKinds();
 		}
 
@@ -24,17 +23,10 @@ namespace homectl.Application
 
 		private void CreateCoreKinds()
 		{
-			CreateHostKind();
+			Add(new HostManager());
 		}
 
-		private void CreateHostKind()
-		{
-			var kind = new Kind(Kind, new ResourceRecord(Host.KIND_RECORD_ID), Host.DESCRIPTOR, ResourceState.Nothing);
-			var manager = new HostResourceManager(kind);
-			Add(kind, manager);
-		}
-
-		private (string group, string apiVersion, string kindName) CreateKey(Kind kind)
+		private (string group, string apiVersion, string kindName) CreateKey(KindDescriptor kind)
 		{
 			return CreateKey(kind.Group, kind.ApiVersion, kind.KindName);
 		}
@@ -44,22 +36,17 @@ namespace homectl.Application
 			return (group, apiVersion, kindName);
 		}
 
-		private void Add(Kind kind, ResourceManager manager)
+		private void Add(ResourceManager manager)
 		{
-			var key = CreateKey(kind);
+			var key = CreateKey(manager.Kind);
 			_kinds.Add(key, manager);
-			Add(kind);
+			Add(new ResourceRecord(manager.Kind.KindId), new KindResource(manager.Kind));
 		}
 
 		public bool TryGetKind(string group, string apiVersion, string kindName, out ResourceManager? resourceManager)
 		{
 			var key = CreateKey(group, apiVersion, kindName);
 			return _kinds.TryGetValue(key, out resourceManager);
-		}
-
-		public override Resource? Update(Resource resource, ResourceMetadata metadata, ResourceSpec spec)
-		{
-			throw new NotSupportedException("Updating kinds is not permitted.");
 		}
 	}
 }

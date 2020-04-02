@@ -8,9 +8,9 @@
 		where TMetadata : class
 		where TSpec : class
 	{
-		TMetadata Metadata { get; set; }
+		new TMetadata Metadata { get; set; }
 
-		TSpec Spec { get; set; }
+		new TSpec Spec { get; set; }
 	}
 
 	public interface IResource<TMetadata, TSpec, TState> : IResource<TMetadata, TSpec>
@@ -18,6 +18,6 @@
 		where TSpec : class
 		where TState : class
 	{
-		TState State { get; set; }
+		new TState State { get; set; }
 	}
 }

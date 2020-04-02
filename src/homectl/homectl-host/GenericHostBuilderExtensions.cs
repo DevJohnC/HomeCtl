@@ -16,6 +16,8 @@ namespace Microsoft.Extensions.Hosting
 				webBuilder
 					.UseKestrel(options =>
 					{
+						options.ListenLocalhost(27891, o => o.Protocols =
+							HttpProtocols.Http2);
 						options.ConfigureEndpointDefaults(listenOpts =>
 						{
 							listenOpts.Protocols = HttpProtocols.Http2;
