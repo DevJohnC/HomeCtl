@@ -46,6 +46,7 @@ namespace HomeCtl.Connection
 		private readonly TimeSpan _connectAttemptTimeout = TimeSpan.FromSeconds(5);
 
 		private CancellationTokenSource _connectCycleCooldownCancellation = new CancellationTokenSource();
+		private MonitoredGrpcChannel? _grpcChannel;
 
 		public ConnectionManager(IEnumerable<IConnectionProvider> connectionProviders)
 		{
@@ -70,7 +71,7 @@ namespace HomeCtl.Connection
 		/// <summary>
 		/// Gets the current grpc channel if connected.
 		/// </summary>
-		public ChannelBase? GrpcChannel { get; private set; }
+		public ChannelBase? GrpcChannel => _grpcChannel;
 
 		/// <summary>
 		/// Runs the connection manager.
@@ -88,7 +89,7 @@ namespace HomeCtl.Connection
 						result.Client != null)
 					{
 						ConnectionState = ConnectionStates.Connected;
-						GrpcChannel = CreateGrpcChannel(result.Client);
+						_grpcChannel = CreateGrpcChannel(result.Client);
 						Connected?.Invoke(this, new ConnectionEventArgs(GrpcChannel));
 					}
 				}
@@ -150,8 +151,8 @@ namespace HomeCtl.Connection
 		/// <returns></returns>
 		private async Task Shutdown()
 		{
-			await (GrpcChannel?.ShutdownAsync() ?? Task.CompletedTask);
-			Disconnect(GrpcChannel, null);
+			await (_grpcChannel?.ShutdownAsync() ?? Task.CompletedTask);
+			Disconnect(_grpcChannel, null);
 		}
 
 		/// <summary>
@@ -159,12 +160,15 @@ namespace HomeCtl.Connection
 		/// </summary>
 		/// <param name="channel"></param>
 		/// <param name="exception"></param>
-		private void Disconnect(ChannelBase? channel, Exception? exception)
+		private void Disconnect(MonitoredGrpcChannel? channel, Exception? exception)
 		{
 			if (channel != null)
 			{
+				//  remove the InvokeError event handler to prevent Disconnect bouncing
+				//  (ie, if multiple gRPC invocations fail at once)
+				channel.InvokeError -= ClientInvokeError;
 				ConnectionState = ConnectionStates.Disconnected;
-				GrpcChannel = null;
+				_grpcChannel = null;
 				Disconnected?.Invoke(this, new ConnectionEventArgs(channel, exception));
 				_connectCycleCooldownCancellation.Cancel();
 			}
@@ -175,7 +179,7 @@ namespace HomeCtl.Connection
 		/// </summary>
 		/// <param name="httpClient"></param>
 		/// <returns></returns>
-		private ChannelBase CreateGrpcChannel(HttpClient httpClient)
+		private MonitoredGrpcChannel CreateGrpcChannel(HttpClient httpClient)
 		{
 			var implClient = Grpc.Net.Client.GrpcChannel.ForAddress(httpClient.BaseAddress, new GrpcChannelOptions
 			{
@@ -197,7 +201,8 @@ namespace HomeCtl.Connection
 			if (eventArgs.Exception is HttpRequestException ||
 				(eventArgs.Exception is RpcException rpcEx && rpcEx.Status.StatusCode == StatusCode.Internal))
 			{
-				Disconnect((ChannelBase)sender, eventArgs.Exception);
+				var monitoredChannel = (MonitoredGrpcChannel)sender;
+				Disconnect(monitoredChannel, eventArgs.Exception);
 			}
 		}
 
