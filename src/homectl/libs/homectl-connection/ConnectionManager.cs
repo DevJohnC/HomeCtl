@@ -91,7 +91,45 @@ namespace HomeCtl.Connection
 					}
 				}
 
-				await Task.Delay(_connectCycleTimeout, cancellationToken);
+				await SafeDelay(_connectCycleTimeout, cancellationToken);
+			}
+
+			await Shutdown();
+		}
+
+		private async Task SafeDelay(TimeSpan timeSpan, CancellationToken cancellationToken)
+		{
+			try
+			{
+				await Task.Delay(timeSpan, cancellationToken);
+			}
+			catch (TaskCanceledException)
+			{
+			}
+		}
+
+		/// <summary>
+		/// Shutdown the connection.
+		/// </summary>
+		/// <returns></returns>
+		private async Task Shutdown()
+		{
+			await (GrpcChannel?.ShutdownAsync() ?? Task.CompletedTask);
+			Disconnect(GrpcChannel, null);
+		}
+
+		/// <summary>
+		/// Handle disconnect for a grpc channel.
+		/// </summary>
+		/// <param name="channel"></param>
+		/// <param name="exception"></param>
+		private void Disconnect(ChannelBase? channel, Exception? exception)
+		{
+			if (channel != null)
+			{
+				ConnectionState = ConnectionStates.Disconnected;
+				GrpcChannel = null;
+				Disconnected?.Invoke(this, new ConnectionEventArgs(channel, exception));
 			}
 		}
 
@@ -121,9 +159,7 @@ namespace HomeCtl.Connection
 		{
 			if (eventArgs.Exception is HttpRequestException)
 			{
-				ConnectionState = ConnectionStates.Disconnected;
-				GrpcChannel = null;
-				Disconnected?.Invoke(this, new ConnectionEventArgs((ChannelBase)sender, eventArgs.Exception));
+				Disconnect((ChannelBase)sender, eventArgs.Exception);
 			}
 		}
 

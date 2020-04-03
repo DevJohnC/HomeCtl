@@ -3,17 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-api-server", "homectl-api-server\homectl-api-server.csproj", "{603F2D50-7947-4C3E-9752-4AB6150F6E89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-api-server", "homectl-api-server\homectl-api-server.csproj", "{603F2D50-7947-4C3E-9752-4AB6150F6E89}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{5079F661-0DA6-4F58-81BD-15796A108A92}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-kinds", "libs\homectl-kinds\homectl-kinds.csproj", "{EAE679D5-6B86-4458-BA52-7EFA0F418948}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-kinds", "libs\homectl-kinds\homectl-kinds.csproj", "{EAE679D5-6B86-4458-BA52-7EFA0F418948}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-host", "libs\homectl-host\homectl-host.csproj", "{DB5A642F-94B7-4352-A491-2CB0DEE0CA4C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-host", "libs\homectl-host\homectl-host.csproj", "{DB5A642F-94B7-4352-A491-2CB0DEE0CA4C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-servers-protocol", "libs\homectl-servers-protocol\homectl-servers-protocol.csproj", "{B2A6D22E-0A92-45A1-A146-08640D2E8C84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-servers-protocol", "libs\homectl-servers-protocol\homectl-servers-protocol.csproj", "{B2A6D22E-0A92-45A1-A146-08640D2E8C84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-connection", "libs\homectl-connection\homectl-connection.csproj", "{62CAE48F-97F6-438F-B038-E7BB18D48962}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-connection", "libs\homectl-connection\homectl-connection.csproj", "{62CAE48F-97F6-438F-B038-E7BB18D48962}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D8BB7D0F-17ED-484C-BFE2-9D73028030F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "unittests-homectl-connection", "..\..\tests\unittests-homectl-connection\unittests-homectl-connection.csproj", "{8975FDC5-AE64-447C-9F33-53C82FE42566}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +45,10 @@ Global
 		{62CAE48F-97F6-438F-B038-E7BB18D48962}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62CAE48F-97F6-438F-B038-E7BB18D48962}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62CAE48F-97F6-438F-B038-E7BB18D48962}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8975FDC5-AE64-447C-9F33-53C82FE42566}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8975FDC5-AE64-447C-9F33-53C82FE42566}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8975FDC5-AE64-447C-9F33-53C82FE42566}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8975FDC5-AE64-447C-9F33-53C82FE42566}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,6 +58,7 @@ Global
 		{DB5A642F-94B7-4352-A491-2CB0DEE0CA4C} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 		{B2A6D22E-0A92-45A1-A146-08640D2E8C84} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 		{62CAE48F-97F6-438F-B038-E7BB18D48962} = {5079F661-0DA6-4F58-81BD-15796A108A92}
+		{8975FDC5-AE64-447C-9F33-53C82FE42566} = {D8BB7D0F-17ED-484C-BFE2-9D73028030F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {84ADA937-A738-4247-A437-DEFC9D1023FF}

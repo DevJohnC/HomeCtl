@@ -1,0 +1,13 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "unittests_homectl_connection";
+
+package unittests_homectl_connection;
+
+message Empty {
+}
+
+service Tests {
+	//  Gets the client's IP address as the server perceives it.
+	rpc ThrowAnException (Empty) returns (Empty);
+}
