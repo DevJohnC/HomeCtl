@@ -119,9 +119,12 @@ namespace HomeCtl.Connection
 		/// <param name="eventArgs"></param>
 		private void ClientInvokeError(object sender, CallInvokerErrorEventArgs eventArgs)
 		{
-			ConnectionState = ConnectionStates.Disconnected;
-			GrpcChannel = null;
-			Disconnected?.Invoke(this, new ConnectionEventArgs((ChannelBase)sender, eventArgs.Exception));
+			if (eventArgs.Exception is HttpRequestException)
+			{
+				ConnectionState = ConnectionStates.Disconnected;
+				GrpcChannel = null;
+				Disconnected?.Invoke(this, new ConnectionEventArgs((ChannelBase)sender, eventArgs.Exception));
+			}
 		}
 
 		/// <summary>
