@@ -90,7 +90,7 @@ namespace HomeCtl.Connection
 					{
 						ConnectionState = ConnectionStates.Connected;
 						_grpcChannel = CreateGrpcChannel(result.Client);
-						Connected?.Invoke(this, new ConnectionEventArgs(GrpcChannel));
+						Connected?.Invoke(this, new ConnectionEventArgs(_grpcChannel));
 					}
 				}
 
@@ -114,7 +114,7 @@ namespace HomeCtl.Connection
 						_connectCycleCooldownCancellation.Token,
 						cancellationToken))
 				{
-					await Task.Delay(timeSpan, cancellationToken);
+					await Task.Delay(timeSpan, combinedCancellationSource.Token);
 				}
 			}
 			catch (OperationCanceledException)
