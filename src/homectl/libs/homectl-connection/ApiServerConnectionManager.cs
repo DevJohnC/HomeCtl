@@ -1,12 +1,41 @@
-﻿using Grpc.Net.Client;
+﻿using Grpc.Core;
+using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace HomeCtl.Connection
 {
+	/// <summary>
+	/// Contains event data for a connection event.
+	/// </summary>
+	public class ConnectionEventArgs : EventArgs
+	{
+		public ConnectionEventArgs(ChannelBase grpcChannel)
+		{
+			GrpcChannel = grpcChannel;
+		}
+
+		public ConnectionEventArgs(ChannelBase grpcChannel, Exception? exception) :
+			this(grpcChannel)
+		{
+			Exception = exception;
+		}
+
+		/// <summary>
+		/// Gets the grpc channel connected/disconnected to/from the remote endpoint.
+		/// </summary>
+		public ChannelBase GrpcChannel { get; }
+
+		/// <summary>
+		/// Gets the exception that caused a disconnect.
+		/// </summary>
+		public Exception? Exception { get; }
+	}
+
 	/// <summary>
 	/// Manages connections to an API server.
 	/// </summary>
@@ -22,9 +51,24 @@ namespace HomeCtl.Connection
 		}
 
 		/// <summary>
+		/// Event raised when a new connection is established.
+		/// </summary>
+		public event EventHandler<ConnectionEventArgs>? Connected;
+
+		/// <summary>
+		/// Event raised when a connection fails.
+		/// </summary>
+		public event EventHandler<ConnectionEventArgs>? Disconnected;
+
+		/// <summary>
 		/// Gets the current connection state.
 		/// </summary>
 		public ConnectionStates ConnectionState { get; private set; }
+
+		/// <summary>
+		/// Gets the current grpc channel if connected.
+		/// </summary>
+		public ChannelBase? GrpcChannel { get; private set; }
 
 		/// <summary>
 		/// Runs the connection manager.
@@ -42,16 +86,42 @@ namespace HomeCtl.Connection
 						result.Client != null)
 					{
 						ConnectionState = ConnectionStates.Connected;
-						var grpcChannel = GrpcChannel.ForAddress(result.Client.BaseAddress, new GrpcChannelOptions
-						{
-							DisposeHttpClient = false,
-							HttpClient = result.Client
-						});
+						GrpcChannel = CreateGrpcChannel(result.Client);
+						Connected?.Invoke(this, new ConnectionEventArgs(GrpcChannel));
 					}
 				}
 
 				await Task.Delay(_connectCycleTimeout, cancellationToken);
 			}
+		}
+
+		/// <summary>
+		/// Creates a grpc channel ready to invoke grpc methods on the remote host.
+		/// </summary>
+		/// <param name="httpClient"></param>
+		/// <returns></returns>
+		private ChannelBase CreateGrpcChannel(HttpClient httpClient)
+		{
+			var implClient = Grpc.Net.Client.GrpcChannel.ForAddress(httpClient.BaseAddress, new GrpcChannelOptions
+			{
+				DisposeHttpClient = false,
+				HttpClient = httpClient
+			});
+			var monitoredClient = new MonitoredGrpcChannel(implClient);
+			monitoredClient.InvokeError += ClientInvokeError;
+			return monitoredClient;
+		}
+
+		/// <summary>
+		/// Client invoke error handler.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
+		private void ClientInvokeError(object sender, CallInvokerErrorEventArgs eventArgs)
+		{
+			ConnectionState = ConnectionStates.Disconnected;
+			GrpcChannel = null;
+			Disconnected?.Invoke(this, new ConnectionEventArgs((ChannelBase)sender, eventArgs.Exception));
 		}
 
 		/// <summary>
