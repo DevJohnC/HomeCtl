@@ -14,12 +14,12 @@ namespace HomeCtl.Connection
 	/// </summary>
 	public class ConnectionEventArgs : EventArgs
 	{
-		public ConnectionEventArgs(ChannelBase grpcChannel)
+		public ConnectionEventArgs(ChannelBase? grpcChannel)
 		{
 			GrpcChannel = grpcChannel;
 		}
 
-		public ConnectionEventArgs(ChannelBase grpcChannel, Exception? exception) :
+		public ConnectionEventArgs(ChannelBase? grpcChannel, Exception? exception) :
 			this(grpcChannel)
 		{
 			Exception = exception;
@@ -28,7 +28,7 @@ namespace HomeCtl.Connection
 		/// <summary>
 		/// Gets the grpc channel connected/disconnected to/from the remote endpoint.
 		/// </summary>
-		public ChannelBase GrpcChannel { get; }
+		public ChannelBase? GrpcChannel { get; }
 
 		/// <summary>
 		/// Gets the exception that caused a disconnect.
@@ -62,6 +62,11 @@ namespace HomeCtl.Connection
 		/// Event raised when a connection fails.
 		/// </summary>
 		public event EventHandler<ConnectionEventArgs>? Disconnected;
+
+		/// <summary>
+		/// Event raised when a connection attempt throws an exception.
+		/// </summary>
+		public event EventHandler<ConnectionEventArgs>? ConnectionAttemptError;
 
 		/// <summary>
 		/// Gets the current connection state.
@@ -220,9 +225,16 @@ namespace HomeCtl.Connection
 						attemptTimeoutSource.Token,
 						cancellationToken))
 				{
-					var result = await connectionProvider.AttemptConnection(combinedCancellationSource.Token);
-					if (result.WasConnectionEstablished)
-						return result;
+					try
+					{
+						var result = await connectionProvider.AttemptConnection(combinedCancellationSource.Token);
+						if (result.WasConnectionEstablished)
+							return result;
+					}
+					catch (Exception ex)
+					{
+						ConnectionAttemptError?.Invoke(this, new ConnectionEventArgs(null, ex));
+					}
 				}
 			}
 			return ConnectionResult.Failed;
