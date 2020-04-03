@@ -231,6 +231,8 @@ namespace HomeCtl.Connection
 						if (result.WasConnectionEstablished)
 							return result;
 					}
+					//  ignore OperationCanceledException, it's usually a result of the cancellation token requesting cancellation
+					catch (OperationCanceledException) { }
 					catch (Exception ex)
 					{
 						ConnectionAttemptError?.Invoke(this, new ConnectionEventArgs(null, ex));
