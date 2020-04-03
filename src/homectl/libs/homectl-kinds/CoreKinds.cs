@@ -16,26 +16,21 @@ namespace HomeCtl.Kinds
 					Type = "object",
 					Properties =
 					{
+						{ "name", new OpenApiSchema { Type = "string" } },
 						{ "hostname", new OpenApiSchema { Type = "string" } }
 					},
 					Required = { "hostname" }
 				},
-				specSchema: new OpenApiSchema
-				{
-					Type = "object",
-					Properties =
-					{
-						{ "endpoint", new OpenApiSchema { Type = "string" } }
-					},
-					Required = { "endpoint" }
-				},
+				specSchema: new OpenApiSchema(),
 				stateSchema: new OpenApiSchema
 				{
 					Type = "object",
 					Properties =
 					{
+						{ "endpoint", new OpenApiSchema { Type = "string" } },
 						{ "status", new OpenApiSchema { Type = "string", Default = new OpenApiString("disconnected"), Enum = new[] { new  OpenApiString("disconnected"), new OpenApiString("connecting"), new OpenApiString("connected") } } }
-					}
+					},
+					Required = { "endpoint" }
 				}
 			), null);
 	}

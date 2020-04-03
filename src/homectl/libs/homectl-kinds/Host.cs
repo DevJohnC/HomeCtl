@@ -35,10 +35,16 @@ namespace HomeCtl.Kinds
 		/// </summary>
 		public class HostMetadata
 		{
-			public HostMetadata(string hostname)
+			public HostMetadata(string name, string hostname)
 			{
+				Name = name;
 				Hostname = hostname;
 			}
+
+			/// <summary>
+			/// Gets or sets a freeform name for the host.
+			/// </summary>
+			public string Name { get; set; }
 
 			/// <summary>
 			/// Gets or sets the machine name of the computer the host is running on.
@@ -52,7 +58,10 @@ namespace HomeCtl.Kinds
 			/// <returns></returns>
 			public static HostMetadata FromJson(JObject json)
 			{
-				return new HostMetadata(json.Value<string>("hostname"));
+				return new HostMetadata(
+					json.Value<string>("name"),
+					json.Value<string>("hostname")
+					);
 			}
 		}
 
