@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>HomeCtl.Host</RootNamespace>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>HomeCtl.Connection</RootNamespace>
     <Nullable>enable</Nullable>
     <LangVersion>8.0</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>John Carruthers</Authors>
     <Product>homectl</Product>
-    <Description>HomeCtl component hosting framework for .NET core.</Description>
+    <Description>HomeCtl connection management APIs.</Description>
     <Copyright>John Carruthers 2020</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/DevJohnC/homectl</PackageProjectUrl>
@@ -19,16 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.27.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\homectl-connection\homectl-connection.csproj" />
-    <ProjectReference Include="..\homectl-servers-protocol\homectl-servers-protocol.csproj" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.27.0" />
   </ItemGroup>
 
 </Project>

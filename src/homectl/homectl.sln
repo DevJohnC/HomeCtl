@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-host", "libs\homect
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-servers-protocol", "libs\homectl-servers-protocol\homectl-servers-protocol.csproj", "{B2A6D22E-0A92-45A1-A146-08640D2E8C84}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-connection", "libs\homectl-connection\homectl-connection.csproj", "{62CAE48F-97F6-438F-B038-E7BB18D48962}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{B2A6D22E-0A92-45A1-A146-08640D2E8C84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2A6D22E-0A92-45A1-A146-08640D2E8C84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2A6D22E-0A92-45A1-A146-08640D2E8C84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62CAE48F-97F6-438F-B038-E7BB18D48962}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62CAE48F-97F6-438F-B038-E7BB18D48962}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62CAE48F-97F6-438F-B038-E7BB18D48962}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62CAE48F-97F6-438F-B038-E7BB18D48962}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,6 +49,7 @@ Global
 		{EAE679D5-6B86-4458-BA52-7EFA0F418948} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 		{DB5A642F-94B7-4352-A491-2CB0DEE0CA4C} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 		{B2A6D22E-0A92-45A1-A146-08640D2E8C84} = {5079F661-0DA6-4F58-81BD-15796A108A92}
+		{62CAE48F-97F6-438F-B038-E7BB18D48962} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {84ADA937-A738-4247-A437-DEFC9D1023FF}
