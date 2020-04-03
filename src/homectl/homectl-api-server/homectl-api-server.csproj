@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>HomeCtl.APIServer</RootNamespace>
+    <RootNamespace>HomeCtl.ApiServer</RootNamespace>
     <Nullable>enable</Nullable>
     <LangVersion>8.0</LangVersion>
     <Authors>John Carruthers</Authors>

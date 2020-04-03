@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace HomeCtl.APIServer
+namespace HomeCtl.ApiServer
 {
-	public class Startup
+	class Startup
 	{
 		public void ConfigureServices(IServiceCollection services)
 		{
