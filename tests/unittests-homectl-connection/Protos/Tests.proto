@@ -8,6 +8,7 @@ message Empty {
 }
 
 service Tests {
-	//  Gets the client's IP address as the server perceives it.
 	rpc ThrowAnException (Empty) returns (Empty);
+
+	rpc DoNothing (Empty) returns (Empty);
 }

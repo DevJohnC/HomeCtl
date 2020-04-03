@@ -45,6 +45,8 @@ namespace HomeCtl.Connection
 		private readonly TimeSpan _connectCycleTimeout = TimeSpan.FromSeconds(1);
 		private readonly TimeSpan _connectAttemptTimeout = TimeSpan.FromSeconds(5);
 
+		private CancellationTokenSource _connectCycleCooldownCancellation = new CancellationTokenSource();
+
 		public ConnectionManager(IEnumerable<IConnectionProvider> connectionProviders)
 		{
 			_connectionProviders = connectionProviders.ToArray();
@@ -91,20 +93,54 @@ namespace HomeCtl.Connection
 					}
 				}
 
-				await SafeDelay(_connectCycleTimeout, cancellationToken);
+				await ConnectionAttemptCooldown(_connectCycleTimeout, cancellationToken);
 			}
 
 			await Shutdown();
 		}
 
-		private async Task SafeDelay(TimeSpan timeSpan, CancellationToken cancellationToken)
+		/// <summary>
+		/// Back off on connection attempts for a period of time.
+		/// </summary>
+		/// <param name="timeSpan"></param>
+		/// <param name="cancellationToken"></param>
+		/// <returns></returns>
+		private async Task ConnectionAttemptCooldown(TimeSpan timeSpan, CancellationToken cancellationToken)
 		{
 			try
 			{
-				await Task.Delay(timeSpan, cancellationToken);
+				using (var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
+						_connectCycleCooldownCancellation.Token,
+						cancellationToken))
+				{
+					await Task.Delay(timeSpan, cancellationToken);
+				}
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
+			}
+			finally
+			{
+				CheckCooldownCancellationSource();
+			}
+		}
+
+		/// <summary>
+		/// Replaces the cooldown cancellation token if needed.
+		/// </summary>
+		/// <remarks>
+		/// Only call from within the Run method to avoid race conditions.
+		/// </remarks>
+		private void CheckCooldownCancellationSource()
+		{
+			if (_connectCycleCooldownCancellation.IsCancellationRequested)
+			{
+				//  copy the reference to _connectCycleCooldownCancellation so that we can replace it
+				//  in place (so that __connectCycleCooldownCancellation.Cancel() can't throw NRE)
+				//  and still be capable of disposal
+				var oldTokenSource = _connectCycleCooldownCancellation;
+				_connectCycleCooldownCancellation = new CancellationTokenSource();
+				oldTokenSource.Dispose();
 			}
 		}
 
@@ -130,6 +166,7 @@ namespace HomeCtl.Connection
 				ConnectionState = ConnectionStates.Disconnected;
 				GrpcChannel = null;
 				Disconnected?.Invoke(this, new ConnectionEventArgs(channel, exception));
+				_connectCycleCooldownCancellation.Cancel();
 			}
 		}
 
