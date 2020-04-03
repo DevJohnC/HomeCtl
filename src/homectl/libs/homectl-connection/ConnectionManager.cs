@@ -39,13 +39,13 @@ namespace HomeCtl.Connection
 	/// <summary>
 	/// Manages connections to an API server.
 	/// </summary>
-	public sealed class ApiServerConnectionManager
+	public sealed class ConnectionManager
 	{
 		private readonly IConnectionProvider[] _connectionProviders;
 		private readonly TimeSpan _connectCycleTimeout = TimeSpan.FromSeconds(1);
 		private readonly TimeSpan _connectAttemptTimeout = TimeSpan.FromSeconds(5);
 
-		public ApiServerConnectionManager(IEnumerable<IConnectionProvider> connectionProviders)
+		public ConnectionManager(IEnumerable<IConnectionProvider> connectionProviders)
 		{
 			_connectionProviders = connectionProviders.ToArray();
 		}
