@@ -157,7 +157,8 @@ namespace HomeCtl.Connection
 		/// <param name="eventArgs"></param>
 		private void ClientInvokeError(object sender, CallInvokerErrorEventArgs eventArgs)
 		{
-			if (eventArgs.Exception is HttpRequestException)
+			if (eventArgs.Exception is HttpRequestException ||
+				(eventArgs.Exception is RpcException rpcEx && rpcEx.Status.StatusCode == StatusCode.Internal))
 			{
 				Disconnect((ChannelBase)sender, eventArgs.Exception);
 			}
