@@ -71,8 +71,8 @@ namespace homectl
 
 		private async Task<string> GetMyIpAddress(HomeCtlClient client)
 		{
-			var serviceClient = new Protocol.WhatsMyIpAddress.WhatsMyIpAddressClient(client.GrpcChannel);
-			var response = await serviceClient.GetIpAddressAsync(new Protocol.IpAddressRequest());
+			var serviceClient = new Protocol.Client.Information.InformationClient(client.GrpcChannel);
+			var response = await serviceClient.GetClientIpAddressAsync(new Protocol.Client.Empty());
 			return response.IpAddress;
 		}
 	}

@@ -43,6 +43,7 @@ namespace Microsoft.Extensions.Hosting
 			builder.UseRouting();
 			builder.UseEndpoints(endpoints =>
 			{
+				endpoints.MapGrpcService<homectl.Protocol.ControllersService>();
 			});
 			return builder;
 		}

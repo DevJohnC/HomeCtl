@@ -6,11 +6,11 @@ package homectl;
 
 service Controllers {
 	//  Attempts to set the specified device spec changes.
-	rpc ChangeDeviceSpec (SetDeviceSpecRequest) returns (SetDeviceSpecResponse);
+	rpc ApplyDeviceSpec (ApplyDeviceSpecRequest) returns (ApplyDeviceSpecResponse);
 }
 
-message SetDeviceSpecRequest {
+message ApplyDeviceSpecRequest {
 }
 
-message SetDeviceSpecResponse {
+message ApplyDeviceSpecResponse {
 }

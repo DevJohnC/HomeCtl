@@ -52,7 +52,7 @@ namespace homectl
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
-				endpoints.MapGrpcService<Protocol.WhatsMyIpAddressService>();
+				endpoints.MapGrpcService<Protocol.InformationService>();
 			});
 		}
 	}

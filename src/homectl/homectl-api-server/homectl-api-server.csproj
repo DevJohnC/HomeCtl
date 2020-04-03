@@ -16,6 +16,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\homectl-api-shared\homectl-api-shared.csproj" />
+    <ProjectReference Include="..\homectl-protocol-client\homectl-protocol-client.csproj" />
+    <ProjectReference Include="..\homectl-protocol-server\homectl-protocol-server.csproj" />
   </ItemGroup>
 
 </Project>
