@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>HomeCtl.Servers</RootNamespace>
+    <Nullable>enable</Nullable>
+    <LangVersion>8.0</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>John Carruthers</Authors>
+    <Product>homectl</Product>
+    <Description>HomeCtl server protocol abstractions for communications between component hosts and the api server.</Description>
+    <Copyright>John Carruthers 2020</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/DevJohnC/homectl</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DevJohnC/homectl</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>home automation</PackageTags>
+    <Version>1.0.0-indev1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="ApiServer\Common.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.11.4" />
+    <PackageReference Include="Grpc.Core" Version="2.27.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.27.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="ApiServer\Common.proto" GrpcServices="Server,Client" />
+    <Protobuf Include="ApiServer\Information.proto" GrpcServices="Server,Client" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,16 @@
+﻿syntax = "proto3";
+
+import "ApiServer/Common.proto";
+
+option csharp_namespace = "HomeCtl.Servers.ApiServer";
+
+package homectl;
+
+service Information {
+	//  Gets the client's IP address as the server perceives it.
+	rpc GetClientIpAddress (Empty) returns (IpAddressResponse);
+}
+
+message IpAddressResponse {
+	string ipAddress = 1;
+}

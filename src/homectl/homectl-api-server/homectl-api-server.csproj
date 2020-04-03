@@ -21,4 +21,8 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.27.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\libs\homectl-servers-protocol\homectl-servers-protocol.csproj" />
+  </ItemGroup>
+
 </Project>

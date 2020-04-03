@@ -1,3 +1,4 @@
+using HomeCtl.ApiServer.ProtocolServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,7 @@ namespace HomeCtl.ApiServer
 
 			app.UseEndpoints(endpoints =>
 			{
+				endpoints.MapGrpcService<InformationService>();
 			});
 		}
 	}
