@@ -9,8 +9,15 @@ package homectl;
 service Information {
 	//  Gets the client's IP address as the server perceives it.
 	rpc GetClientIpAddress (Empty) returns (IpAddressResponse);
+
+	//  Gets the server's version information.
+	rpc GetServerVersion (Empty) returns (ServerVersionResponse);
 }
 
 message IpAddressResponse {
 	string ipAddress = 1;
+}
+
+message ServerVersionResponse {
+	Version apiServerVersion = 1;
 }
