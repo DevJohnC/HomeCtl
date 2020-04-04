@@ -12,3 +12,31 @@ message Version {
 	int32 minor = 2;
 	string name = 3;
 }
+
+message RecordQuery {
+	oneof query {
+		string resourceId = 1;
+		MetadataQuery metadataQuery = 2;
+	}
+}
+
+message MetadataQuery {
+	MatchOperation matchOperation = 1;
+	repeated MetadataFieldQuery fieldQueries = 2;
+}
+
+message MetadataFieldQuery {
+	string fieldName = 1;
+	string fieldValue = 2;
+	MatchType matchType = 3;
+}
+
+enum MatchOperation {
+	AND = 0;
+	OR = 1;
+}
+
+enum MatchType {
+	EXACT = 0;
+	CASE_INSENSITIVE_MATCH = 1;
+}

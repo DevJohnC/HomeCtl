@@ -1,0 +1,29 @@
+﻿syntax = "proto3";
+
+import "ApiServer/Common.proto";
+
+option csharp_namespace = "HomeCtl.Servers.ApiServer";
+
+package homectl;
+
+service Hosts {
+	//  Stores the host record.
+	rpc Store (HostStoreRequest) returns (Empty);
+}
+
+enum HostEndpointThpe {
+	HTTP = 0;
+	HTTPS = 1;
+}
+
+message HostManifest {
+	string metadataJson = 1; 
+	string hostId = 2;
+	HostEndpointThpe endpointType = 3;
+	int32 endpointPort = 4;
+}
+
+message HostStoreRequest {
+	HostManifest hostManifest = 1;
+	RecordQuery hostMatchQuery = 2;
+}

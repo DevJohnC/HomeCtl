@@ -10,6 +10,7 @@ namespace HomeCtl.ApiServer
 	{
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddSingleton<Hosts.HostsManager>();
 			services.AddGrpc();
 		}
 
@@ -25,6 +26,7 @@ namespace HomeCtl.ApiServer
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapGrpcService<InformationService>();
+				endpoints.MapGrpcService<HostsService>();
 			});
 		}
 	}

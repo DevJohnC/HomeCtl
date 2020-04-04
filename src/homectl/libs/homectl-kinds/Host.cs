@@ -59,8 +59,8 @@ namespace HomeCtl.Kinds
 			public static HostMetadata FromJson(JObject json)
 			{
 				return new HostMetadata(
-					json.Value<string>("name"),
-					json.Value<string>("hostname")
+					json.Value<string>("name") ?? "",
+					json.Value<string>("hostname") ?? ""
 					);
 			}
 		}

@@ -28,7 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\homectl-kinds\homectl-kinds.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Protobuf Include="ApiServer\Common.proto" GrpcServices="Server,Client" />
+    <Protobuf Include="ApiServer\Hosts.proto" GrpcServices="Server,Client" />
     <Protobuf Include="ApiServer\Information.proto" GrpcServices="Server,Client" />
   </ItemGroup>
 
