@@ -8,7 +8,7 @@ package homectl;
 
 service Hosts {
 	//  Stores the host record.
-	rpc Store (HostStoreRequest) returns (Empty);
+	rpc Store (HostStoreRequest) returns (HostStoreResponse);
 }
 
 enum HostEndpointThpe {
@@ -17,8 +17,8 @@ enum HostEndpointThpe {
 }
 
 message HostManifest {
-	string metadataJson = 1; 
-	string hostId = 2;
+	string hostId = 1;
+	string metadataJson = 2;
 	HostEndpointThpe endpointType = 3;
 	int32 endpointPort = 4;
 }
@@ -26,4 +26,15 @@ message HostManifest {
 message HostStoreRequest {
 	HostManifest hostManifest = 1;
 	RecordQuery hostMatchQuery = 2;
+}
+
+message HostStoreRecord {
+	string hostId = 1;
+	string metadataJson = 2;
+	string stateJson = 3;
+}
+
+message HostStoreResponse {
+	repeated HostStoreRecord created = 1;
+	repeated HostStoreRecord updated = 2;
 }

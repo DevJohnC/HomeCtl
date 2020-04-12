@@ -5,7 +5,7 @@ namespace HomeCtl.Kinds
 	/// <summary>
 	/// A host running somewhere on the network.
 	/// </summary>
-	public class Host : IResource
+	public struct Host : IResource
 	{
 		public Host(HostMetadata metadata, HostState state)
 		{
@@ -30,10 +30,20 @@ namespace HomeCtl.Kinds
 		/// </summary>
 		public HostMetadata Metadata { get; set; }
 
+		public Host WithState(HostState state)
+		{
+			return new Host(Metadata, state);
+		}
+
+		public Host WithMetadata(HostMetadata metadata)
+		{
+			return new Host(metadata, State);
+		}
+
 		/// <summary>
 		/// Metadata structure for hosts.
 		/// </summary>
-		public class HostMetadata
+		public struct HostMetadata
 		{
 			public HostMetadata(string name, string hostname)
 			{
@@ -68,7 +78,7 @@ namespace HomeCtl.Kinds
 		/// <summary>
 		/// State structure for hosts.
 		/// </summary>
-		public class HostState
+		public struct HostState
 		{
 			public HostState(string endpoint, HostStatus status)
 			{
