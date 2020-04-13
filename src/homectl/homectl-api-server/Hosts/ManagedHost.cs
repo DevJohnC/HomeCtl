@@ -1,5 +1,4 @@
-﻿using HomeCtl.Connection;
-using HomeCtl.Kinds;
+﻿using HomeCtl.Kinds;
 using System;
 
 namespace HomeCtl.ApiServer.Hosts
@@ -10,14 +9,11 @@ namespace HomeCtl.ApiServer.Hosts
 		{
 			Id = id;
 			Host = host;
-			ConnectionManager = default;
 		}
 
 		public Guid Id { get; }
 
 		public Host Host { get; }
-
-		public ConnectionManager? ConnectionManager { get; }
 
 		public ManagedHost WithHost(Host host)
 		{

@@ -10,10 +10,9 @@ namespace HomeCtl.ApiServer
 	{
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddHostedService<HostConnectionsService>();
-			services.AddSingleton<Hosts.HostsConnectionManager>();
+			services.AddSingleton<Orchestration.OrchestrationConductor>();
+			services.AddHostedService<BackgroundServices.OrchestrationBackgroundService>();
 			services.AddSingleton<Hosts.HostsManager>();
-			services.AddSingleton<Hosts.IConnectionProviderFactory, Hosts.HostEndpointConnectionFactory>();
 			services.AddGrpc();
 		}
 
