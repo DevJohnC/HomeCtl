@@ -1,0 +1,42 @@
+﻿syntax = "proto3";
+
+import "ApiServer/Common.proto";
+
+option csharp_namespace = "HomeCtl.Servers.ApiServer";
+
+package homectl;
+
+service Resources {
+	//  Create a single new resource.
+	rpc Create (ResourceStoreRequest) returns (ResourceStoreResponse);
+	//  Store (create or update) a single resource.
+	rpc Store (ResourceStoreRequest) returns (ResourceStoreResponse);
+	//  Patch (update) one or more resources.
+	rpc Patch (Empty) returns (Empty);
+}
+
+message KindIdentifier {
+	string kindGroup = 1;
+	string kindApiVersion = 2;
+	string kindName = 3;
+}
+
+message ResourceStoreRequest {
+	KindIdentifier kindIdentifier = 1;
+	string metadataJson = 2;
+	string specJson = 3;
+}
+
+message ResourceStoreResponse {
+	KindIdentifier kindIdentifier = 1;
+	string metadataJson = 2;
+	string specJson = 3;
+	string stateJson = 4;
+	StoreResultType storeResult = 5;
+
+	enum StoreResultType {
+		UNSAVED = 0;
+		CREATED = 1;
+		UPDATED = 2;
+	}
+}

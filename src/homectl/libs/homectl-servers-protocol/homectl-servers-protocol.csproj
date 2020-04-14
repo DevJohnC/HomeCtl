@@ -19,6 +19,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ApiServer\Resources.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.11.4" />
     <PackageReference Include="Grpc.Core" Version="2.27.0" />
     <PackageReference Include="Grpc.Tools" Version="2.27.0">
@@ -33,6 +37,7 @@
 
   <ItemGroup>
     <Protobuf Include="ApiServer\Common.proto" GrpcServices="Server,Client" />
+    <Protobuf Include="ApiServer\Resources.proto" GrpcServices="Server,Client" />
     <Protobuf Include="ApiServer\Hosts.proto" GrpcServices="Server,Client" />
     <Protobuf Include="ApiServer\Information.proto" GrpcServices="Server,Client" />
   </ItemGroup>

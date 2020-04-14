@@ -1,5 +1,4 @@
-﻿using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
 
 namespace HomeCtl.Kinds
 {
@@ -16,21 +15,28 @@ namespace HomeCtl.Kinds
 					Type = "object",
 					Properties =
 					{
-						{ "name", new OpenApiSchema { Type = "string" } },
+						{ "id", new OpenApiSchema { Type = "string" } },
+						{ "label", new OpenApiSchema { Type = "string" } },
 						{ "hostname", new OpenApiSchema { Type = "string" } }
 					},
 					Required = { "hostname" }
 				},
-				specSchema: new OpenApiSchema(),
+				specSchema: new OpenApiSchema
+				{
+					Type = "object",
+					Properties =
+					{
+						{ "ipAddress", new OpenApiSchema { Type = "string", Format = "ipvAny", Description = "IP address the host can be contact on" } },
+						{ "port", new OpenApiSchema { Type = "integer", Format = "int32", Minimum = 1024, Maximum = 65535, Description = "Port number the host can be contacted on" } }
+					}
+				},
 				stateSchema: new OpenApiSchema
 				{
 					Type = "object",
 					Properties =
 					{
-						{ "endpoint", new OpenApiSchema { Type = "string" } },
-						{ "status", new OpenApiSchema { Type = "string", Default = new OpenApiString("disconnected"), Enum = new[] { new  OpenApiString("disconnected"), new OpenApiString("connecting"), new OpenApiString("connected") } } }
-					},
-					Required = { "endpoint" }
+						{ "endpoint", new OpenApiSchema { Type = "string" } }
+					}
 				}
 			), null);
 	}

@@ -11,7 +11,7 @@ service Hosts {
 	rpc Store (HostStoreRequest) returns (HostStoreResponse);
 }
 
-enum HostEndpointThpe {
+enum HostEndpointType {
 	HTTP = 0;
 	HTTPS = 1;
 }
@@ -19,7 +19,7 @@ enum HostEndpointThpe {
 message HostManifest {
 	string hostId = 1;
 	string metadataJson = 2;
-	HostEndpointThpe endpointType = 3;
+	HostEndpointType endpointType = 3;
 	int32 endpointPort = 4;
 }
 

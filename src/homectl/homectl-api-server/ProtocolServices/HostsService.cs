@@ -39,8 +39,8 @@ namespace HomeCtl.ApiServer.ProtocolServices
 						new Kinds.Host(
 							metadata,
 							new Kinds.Host.HostState(
-								$"{(request.HostManifest.EndpointType == HostEndpointThpe.Http ? "http" : "https")}://{remoteHostname}:{request.HostManifest.EndpointPort}",
-								Kinds.Host.HostStatus.Disconnected)))
+								$"{(request.HostManifest.EndpointType == HostEndpointType.Http ? "http" : "https")}://{remoteHostname}:{request.HostManifest.EndpointPort}"
+								)))
 				};
 				var applyResult = _hostsManager.Apply(managedHosts);
 

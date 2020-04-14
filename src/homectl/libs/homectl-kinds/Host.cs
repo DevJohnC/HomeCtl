@@ -14,7 +14,7 @@ namespace HomeCtl.Kinds
 		}
 
 		public Host(JObject metadata) :
-			this(HostMetadata.FromJson(metadata), new HostState(string.Empty, HostStatus.Disconnected))
+			this(HostMetadata.FromJson(metadata), new HostState(string.Empty))
 		{
 		}
 
@@ -80,31 +80,15 @@ namespace HomeCtl.Kinds
 		/// </summary>
 		public struct HostState
 		{
-			public HostState(string endpoint, HostStatus status)
+			public HostState(string endpoint)
 			{
 				Endpoint = endpoint;
-				Status = status;
 			}
 
 			/// <summary>
 			/// Gets or sets the gRPC endpoint the host is available on.
 			/// </summary>
 			public string Endpoint { get; set; }
-
-			/// <summary>
-			/// Gets or sets the current availability status of the host.
-			/// </summary>
-			public HostStatus Status { get; set; }
-		}
-
-		/// <summary>
-		/// Host availability status.
-		/// </summary>
-		public enum HostStatus
-		{
-			Disconnected,
-			Connecting,
-			Connected
 		}
 	}
 }

@@ -7,28 +7,41 @@ namespace HomeCtl.ApiServer.Orchestration
 	class OrchestrationConductor
 	{
 		private readonly PendingChangeTracker _changeTracker = new PendingChangeTracker();
+		private readonly ISpecApplierFactory _applierFactory;
+
+		public OrchestrationConductor(ISpecApplierFactory applierFactory)
+		{
+			_applierFactory = applierFactory;
+		}
 
 		public async Task Run(CancellationToken stoppingToken)
 		{
 			while (!stoppingToken.IsCancellationRequested)
 			{
-				var pendingChanges = await _changeTracker.WaitForChanges(stoppingToken);
+				var pendingPatches = await _changeTracker.WaitForChanges(stoppingToken);
 
 				if (stoppingToken.IsCancellationRequested)
 					break;
 
-				foreach (var change in pendingChanges)
+				foreach (var filteredPatch in pendingPatches)
 				{
+					await ApplyChange(filteredPatch);
 				}
 			}
 		}
 
-		public void NotifySpecChanged(params object[] changedRecords)
+		private async Task ApplyChange(FilteredSpecPatch specPatch)
 		{
-			NotifySpecChanged((IEnumerable<object>)changedRecords);
+			var applier = _applierFactory.GetApplier();
+			var applyResult = await applier.ApplySpecChanges(specPatch);
 		}
 
-		public void NotifySpecChanged(IEnumerable<object> changedRecords)
+		public void EnqueueSpecPatch(params FilteredSpecPatch[] changedRecords)
+		{
+			EnqueueSpecPatch((IEnumerable<FilteredSpecPatch>)changedRecords);
+		}
+
+		public void EnqueueSpecPatch(IEnumerable<FilteredSpecPatch> changedRecords)
 		{
 			_changeTracker.AddChangesAndSignal(changedRecords);
 		}
@@ -37,9 +50,9 @@ namespace HomeCtl.ApiServer.Orchestration
 		{
 			private readonly object _lockObj = new object();
 			private TaskCompletionSource<bool> _changesAddedSignal = new TaskCompletionSource<bool>(false);
-			private List<object> _pendingChanges = new List<object>();
+			private List<FilteredSpecPatch> _pendingPatches = new List<FilteredSpecPatch>();
 
-			public async Task<IEnumerable<object>> WaitForChanges(CancellationToken stoppingToken)
+			public async Task<IEnumerable<FilteredSpecPatch>> WaitForChanges(CancellationToken stoppingToken)
 			{
 				var cancellationTaskSource = new TaskCompletionSource<bool>();
 				stoppingToken.Register(() => cancellationTaskSource.SetResult(true));
@@ -55,7 +68,7 @@ namespace HomeCtl.ApiServer.Orchestration
 				lock (_lockObj)
 				{
 					_changesAddedSignal = new TaskCompletionSource<bool>(false);
-					return _pendingChanges.ToArray();
+					return _pendingPatches.ToArray();
 				}
 			}
 
@@ -65,11 +78,11 @@ namespace HomeCtl.ApiServer.Orchestration
 					_changesAddedSignal.SetResult(true);
 			}
 
-			public void AddChangesAndSignal(IEnumerable<object> newChanges)
+			public void AddChangesAndSignal(IEnumerable<FilteredSpecPatch> newChanges)
 			{
 				lock (_lockObj)
 				{
-					_pendingChanges.AddRange(newChanges);
+					_pendingPatches.AddRange(newChanges);
 					SetWaitingSignalNoLock();
 				}
 			}

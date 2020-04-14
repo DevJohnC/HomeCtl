@@ -5,5 +5,10 @@
 	/// </summary>
 	interface ISpecApplierFactory
 	{
+		/// <summary>
+		/// Gets an applier.
+		/// </summary>
+		/// <returns></returns>
+		ISpecApplier GetApplier();
 	}
 }
