@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json.Linq;
 
 namespace HomeCtl.ApiServer
 {
@@ -13,14 +12,13 @@ namespace HomeCtl.ApiServer
 		{
 			services.AddSingleton<Newtonsoft.Json.JsonSerializer>(new Newtonsoft.Json.JsonSerializer());
 
-			services.AddSingleton<Orchestration.ISpecApplierFactory, Orchestration.NetworkedSpecApplierFactory>();
+			services.AddSingleton<EventBus.EventBus>();
+
 			services.AddSingleton<Orchestration.OrchestrationConductor>();
 			services.AddHostedService<BackgroundServices.OrchestrationBackgroundService>();
 
-			services.AddSingleton<Resources.ResourceManager>();
-			services.AddSingleton<Resources.ResourceSegmentManager>();
+			services.AddSingleton<Resources.ResourceStore>();
 
-			services.AddSingleton<Hosts.HostsManager>();
 			services.AddGrpc();
 		}
 
@@ -36,7 +34,7 @@ namespace HomeCtl.ApiServer
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapGrpcService<InformationService>();
-				endpoints.MapGrpcService<HostsService>();
+				endpoints.MapGrpcService<ResourcesService>();
 			});
 		}
 	}

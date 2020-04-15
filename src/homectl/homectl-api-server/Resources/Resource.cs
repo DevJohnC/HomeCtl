@@ -1,31 +1,26 @@
-﻿using HomeCtl.Kinds;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace HomeCtl.ApiServer.Resources
 {
 	struct Resource
 	{
-		public Resource(JObject metadataJson, JObject specJson, Kind kind) : this()
+		public Resource(ResourceRecord record, KindDescriptor kind, JObject metadataJson, JObject specJson, JObject? stateJson = null)
 		{
+			Record = record;
 			MetadataJson = metadataJson;
 			SpecJson = specJson;
 			Kind = kind;
-		}
-
-		public Resource(JObject metadataJson, JObject specJson, JObject? stateJson, Kind kind)
-		{
-			MetadataJson = metadataJson;
-			SpecJson = specJson;
 			StateJson = stateJson;
-			Kind = kind;
 		}
 
-		public JObject MetadataJson { get; set; }
+		public ResourceRecord Record { get; }
 
-		public JObject SpecJson { get; set; }
+		public JObject MetadataJson { get; }
 
-		public JObject? StateJson { get; set; }
+		public JObject SpecJson { get; }
 
-		public Kind Kind { get; }
+		public JObject? StateJson { get; }
+
+		public KindDescriptor Kind { get; }
 	}
 }

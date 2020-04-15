@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using HomeCtl.ApiServer.Resources;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,33 +8,55 @@ namespace HomeCtl.ApiServer.Orchestration
 	class OrchestrationConductor
 	{
 		private readonly PendingChangeTracker _changeTracker = new PendingChangeTracker();
-		private readonly ISpecApplierFactory _applierFactory;
+		private readonly EventBus.EventBus _eventBus;
 
-		public OrchestrationConductor(ISpecApplierFactory applierFactory)
+		public OrchestrationConductor(EventBus.EventBus eventBus)
 		{
-			_applierFactory = applierFactory;
+			_eventBus = eventBus;
+		}
+
+		private void SubscribeToEvents()
+		{
+			_eventBus.Subscribe<ResourceEvents.ResourceCreatedEvent>(ResourceCreated);
+		}
+
+		private void UnsubscribeFromEvents()
+		{
+			_eventBus.Unsubscribe<ResourceEvents.ResourceCreatedEvent>(ResourceCreated);
+		}
+
+		private void ResourceCreated(ResourceEvents.ResourceCreatedEvent eventData)
+		{
+
 		}
 
 		public async Task Run(CancellationToken stoppingToken)
 		{
-			while (!stoppingToken.IsCancellationRequested)
+			try
 			{
-				var pendingPatches = await _changeTracker.WaitForChanges(stoppingToken);
+				SubscribeToEvents();
 
-				if (stoppingToken.IsCancellationRequested)
-					break;
-
-				foreach (var filteredPatch in pendingPatches)
+				while (!stoppingToken.IsCancellationRequested)
 				{
-					await ApplyChange(filteredPatch);
+					var pendingPatches = await _changeTracker.WaitForChanges(stoppingToken);
+
+					if (stoppingToken.IsCancellationRequested)
+						break;
+
+					foreach (var filteredPatch in pendingPatches)
+					{
+						await ApplyChange(filteredPatch);
+					}
 				}
+			}
+			finally
+			{
+				UnsubscribeFromEvents();
 			}
 		}
 
 		private async Task ApplyChange(FilteredSpecPatch specPatch)
 		{
-			var applier = _applierFactory.GetApplier();
-			var applyResult = await applier.ApplySpecChanges(specPatch);
 		}
 
 		public void EnqueueSpecPatch(params FilteredSpecPatch[] changedRecords)
