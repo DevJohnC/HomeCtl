@@ -1,7 +1,6 @@
 ﻿using Grpc.Core;
 using HomeCtl.ApiServer.Resources;
-using HomeCtl.Kinds;
-using HomeCtl.Servers.ApiServer;
+using HomeCtl.Clients;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -10,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.ProtocolServices
 {
-	class ResourcesService : Servers.ApiServer.Resources.ResourcesBase
+	class ResourcesService : Clients.Resources.ResourcesBase
 	{
 		private readonly ResourceStore _resourceStore;
 		private readonly JsonSerializer _jsonSerializer;

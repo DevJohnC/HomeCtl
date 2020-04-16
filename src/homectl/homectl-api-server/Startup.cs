@@ -34,6 +34,7 @@ namespace HomeCtl.ApiServer
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapGrpcService<InformationService>();
+				endpoints.MapGrpcService<RecordsService>();
 				endpoints.MapGrpcService<ResourcesService>();
 			});
 		}

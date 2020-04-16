@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>HomeCtl.Servers</RootNamespace>
+    <RootNamespace>HomeCtl.Clients</RootNamespace>
     <Nullable>enable</Nullable>
     <LangVersion>8.0</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>John Carruthers</Authors>
     <Product>homectl</Product>
-    <Description>HomeCtl server protocol abstractions for communications between component hosts and the api server.</Description>
+    <Description>HomeCtl client protocol abstractions for communications between clients and the api server.</Description>
     <Copyright>John Carruthers 2020</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/DevJohnC/homectl</PackageProjectUrl>
@@ -32,10 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="ApiServer\Common.proto" GrpcServices="Server,Client" />
-    <Protobuf Include="ApiServer\Records.proto" GrpcServices="Server,Client" />
-    <Protobuf Include="ApiServer\Information.proto" GrpcServices="Server,Client" />
-    <Protobuf Include="Host\Controllers.proto" GrpcServices="Server,Client" />
+    <Protobuf Include="Resources.proto" GrpcServices="Server,Client" />
   </ItemGroup>
 
 </Project>

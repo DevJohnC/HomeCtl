@@ -1,8 +1,6 @@
 ﻿syntax = "proto3";
 
-import "ApiServer/Common.proto";
-
-option csharp_namespace = "HomeCtl.Servers.ApiServer";
+option csharp_namespace = "HomeCtl.Clients";
 
 package homectl;
 
@@ -11,8 +9,6 @@ service Resources {
 	rpc Create (ResourceStoreRequest) returns (ResourceStoreResponse);
 	//  Store (create or update) a single resource.
 	rpc Store (ResourceStoreRequest) returns (ResourceStoreResponse);
-	//  Patch (update) one or more resources.
-	rpc Patch (Empty) returns (Empty);
 }
 
 message KindIdentifier {

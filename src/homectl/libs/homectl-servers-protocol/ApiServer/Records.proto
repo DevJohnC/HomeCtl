@@ -1,0 +1,70 @@
+﻿syntax = "proto3";
+
+import "ApiServer/Common.proto";
+
+option csharp_namespace = "HomeCtl.Servers.ApiServer";
+
+package homectl;
+
+service Records {
+	rpc StoreRecord (StoreRecordRequest) returns (StoreRecordResponse);
+}
+
+message KindIdentifier {
+	string kindGroup = 1;
+	string kindApiVersion = 2;
+	string kindName = 3;
+}
+
+//  Describes a resource
+message ResourceDocument {
+	ResourceDocumentMetadata metadata = 1;
+	ResourceDocumentSpec spec = 2;
+	ResourceDocumentState state = 3;
+}
+
+message ResourceDocumentMetadata {
+	string id = 1;
+	string label = 2;
+	repeated ResourceDocumentField fields = 3;
+}
+
+message ResourceDocumentSpec {
+	repeated ResourceDocumentField fields = 1;
+}
+
+message ResourceDocumentState {
+	repeated ResourceDocumentField fields = 1;
+}
+
+message ResourceDocumentField {
+	string fieldName = 1;
+	ResourceDocumentValue fieldValue = 2;
+}
+
+message ResourceDocumentFieldCollection {
+	repeated ResourceDocumentField fields = 1;
+}
+
+message ResourceDocumentValue {
+	oneof valueType {
+		string stringValue = 1;
+		bool boolValue = 2;
+		int32 int32Value = 3;
+		int64 int64Value = 4;
+		ResourceDocumentFieldCollection objectValue = 5;
+	}
+}
+
+message StoreRecordRequest {
+	ResourceDocument resourceRecord = 1;
+}
+
+message StoreRecordResponse {
+	StoreResultType storeResult = 1;
+	enum StoreResultType {
+		UNSAVED = 0;
+		CREATED = 1;
+		UPDATED = 2;
+	}
+}
