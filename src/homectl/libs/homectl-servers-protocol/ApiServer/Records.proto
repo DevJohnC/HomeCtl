@@ -18,9 +18,10 @@ message KindIdentifier {
 
 //  Describes a resource
 message ResourceDocument {
-	ResourceDocumentMetadata metadata = 1;
-	ResourceDocumentSpec spec = 2;
-	ResourceDocumentState state = 3;
+	KindIdentifier kind = 1;
+	ResourceDocumentMetadata metadata = 2;
+	ResourceDocumentSpec spec = 3;
+	ResourceDocumentState state = 4;
 }
 
 message ResourceDocumentMetadata {

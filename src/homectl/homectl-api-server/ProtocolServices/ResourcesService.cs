@@ -44,70 +44,71 @@ namespace HomeCtl.ApiServer.ProtocolServices
 
 		public override Task<ResourceStoreResponse> Create(ResourceStoreRequest request, ServerCallContext context)
 		{
-			var resourceId = Guid.Empty;
+			return base.Create(request, context);
+			//var resourceId = Guid.Empty;
 
-			var kind = new KindDescriptor(
-				request.KindIdentifier.KindGroup, request.KindIdentifier.KindApiVersion,
-				request.KindIdentifier.KindName
-				);
-			var metadataJson = DeserializeJsonString(request.MetadataJson);
-			var specJson = DeserializeJsonString(request.SpecJson);
+			//var kind = new KindDescriptor(
+			//	request.KindIdentifier.KindGroup, request.KindIdentifier.KindApiVersion,
+			//	request.KindIdentifier.KindName
+			//	);
+			//var metadataJson = DeserializeJsonString(request.MetadataJson);
+			//var specJson = DeserializeJsonString(request.SpecJson);
 
-			if (metadataJson.ContainsKey("Id"))
-			{
-				if (!Guid.TryParse(metadataJson.Value<string>("Id"), out var parsedId))
-				{
-					//  malformed id
-					return Task.FromResult(new ResourceStoreResponse
-					{
-						KindIdentifier = request.KindIdentifier,
-						StoreResult = ResourceStoreResponse.Types.StoreResultType.Unsaved,
-						MetadataJson = request.MetadataJson,
-						SpecJson = request.SpecJson
-					});
-				}
-				resourceId = parsedId;
-			}
-			else
-			{
-				resourceId = Guid.NewGuid();
-			}
+			//if (metadataJson.ContainsKey("Id"))
+			//{
+			//	if (!Guid.TryParse(metadataJson.Value<string>("Id"), out var parsedId))
+			//	{
+			//		//  malformed id
+			//		return Task.FromResult(new ResourceStoreResponse
+			//		{
+			//			KindIdentifier = request.KindIdentifier,
+			//			StoreResult = ResourceStoreResponse.Types.StoreResultType.Unsaved,
+			//			MetadataJson = request.MetadataJson,
+			//			SpecJson = request.SpecJson
+			//		});
+			//	}
+			//	resourceId = parsedId;
+			//}
+			//else
+			//{
+			//	resourceId = Guid.NewGuid();
+			//}
 
-			if (_resourceStore.TryGetResource(new ResourceRecord(resourceId), kind, out var _
-				))
-			{
-				//  resource with same id already exists
-				return Task.FromResult(new ResourceStoreResponse
-				{
-					KindIdentifier = request.KindIdentifier,
-					StoreResult = ResourceStoreResponse.Types.StoreResultType.Unsaved,
-					MetadataJson = request.MetadataJson,
-					SpecJson = request.SpecJson
-				});
-			}
+			//if (_resourceStore.TryGetResource(new ResourceRecord(resourceId), kind, out var _
+			//	))
+			//{
+			//	//  resource with same id already exists
+			//	return Task.FromResult(new ResourceStoreResponse
+			//	{
+			//		KindIdentifier = request.KindIdentifier,
+			//		StoreResult = ResourceStoreResponse.Types.StoreResultType.Unsaved,
+			//		MetadataJson = request.MetadataJson,
+			//		SpecJson = request.SpecJson
+			//	});
+			//}
 
-			var resource = new Resource(
-				new ResourceRecord(resourceId, metadataJson.Value<string>("Label")),
-				kind, metadataJson, specJson);
-			if (!_resourceStore.TryStoreResource(resource, out var storedVersion))
-			{
-				//  failure, likely kind doesnt exist or data isnt valid
-				return Task.FromResult(new ResourceStoreResponse
-				{
-					KindIdentifier = request.KindIdentifier,
-					StoreResult = ResourceStoreResponse.Types.StoreResultType.Unsaved,
-					MetadataJson = request.MetadataJson,
-					SpecJson = request.SpecJson
-				});
-			}
+			//var resource = new Resource(
+			//	new ResourceRecord(resourceId, metadataJson.Value<string>("Label")),
+			//	kind, metadataJson, specJson);
+			//if (!_resourceStore.TryStoreResource(resource, out var storedVersion))
+			//{
+			//	//  failure, likely kind doesnt exist or data isnt valid
+			//	return Task.FromResult(new ResourceStoreResponse
+			//	{
+			//		KindIdentifier = request.KindIdentifier,
+			//		StoreResult = ResourceStoreResponse.Types.StoreResultType.Unsaved,
+			//		MetadataJson = request.MetadataJson,
+			//		SpecJson = request.SpecJson
+			//	});
+			//}
 
-			return Task.FromResult(new ResourceStoreResponse
-			{
-				KindIdentifier = request.KindIdentifier,
-				StoreResult = ResourceStoreResponse.Types.StoreResultType.Created,
-				MetadataJson = SerializeToJsonString(storedVersion.MetadataJson),
-				SpecJson = SerializeToJsonString(storedVersion.SpecJson)
-			});
+			//return Task.FromResult(new ResourceStoreResponse
+			//{
+			//	KindIdentifier = request.KindIdentifier,
+			//	StoreResult = ResourceStoreResponse.Types.StoreResultType.Created,
+			//	MetadataJson = SerializeToJsonString(storedVersion.MetadataJson),
+			//	SpecJson = SerializeToJsonString(storedVersion.SpecJson)
+			//});
 		}
 
 		public override Task<ResourceStoreResponse> Store(ResourceStoreRequest request, ServerCallContext context)

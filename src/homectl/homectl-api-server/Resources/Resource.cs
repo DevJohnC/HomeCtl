@@ -1,25 +1,26 @@
-﻿using Newtonsoft.Json.Linq;
-
-namespace HomeCtl.ApiServer.Resources
+﻿namespace HomeCtl.ApiServer.Resources
 {
 	struct Resource
 	{
-		public Resource(ResourceRecord record, KindDescriptor kind, JObject metadataJson, JObject specJson, JObject? stateJson = null)
+		public Resource(KindDescriptor kind, ResourceDocumentMetadata metadata,
+			ResourceDocumentSpec? spec = null, ResourceDocumentState? state = null)
 		{
-			Record = record;
-			MetadataJson = metadataJson;
-			SpecJson = specJson;
+			Metadata = metadata;
+			Spec = spec;
 			Kind = kind;
-			StateJson = stateJson;
+			State = state;
 		}
 
-		public ResourceRecord Record { get; }
+		public Resource(ResourceDocument resourceDocument) :
+			this(resourceDocument.Kind, resourceDocument.Metadata, resourceDocument.Spec, resourceDocument.State)
+		{
+		}
 
-		public JObject MetadataJson { get; }
+		public ResourceDocumentMetadata Metadata { get; }
 
-		public JObject SpecJson { get; }
+		public ResourceDocumentSpec? Spec { get; }
 
-		public JObject? StateJson { get; }
+		public ResourceDocumentState? State { get; }
 
 		public KindDescriptor Kind { get; }
 	}

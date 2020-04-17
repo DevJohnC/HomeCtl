@@ -1,6 +1,4 @@
-﻿using HomeCtl.Kinds;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 
 namespace HomeCtl.ApiServer.Resources
 {
@@ -13,21 +11,25 @@ namespace HomeCtl.ApiServer.Resources
 			_eventBus = eventBus;
 		}
 
-		public bool TryGetResource(ResourceRecord record, KindDescriptor kind, out Resource resource)
+		public bool TryGetResource(Guid id, KindDescriptor kind, out Resource resource)
 		{
 			resource = default;
 			return false;
 		}
 
-		public bool TryStoreResource(Resource resource, out Resource storedResource)
+		public bool TryStoreResource(Resource resource)
+		{
+			return TryStoreResource(resource, out var _);
+		}
+
+		public bool TryStoreResource(Resource resource, out bool updatedExistingResource)
 		{
 			//  validate Kind
+			//  validate data against kind schema
 			//  store
-			//  publish
-			_eventBus.Publish(new ResourceEvents.ResourceCreatedEvent(resource));
-			//  assign the version of the resource that was actually stored
-			//  incase any data was removed from the metadata/spec data
-			storedResource = resource;
+			//  publish event
+			_eventBus.Publish(new ResourceEvents.ResourceStoredEvent(resource));
+			updatedExistingResource = false;
 			return true;
 		}
 	}

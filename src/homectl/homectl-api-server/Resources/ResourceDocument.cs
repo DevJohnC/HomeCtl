@@ -1,19 +1,22 @@
-﻿using Newtonsoft.Json.Bson;
+﻿using HomeCtl.Clients;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace HomeCtl.ApiServer.Resources
 {
 	class ResourceDocument
 	{
-		public ResourceDocument(ResourceDocumentMetadata metadata, ResourceDocumentSpec? spec, ResourceDocumentState? state)
+		public ResourceDocument(KindDescriptor kind, ResourceDocumentMetadata metadata,
+			ResourceDocumentSpec? spec, ResourceDocumentState? state)
 		{
+			Kind = kind;
 			Metadata = metadata;
 			Spec = spec;
 			State = state;
 		}
+
+		public KindDescriptor Kind { get; set; }
 
 		public ResourceDocumentMetadata Metadata { get; set; }
 
@@ -27,6 +30,9 @@ namespace HomeCtl.ApiServer.Resources
 				throw new Exception("Metadata required.");
 
 			return new ResourceDocument(
+				new KindDescriptor(
+					protoDocument.Kind.KindGroup, protoDocument.Kind.KindApiVersion,
+					protoDocument.Kind.KindName),
 				ResourceDocumentMetadata.FromProto(protoDocument.Metadata),
 				ResourceDocumentSpec.FromProto(protoDocument.Spec),
 				ResourceDocumentState.FromProto(protoDocument.State)
