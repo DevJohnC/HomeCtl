@@ -4,9 +4,9 @@ namespace HomeCtl.ApiServer.Resources
 {
 	class ResourceStore
 	{
-		private readonly EventBus.EventBus _eventBus;
+		private readonly Events.EventBus _eventBus;
 
-		public ResourceStore(EventBus.EventBus eventBus)
+		public ResourceStore(Events.EventBus eventBus)
 		{
 			_eventBus = eventBus;
 		}

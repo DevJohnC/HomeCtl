@@ -8,9 +8,9 @@ namespace HomeCtl.ApiServer.Orchestration
 	class OrchestrationConductor
 	{
 		private readonly PendingChangeTracker _changeTracker = new PendingChangeTracker();
-		private readonly EventBus.EventBus _eventBus;
+		private readonly Events.EventBus _eventBus;
 
-		public OrchestrationConductor(EventBus.EventBus eventBus)
+		public OrchestrationConductor(Events.EventBus eventBus)
 		{
 			_eventBus = eventBus;
 		}

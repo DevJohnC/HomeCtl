@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace HomeCtl.ApiServer.EventBus
+namespace HomeCtl.Events
 {
-	class EventBus
+	public class EventBus
 	{
 		private readonly object _lockObj = new object();
 		private readonly Dictionary<Type, SubscriptionCollection> _subscriptionCollections =

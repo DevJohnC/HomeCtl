@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\libs\homectl-clients-protocol\homectl-clients-protocol.csproj" />
-    <ProjectReference Include="..\libs\homectl-connection\homectl-connection.csproj" />
+    <ProjectReference Include="..\libs\homectl-events\homectl-events.csproj" />
     <ProjectReference Include="..\libs\homectl-kinds\homectl-kinds.csproj" />
     <ProjectReference Include="..\libs\homectl-servers-protocol\homectl-servers-protocol.csproj" />
   </ItemGroup>

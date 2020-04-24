@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -8,7 +8,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>John Carruthers</Authors>
     <Product>homectl</Product>
-    <Description>HomeCtl connection management APIs.</Description>
+    <Description>HomeCtl API server connection management APIs.</Description>
     <Copyright>John Carruthers 2020</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/DevJohnC/homectl</PackageProjectUrl>

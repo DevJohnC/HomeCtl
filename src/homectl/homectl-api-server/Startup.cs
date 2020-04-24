@@ -12,7 +12,7 @@ namespace HomeCtl.ApiServer
 		{
 			services.AddSingleton<Newtonsoft.Json.JsonSerializer>(new Newtonsoft.Json.JsonSerializer());
 
-			services.AddSingleton<EventBus.EventBus>();
+			services.AddSingleton<Events.EventBus>();
 
 			services.AddSingleton<Orchestration.OrchestrationConductor>();
 			services.AddHostedService<BackgroundServices.OrchestrationBackgroundService>();

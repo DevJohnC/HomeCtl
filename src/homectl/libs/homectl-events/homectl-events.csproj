@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>HomeCtl.Events</RootNamespace>
+    <Nullable>enable</Nullable>
+    <LangVersion>8.0</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>John Carruthers</Authors>
+    <Product>homectl</Product>
+    <Description>HomeCtl event APIs.</Description>
+    <Copyright>John Carruthers 2020</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/DevJohnC/homectl</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DevJohnC/homectl</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>home automation</PackageTags>
+    <Version>1.0.0-indev1</Version>
+  </PropertyGroup>
+
+</Project>
