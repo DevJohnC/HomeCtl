@@ -7,7 +7,7 @@ namespace HomeCtl.Kinds
 	/// </summary>
 	public class KindSchema
 	{
-		public KindSchema(OpenApiSchema metadataSchema, OpenApiSchema specSchema, OpenApiSchema? stateSchema)
+		public KindSchema(OpenApiSchema metadataSchema, OpenApiSchema? specSchema, OpenApiSchema? stateSchema)
 		{
 			MetadataSchema = metadataSchema;
 			SpecSchema = specSchema;
@@ -22,7 +22,7 @@ namespace HomeCtl.Kinds
 		/// <summary>
 		/// Gets an OpenApi type schema that describes the structure of the kinds spec.
 		/// </summary>
-		public OpenApiSchema SpecSchema { get; }
+		public OpenApiSchema? SpecSchema { get; }
 
 		/// <summary>
 		/// Gets an OpenApi type schema that describes the structure of the kinds state, if it has one.

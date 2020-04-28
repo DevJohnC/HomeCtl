@@ -1,4 +1,4 @@
-﻿namespace HomeCtl.ApiServer.Resources
+﻿namespace HomeCtl.Kinds.Resources
 {
 	public struct KindDescriptor
 	{

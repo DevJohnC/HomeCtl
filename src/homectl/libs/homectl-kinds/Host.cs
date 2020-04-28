@@ -5,7 +5,7 @@ namespace HomeCtl.Kinds
 	/// <summary>
 	/// A host running somewhere on the network.
 	/// </summary>
-	public struct Host : IResource
+	public class Host : IResource
 	{
 		public Host(HostMetadata metadata, HostState state)
 		{

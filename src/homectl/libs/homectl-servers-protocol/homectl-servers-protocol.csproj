@@ -35,7 +35,7 @@
     <Protobuf Include="ApiServer\Common.proto" GrpcServices="Server,Client" />
     <Protobuf Include="ApiServer\Records.proto" GrpcServices="Server,Client" />
     <Protobuf Include="ApiServer\Information.proto" GrpcServices="Server,Client" />
-    <Protobuf Include="Host\Controllers.proto" GrpcServices="Server,Client" />
+    <Protobuf Include="Host\HostInterface.proto" GrpcServices="Server,Client" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using HomeCtl.Kinds.Resources;
 
 namespace HomeCtl.Kinds
 {
@@ -7,7 +7,41 @@ namespace HomeCtl.Kinds
 		public const string KIND_GROUP_CORE = "core";
 		public const string KIND_VERSION_V1ALPHA1 = "v1alpha1";
 
-		public static readonly Kind Kind = new Kind("kind", "kinds", KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, new KindSchema(
+		public static readonly Kind<Kind> Kind = KindBuilder.Build(
+			KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, "kind", "kinds",
+			KindToDocument, DocumentToKind,
+			metadata: metadata => { },
+			spec: spec => { }
+			);
+
+		public static readonly Kind<Host> Host = KindBuilder.Build(
+			KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, "host", "hosts",
+			HostToDocument, DocumentToHost,
+			metadata: metadata => { },
+			state: state => { }
+			);
+
+		private static ResourceDocument? KindToDocument(Kind kind)
+		{
+			return null;
+		}
+
+		private static Kind? DocumentToKind(ResourceDocument resourceDocument)
+		{
+			return null;
+		}
+
+		private static ResourceDocument? HostToDocument(Host kind)
+		{
+			return null;
+		}
+
+		private static Host? DocumentToHost(ResourceDocument resourceDocument)
+		{
+			return null;
+		}
+
+		/*public static readonly Kind Kind = new Kind("kind", "kinds", KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, new KindSchema(
 			metadataSchema: new OpenApiSchema
 			{
 				Type = "object",
@@ -53,6 +87,6 @@ namespace HomeCtl.Kinds
 						{ "endpoint", new OpenApiSchema { Type = "string" } }
 					}
 				}
-			), null);
+			), null);*/
 	}
 }

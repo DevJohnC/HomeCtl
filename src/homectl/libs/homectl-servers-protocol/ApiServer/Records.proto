@@ -47,6 +47,10 @@ message ResourceDocumentFieldCollection {
 	repeated ResourceDocumentField fields = 1;
 }
 
+message ResourceDocumentValueCollection {
+	repeated ResourceDocumentValue values = 1;
+}
+
 message ResourceDocumentValue {
 	oneof valueType {
 		string stringValue = 1;
@@ -54,6 +58,7 @@ message ResourceDocumentValue {
 		int32 int32Value = 3;
 		int64 int64Value = 4;
 		ResourceDocumentFieldCollection objectValue = 5;
+		ResourceDocumentValueCollection arrayOfValues = 6;
 	}
 }
 

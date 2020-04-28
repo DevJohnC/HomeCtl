@@ -1,0 +1,15 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "HomeCtl.Servers.Host";
+
+package homectl;
+
+service HostInterface {
+	rpc ProcessIntent (ProcessIntentRequest) returns (ProcessIntentResponse);
+}
+
+message ProcessIntentRequest {
+}
+
+message ProcessIntentResponse {
+}

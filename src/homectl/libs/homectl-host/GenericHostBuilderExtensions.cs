@@ -1,4 +1,6 @@
-﻿using HomeCtl.Host;
+﻿using HomeCtl.Connection;
+using HomeCtl.Host;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -13,7 +15,17 @@ namespace Microsoft.Extensions.Hosting
 			{
 				webBuilder.ConfigureServices(svcs =>
 				{
+					svcs.AddSingleton<ServerConnector>();
+					svcs.AddGrpc();
 					svcs.AddHostedService<HomeCtlHostService>();
+				});
+				webBuilder.Configure(appBuilder =>
+				{
+					appBuilder.UseRouting();
+					appBuilder.UseEndpoints(endpoints =>
+					{
+						endpoints.MapGrpcService<HomeCtl.Host.ProtocolServices.HostInterfaceService>();
+					});
 				});
 				configure?.Invoke(webBuilder);
 			});

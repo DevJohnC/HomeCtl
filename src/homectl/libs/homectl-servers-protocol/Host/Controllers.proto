@@ -1,8 +1,0 @@
-﻿syntax = "proto3";
-
-option csharp_namespace = "HomeCtl.Servers.Host";
-
-package homectl;
-
-service Controllers {
-}

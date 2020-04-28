@@ -111,8 +111,8 @@ namespace HomeCtl.Connection
 			try
 			{
 				var monitoringTasks = _monitors
-				.Select(q => q.MonitorForDisconnect(combinedCancellationSource.Token))
-				.ToArray();
+					.Select(q => q.MonitorForDisconnect(combinedCancellationSource.Token))
+					.ToArray();
 
 				var finishedTask = await Task.WhenAny(monitoringTasks);
 				//  await the finished task to observe any exceptions
