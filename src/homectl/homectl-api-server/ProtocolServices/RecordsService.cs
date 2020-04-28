@@ -16,6 +16,9 @@ namespace HomeCtl.ApiServer.ProtocolServices
 
 		public override Task<StoreRecordResponse> StoreRecord(StoreRecordRequest request, ServerCallContext context)
 		{
+			var resourceDocument = request.ResourceRecord.ToResourceDocument();
+			return base.StoreRecord(request, context);
+			/*
 			var resourceDocument = Resources.ResourceDocument.FromProto(request.ResourceRecord);
 			var resource = new Resource(resourceDocument);
 
@@ -30,7 +33,7 @@ namespace HomeCtl.ApiServer.ProtocolServices
 			return Task.FromResult(new StoreRecordResponse
 			{
 				StoreResult = StoreRecordResponse.Types.StoreResultType.Unsaved
-			});
+			});*/
 		}
 	}
 }

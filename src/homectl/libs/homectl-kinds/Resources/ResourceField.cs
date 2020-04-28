@@ -11,13 +11,5 @@
 		public string FieldName { get; set; }
 
 		public ResourceFieldValue FieldValue { get; set; }
-
-		/*public static ResourceDocumentField FromProto(Servers.ApiServer.ResourceDocumentField protoDocument)
-		{
-			return new ResourceDocumentField(
-				protoDocument.FieldName,
-				ResourceDocumentValue.FromProto(protoDocument.FieldValue)
-				);
-		}*/
 	}
 }

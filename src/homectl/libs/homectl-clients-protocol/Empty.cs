@@ -1,4 +1,4 @@
-﻿namespace HomeCtl.Servers.ApiServer
+﻿namespace HomeCtl.Clients
 {
 	public partial class Empty
 	{

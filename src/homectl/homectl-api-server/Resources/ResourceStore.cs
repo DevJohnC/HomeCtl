@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HomeCtl.Kinds.Resources;
+using System;
 
 namespace HomeCtl.ApiServer.Resources
 {

@@ -15,17 +15,5 @@ namespace HomeCtl.Kinds.Resources
 		public Guid Id { get; set; }
 
 		public string? Label { get; set; }
-
-		/*public static ResourceDocumentMetadata FromProto(Servers.ApiServer.ResourceDocumentMetadata protoDocument)
-		{
-			if (!Guid.TryParse(protoDocument.Id, out var parsedId))
-				throw new Exception("Id format invalid.");
-
-			return new ResourceDocumentMetadata(
-				parsedId,
-				protoDocument.Label,
-				ConvertFields(protoDocument.Fields)
-				);
-		}*/
 	}
 }

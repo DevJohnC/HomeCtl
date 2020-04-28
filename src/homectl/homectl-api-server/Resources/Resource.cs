@@ -2,6 +2,7 @@
 {
 	struct Resource
 	{
+		/*
 		public Resource(KindDescriptor kind, ResourceDocumentMetadata metadata,
 			ResourceDocumentSpec? spec = null, ResourceDocumentState? state = null)
 		{
@@ -23,5 +24,6 @@
 		public ResourceDocumentState? State { get; }
 
 		public KindDescriptor Kind { get; }
+		*/
 	}
 }

@@ -10,8 +10,6 @@ namespace HomeCtl.ApiServer
 	{
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddSingleton<Newtonsoft.Json.JsonSerializer>(new Newtonsoft.Json.JsonSerializer());
-
 			services.AddSingleton<Events.EventBus>();
 
 			services.AddSingleton<Orchestration.OrchestrationConductor>();

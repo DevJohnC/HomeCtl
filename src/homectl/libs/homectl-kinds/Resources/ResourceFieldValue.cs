@@ -114,44 +114,6 @@ namespace HomeCtl.Kinds.Resources
 			return ret;
 		}
 
-		/*public static ResourceDocumentValue FromProto(Servers.ApiServer.ResourceDocumentValue protoDocument)
-		{
-			switch (protoDocument.ValueTypeCase)
-			{
-				case Servers.ApiServer.ResourceDocumentValue.ValueTypeOneofCase.BoolValue:
-					{
-						var val = new ResourceDocumentValue();
-						val.SetBool(protoDocument.BoolValue);
-						return val;
-					}
-				case Servers.ApiServer.ResourceDocumentValue.ValueTypeOneofCase.Int32Value:
-					{
-						var val = new ResourceDocumentValue();
-						val.SetInt32(protoDocument.Int32Value);
-						return val;
-					}
-				case Servers.ApiServer.ResourceDocumentValue.ValueTypeOneofCase.Int64Value:
-					{
-						var val = new ResourceDocumentValue();
-						val.SetInt64(protoDocument.Int64Value);
-						return val;
-					}
-				case Servers.ApiServer.ResourceDocumentValue.ValueTypeOneofCase.StringValue:
-					{
-						var val = new ResourceDocumentValue();
-						val.SetString(protoDocument.StringValue);
-						return val;
-					}
-				case Servers.ApiServer.ResourceDocumentValue.ValueTypeOneofCase.ObjectValue:
-					{
-						var val = new ResourceDocumentValue();
-						val.SetObject(ResourceDocumentFieldCollection.FromProto(protoDocument.ObjectValue));
-						return val;
-					}
-			}
-			throw new Exception("Invalid value type.");
-		}*/
-
 		public enum ValueType
 		{
 			Bool,

@@ -1,4 +1,5 @@
 ﻿using Grpc.Core;
+using HomeCtl.Clients;
 using HomeCtl.Servers.ApiServer;
 using System.Threading.Tasks;
 

@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Resources.proto" GrpcServices="Server,Client" />
+    <Protobuf Include="..\homectl-clients-protocol\*.proto" ProtoRoot=".." GrpcServices="Server,Client" />
   </ItemGroup>
 
 </Project>

@@ -24,22 +24,5 @@ namespace HomeCtl.Kinds.Resources
 				return field.FieldValue;
 			}
 		}
-
-		/*public static ResourceDocumentFieldCollection? FromProto(Servers.ApiServer.ResourceDocumentFieldCollection? protoDocument)
-		{
-			if (protoDocument == null)
-				return null;
-
-			return new ResourceDocumentFieldCollection(
-				ConvertFields(protoDocument.Fields)
-				);
-		}
-
-		protected static IList<ResourceDocumentField> ConvertFields(IEnumerable<Servers.ApiServer.ResourceDocumentField> fields)
-		{
-			return fields
-				.Select(q => ResourceDocumentField.FromProto(q))
-				.ToList();
-		}*/
 	}
 }

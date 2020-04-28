@@ -28,14 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\homectl-clients-protocol\homectl-clients-protocol.csproj" />
     <ProjectReference Include="..\homectl-kinds\homectl-kinds.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="ApiServer\Common.proto" GrpcServices="Server,Client" />
-    <Protobuf Include="ApiServer\Records.proto" GrpcServices="Server,Client" />
-    <Protobuf Include="ApiServer\Information.proto" GrpcServices="Server,Client" />
-    <Protobuf Include="Host\HostInterface.proto" GrpcServices="Server,Client" />
+    <Protobuf Include="..\homectl-servers-protocol\**\*.proto" ProtoRoot=".." GrpcServices="Server,Client" />
   </ItemGroup>
 
 </Project>

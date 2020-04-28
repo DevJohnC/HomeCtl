@@ -1,8 +1,8 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "HomeCtl.Servers.ApiServer";
+option csharp_namespace = "HomeCtl.Clients";
 
-package homectl;
+package homectl.clients;
 
 message Empty {
 }

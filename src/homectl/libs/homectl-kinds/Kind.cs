@@ -71,11 +71,11 @@ namespace HomeCtl.Kinds
 	public class Kind<T> : Kind
 		where T : class, IResource
 	{
-		private readonly Func<T, ResourceDocument> _convertToDocument;
+		private readonly Func<T, ResourceDocument?> _convertToDocument;
 		private readonly Func<ResourceDocument, T?> _convertToResource;
 
 		public Kind(string kindName, string kindNamePlural, string group, string apiVersion,
-			KindSchema schema, Kind? extendsKind, Func<T, ResourceDocument> convertToDocument,
+			KindSchema schema, Kind? extendsKind, Func<T, ResourceDocument?> convertToDocument,
 			Func<ResourceDocument, T?> convertToResource) :
 			base(kindName, kindNamePlural, group, apiVersion, schema, extendsKind)
 		{
