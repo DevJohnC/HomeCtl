@@ -109,20 +109,25 @@ namespace HomeCtl.Events
 
 			public void Invoke(TEvent eventData)
 			{
+				Action<TEvent>[] subscribers;
 				lock (_lockObj)
+					subscribers = _subscribers.ToArray();
+
+				var exceptions = new List<Exception>();
+				foreach (var @delegate in _subscribers)
 				{
-					foreach (var @delegate in _subscribers)
+					try
 					{
-						try
-						{
-							@delegate(eventData);
-						}
-						catch (Exception ex)
-						{
-							//  todo: logging
-						}
+						@delegate(eventData);
+					}
+					catch (Exception ex)
+					{
+						exceptions.Add(ex);
 					}
 				}
+
+				if (exceptions.Count > 0)
+					throw new AggregateException("Exceptions when raising event.", exceptions);
 			}
 		}
 	}
