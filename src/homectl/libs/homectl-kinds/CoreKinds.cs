@@ -21,6 +21,12 @@ namespace HomeCtl.Kinds
 			state: state => { }
 			);
 
+		public static readonly Kind<Device> Device = KindBuilder.Build(
+			KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, "device", "devices",
+			DeviceToDocument, DocumentToDevice,
+			metadata: metadata => { }
+			);
+
 		private static ResourceDocument? KindToDocument(Kind kind)
 		{
 			return null;
@@ -37,6 +43,16 @@ namespace HomeCtl.Kinds
 		}
 
 		private static Host? DocumentToHost(ResourceDocument resourceDocument)
+		{
+			return null;
+		}
+
+		private static ResourceDocument? DeviceToDocument(Device kind)
+		{
+			return null;
+		}
+
+		private static Device? DocumentToDevice(ResourceDocument resourceDocument)
 		{
 			return null;
 		}
