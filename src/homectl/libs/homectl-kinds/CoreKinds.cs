@@ -1,4 +1,6 @@
 ﻿using HomeCtl.Kinds.Resources;
+using System;
+using System.Collections.Generic;
 
 namespace HomeCtl.Kinds
 {
@@ -10,8 +12,16 @@ namespace HomeCtl.Kinds
 		public static readonly Kind<Kind> Kind = KindBuilder.Build(
 			KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, "kind", "kinds",
 			KindToDocument, DocumentToKind,
-			metadata: metadata => { },
-			spec: spec => { }
+			metadata: metadata => metadata
+				.RequireString("group")
+				.RequireString("apiVersion")
+				.RequireString("kindName")
+				.RequireString("kindNamePlural")
+				.RequireString("extendsKind"),
+			spec: spec => spec
+				.RequireString("metadataSchema", "json")
+				.OptionalString("specSchema", "json")
+				.OptionalString("stateSchema", "json")
 			);
 
 		public static readonly Kind<Host> Host = KindBuilder.Build(
@@ -29,7 +39,29 @@ namespace HomeCtl.Kinds
 
 		private static ResourceDocument? KindToDocument(Kind kind)
 		{
-			return null;
+			return new ResourceDocument(
+				new KindDescriptor(Kind.Group, Kind.ApiVersion, Kind.KindName),
+				new ResourceMetadata(Guid.Empty, "", new List<ResourceField>
+				{
+					new ResourceField("group", ResourceFieldValue.String(kind.Group)),
+					new ResourceField("apiVersion", ResourceFieldValue.String(kind.ApiVersion)),
+					new ResourceField("kindName", ResourceFieldValue.String(kind.KindName)),
+					new ResourceField("kindNamePlural", ResourceFieldValue.String(kind.KindNamePlural)),
+					new ResourceField("extendsKind", ResourceFieldValue.String(GetExtendsKindValue())),
+				}),
+				spec: new ResourceSpec(new List<ResourceField>
+				{
+					new ResourceField("metadataSchema", ResourceFieldValue.String("")),
+					new ResourceField("specSchema", ResourceFieldValue.String("")),
+					new ResourceField("stateSchema", ResourceFieldValue.String(""))
+				}));
+
+			string GetExtendsKindValue()
+			{
+				if (kind.ExtendsKind != null)
+					return $"{kind.ExtendsKind.Group}/{kind.ExtendsKind.ApiVersion}/{kind.ExtendsKind.KindName}";
+				return "";
+			}
 		}
 
 		private static Kind? DocumentToKind(ResourceDocument resourceDocument)
@@ -37,7 +69,7 @@ namespace HomeCtl.Kinds
 			return null;
 		}
 
-		private static ResourceDocument? HostToDocument(Host kind)
+		private static ResourceDocument? HostToDocument(Host host)
 		{
 			return null;
 		}
@@ -47,7 +79,7 @@ namespace HomeCtl.Kinds
 			return null;
 		}
 
-		private static ResourceDocument? DeviceToDocument(Device kind)
+		private static ResourceDocument? DeviceToDocument(Device device)
 		{
 			return null;
 		}

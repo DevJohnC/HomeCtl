@@ -5,7 +5,7 @@ namespace HomeCtl.Kinds.Resources
 	public class ResourceDocument
 	{
 		public ResourceDocument(KindDescriptor kind, ResourceMetadata metadata,
-			ResourceSpec? spec, ResourceState? state)
+			ResourceSpec? spec = null, ResourceState? state = null)
 		{
 			Kind = kind;
 			Metadata = metadata;
