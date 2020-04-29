@@ -1,6 +1,6 @@
 ﻿using Grpc.Core;
-using HomeCtl.Clients;
-using HomeCtl.Servers.ApiServer;
+using HomeCtl.Services;
+using HomeCtl.Services.Server;
 using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.ProtocolServices

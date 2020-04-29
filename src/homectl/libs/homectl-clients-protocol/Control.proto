@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "homectl-clients-protocol/Common.proto";
+
+option csharp_namespace = "HomeCtl.Services.Server";
+
+package homectl.services.server;
+
+service Control {
+	rpc ApplyDocument (ApplyDocumentRequest) returns (ApplyDocumentResponse);
+}
+
+message ApplyDocumentRequest {
+	homectl.services.ResourceDocument ResourceDocument = 1;
+}
+
+message ApplyDocumentResponse {
+}

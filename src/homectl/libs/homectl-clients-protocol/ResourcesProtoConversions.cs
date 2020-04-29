@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HomeCtl.Clients
+namespace HomeCtl.Services
 {
 	public partial class ResourceDocument
 	{

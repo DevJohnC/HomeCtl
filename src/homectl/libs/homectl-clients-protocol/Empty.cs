@@ -1,4 +1,4 @@
-﻿namespace HomeCtl.Clients
+﻿namespace HomeCtl.Services
 {
 	public partial class Empty
 	{

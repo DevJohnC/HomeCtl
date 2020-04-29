@@ -1,8 +1,8 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "HomeCtl.Clients";
+option csharp_namespace = "HomeCtl.Services";
 
-package homectl.clients;
+package homectl.services;
 
 message Empty {
 }
@@ -39,4 +39,56 @@ enum MatchOperation {
 enum MatchType {
 	EXACT = 0;
 	CASE_INSENSITIVE_MATCH = 1;
+}
+
+message KindIdentifier {
+	string kindGroup = 1;
+	string kindApiVersion = 2;
+	string kindName = 3;
+}
+
+//  Describes a resource
+message ResourceDocument {
+	KindIdentifier kind = 1;
+	ResourceDocumentMetadata metadata = 2;
+	ResourceDocumentSpec spec = 3;
+	ResourceDocumentState state = 4;
+}
+
+message ResourceDocumentMetadata {
+	string id = 1;
+	string label = 2;
+	repeated ResourceDocumentField fields = 3;
+}
+
+message ResourceDocumentSpec {
+	repeated ResourceDocumentField fields = 1;
+}
+
+message ResourceDocumentState {
+	repeated ResourceDocumentField fields = 1;
+}
+
+message ResourceDocumentField {
+	string fieldName = 1;
+	ResourceDocumentValue fieldValue = 2;
+}
+
+message ResourceDocumentFieldCollection {
+	repeated ResourceDocumentField fields = 1;
+}
+
+message ResourceDocumentValueCollection {
+	repeated ResourceDocumentValue values = 1;
+}
+
+message ResourceDocumentValue {
+	oneof valueType {
+		string stringValue = 1;
+		bool boolValue = 2;
+		int32 int32Value = 3;
+		int64 int64Value = 4;
+		ResourceDocumentFieldCollection objectValue = 5;
+		ResourceDocumentValueCollection arrayOfValues = 6;
+	}
 }

@@ -1,4 +1,3 @@
-using HomeCtl.ApiServer.ProtocolServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +14,8 @@ namespace HomeCtl.ApiServer
 			services.AddSingleton<Orchestration.OrchestrationConductor>();
 			services.AddHostedService<BackgroundServices.OrchestrationBackgroundService>();
 
-			services.AddSingleton<Resources.ResourceStore>();
+			services.AddSingleton<Resources.ResourceDocumentStore>();
+			services.AddSingleton<Resources.ResourceManager>();
 
 			services.AddGrpc();
 		}
@@ -31,9 +31,7 @@ namespace HomeCtl.ApiServer
 
 			app.UseEndpoints(endpoints =>
 			{
-				endpoints.MapGrpcService<InformationService>();
-				endpoints.MapGrpcService<RecordsService>();
-				endpoints.MapGrpcService<ResourcesService>();
+				endpoints.MapGrpcService<ProtocolServices.InformationService>();
 			});
 		}
 	}

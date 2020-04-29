@@ -1,5 +1,5 @@
 ﻿using Grpc.Core;
-using HomeCtl.Servers.Host;
+using HomeCtl.Services.Host;
 using System.Threading.Tasks;
 
 namespace HomeCtl.Host.ProtocolServices

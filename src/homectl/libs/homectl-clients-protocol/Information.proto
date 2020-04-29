@@ -2,16 +2,16 @@
 
 import "homectl-clients-protocol/Common.proto";
 
-option csharp_namespace = "HomeCtl.Servers.ApiServer";
+option csharp_namespace = "HomeCtl.Services.Server";
 
-package homectl.servers.apiserver;
+package homectl.services.server;
 
 service Information {
 	//  Gets the client's IP address as the server perceives it.
-	rpc GetClientIpAddress (homectl.clients.Empty) returns (IpAddressResponse);
+	rpc GetClientIpAddress (homectl.services.Empty) returns (IpAddressResponse);
 
 	//  Gets the server's version information.
-	rpc GetServerVersion (homectl.clients.Empty) returns (ServerVersionResponse);
+	rpc GetServerVersion (homectl.services.Empty) returns (ServerVersionResponse);
 }
 
 message IpAddressResponse {
@@ -19,5 +19,5 @@ message IpAddressResponse {
 }
 
 message ServerVersionResponse {
-	homectl.clients.Version apiServerVersion = 1;
+	homectl.services.Version apiServerVersion = 1;
 }
