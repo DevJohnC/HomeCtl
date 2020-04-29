@@ -32,6 +32,7 @@ namespace HomeCtl.ApiServer
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapGrpcService<ProtocolServices.InformationService>();
+				endpoints.MapGrpcService<ProtocolServices.ControlService>();
 			});
 		}
 	}
