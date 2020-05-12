@@ -30,14 +30,10 @@ namespace HomeCtl.Kinds
 		/// </summary>
 		public HostMetadata Metadata { get; set; }
 
-		public Host WithState(HostState state)
+		public enum ConnectedState
 		{
-			return new Host(Metadata, state);
-		}
-
-		public Host WithMetadata(HostMetadata metadata)
-		{
-			return new Host(metadata, State);
+			Online,
+			Offline
 		}
 
 		/// <summary>

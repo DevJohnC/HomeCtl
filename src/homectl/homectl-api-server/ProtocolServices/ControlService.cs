@@ -1,6 +1,5 @@
 ﻿using Grpc.Core;
 using HomeCtl.ApiServer.Resources;
-using HomeCtl.Services;
 using HomeCtl.Services.Server;
 using System.Threading.Tasks;
 

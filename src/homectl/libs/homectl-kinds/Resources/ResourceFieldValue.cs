@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace HomeCtl.Kinds.Resources
@@ -14,10 +15,22 @@ namespace HomeCtl.Kinds.Resources
 
 		public object? Value => _value;
 
+		private void CheckType(ValueType checkType)
+		{
+			if (_type != checkType)
+				throw new InvalidOperationException($"Value is not of the type {checkType}");
+		}
+
 		public void SetBool(bool value)
 		{
 			_value = value;
 			_type = ValueType.Bool;
+		}
+
+		public bool GetBool()
+		{
+			CheckType(ValueType.Bool);
+			return (bool)_value;
 		}
 
 		public void SetInt32(int value)
@@ -26,10 +39,22 @@ namespace HomeCtl.Kinds.Resources
 			_type = ValueType.Int32;
 		}
 
+		public int GetInt32()
+		{
+			CheckType(ValueType.Int32);
+			return (int)_value;
+		}
+
 		public void SetInt64(long value)
 		{
 			_value = value;
 			_type = ValueType.Int64;
+		}
+
+		public long GetInt64()
+		{
+			CheckType(ValueType.Int64);
+			return (long)_value;
 		}
 
 		public void SetString(string? value)
@@ -38,16 +63,34 @@ namespace HomeCtl.Kinds.Resources
 			_type = ValueType.String;
 		}
 
+		public string? GetString()
+		{
+			CheckType(ValueType.String);
+			return (string?)_value;
+		}
+
 		public void SetObject(ResourceFieldCollection? value)
 		{
 			_value = value;
 			_type = ValueType.Object;
 		}
 
+		public ResourceFieldCollection? GetObject()
+		{
+			CheckType(ValueType.Object);
+			return (ResourceFieldCollection?)_value;
+		}
+
 		public void SetArray(ResourceFieldValueCollection valueCollection)
 		{
 			_value = valueCollection;
 			_type = ValueType.Array;
+		}
+
+		public ResourceFieldValueCollection GetArray()
+		{
+			CheckType(ValueType.Array);
+			return (ResourceFieldValueCollection)_value;
 		}
 
 		public static ResourceFieldValue Bool(bool value)

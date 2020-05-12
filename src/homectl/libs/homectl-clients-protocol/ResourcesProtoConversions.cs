@@ -27,12 +27,7 @@ namespace HomeCtl.Services
 	{
 		public ResourceMetadata ToMetadata()
 		{
-			if (!Guid.TryParse(Id, out var parsedId))
-				throw new Exception("Id format invalid.");
-
 			return new ResourceMetadata(
-				parsedId,
-				Label,
 				ResourceDocumentFieldCollection.ConvertFields(Fields)
 				);
 		}

@@ -130,4 +130,22 @@ namespace HomeCtl.Kinds
 			}
 		}
 	}
+
+	public class SchemaDrivenKind : Kind
+	{
+		public SchemaDrivenKind(string kindName, string kindNamePlural, string group, string apiVersion, KindSchema schema, Kind? extendsKind) :
+			base(kindName, kindNamePlural, group, apiVersion, schema, extendsKind)
+		{
+		}
+
+		protected override bool TryConvertToDocumentImpl(IResource resourceInstance, out ResourceDocument? resourceDocument)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected override bool TryConvertToResourceInstanceImpl(ResourceDocument resourceDocument, out IResource? resourceInstance)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

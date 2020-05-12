@@ -1,5 +1,4 @@
 ﻿using HomeCtl.Kinds.Resources;
-using System;
 using System.Collections.Generic;
 
 namespace HomeCtl.Kinds
@@ -15,8 +14,8 @@ namespace HomeCtl.Kinds
 			metadata: metadata => metadata
 				.RequireString("group")
 				.RequireString("apiVersion")
-				.RequireString("kindName")
-				.RequireString("kindNamePlural")
+				.RequireString("name")
+				.RequireString("namePlural")
 				.RequireString("extendsKind"),
 			spec: spec => spec
 				.RequireString("metadataSchema", "json")
@@ -27,8 +26,23 @@ namespace HomeCtl.Kinds
 		public static readonly Kind<Host> Host = KindBuilder.Build(
 			KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, "host", "hosts",
 			HostToDocument, DocumentToHost,
-			metadata: metadata => { },
-			state: state => { }
+			metadata: metadata => metadata
+				.RequireString("hostId", format: "uuid")
+				.RequireString("machineName"),
+			state: state => state
+				.RequireString("endpoint")
+				.RequireEnum<Host.ConnectedState>("connectedState")
+			);
+
+		public static readonly Kind<Controller> Controller = KindBuilder.Build(
+			KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, "controller", "controllers",
+			ControllerToDocument, DocumentToController,
+			metadata: metadata => metadata
+				.RequireString("hostId", format: "uuid"),
+			state: state => state
+				.OptionalObjectArray("intentFilters", filters => filters
+					.OptionalString("action")
+					.OptionalString("category"))
 			);
 
 		public static readonly Kind<Device> Device = KindBuilder.Build(
@@ -41,12 +55,12 @@ namespace HomeCtl.Kinds
 		{
 			return new ResourceDocument(
 				new KindDescriptor(Kind.Group, Kind.ApiVersion, Kind.KindName),
-				new ResourceMetadata(Guid.Empty, "", new List<ResourceField>
+				new ResourceMetadata(new List<ResourceField>
 				{
 					new ResourceField("group", ResourceFieldValue.String(kind.Group)),
 					new ResourceField("apiVersion", ResourceFieldValue.String(kind.ApiVersion)),
-					new ResourceField("kindName", ResourceFieldValue.String(kind.KindName)),
-					new ResourceField("kindNamePlural", ResourceFieldValue.String(kind.KindNamePlural)),
+					new ResourceField("name", ResourceFieldValue.String(kind.KindName)),
+					new ResourceField("namePlural", ResourceFieldValue.String(kind.KindNamePlural)),
 					new ResourceField("extendsKind", ResourceFieldValue.String(GetExtendsKindValue())),
 				}),
 				spec: new ResourceSpec(new List<ResourceField>
@@ -66,7 +80,19 @@ namespace HomeCtl.Kinds
 
 		private static Kind? DocumentToKind(ResourceDocument resourceDocument)
 		{
-			return null;
+			if (resourceDocument.Kind.Group != Kind.Group ||
+				resourceDocument.Kind.ApiVersion != Kind.ApiVersion ||
+				resourceDocument.Kind.KindName != Kind.KindName)
+				return null; //  not a kind
+
+			return new SchemaDrivenKind(
+				resourceDocument.Metadata["name"]?.GetString() ?? throw new MissingResourceFieldException("name"),
+				resourceDocument.Metadata["namePlural"]?.GetString() ?? throw new MissingResourceFieldException("namePlural"),
+				resourceDocument.Metadata["group"]?.GetString() ?? throw new MissingResourceFieldException("group"),
+				resourceDocument.Metadata["apiVersion"]?.GetString() ?? throw new MissingResourceFieldException("apiVersion"),
+				KindSchema.FromKindSpec(resourceDocument.Spec ?? throw new MissingResourceFieldException("spec")),
+				null
+				);
 		}
 
 		private static ResourceDocument? HostToDocument(Host host)
@@ -75,6 +101,16 @@ namespace HomeCtl.Kinds
 		}
 
 		private static Host? DocumentToHost(ResourceDocument resourceDocument)
+		{
+			return null;
+		}
+
+		private static ResourceDocument? ControllerToDocument(Controller controller)
+		{
+			return null;
+		}
+
+		private static Controller? DocumentToController(ResourceDocument resourceDocument)
 		{
 			return null;
 		}
@@ -88,53 +124,5 @@ namespace HomeCtl.Kinds
 		{
 			return null;
 		}
-
-		/*public static readonly Kind Kind = new Kind("kind", "kinds", KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, new KindSchema(
-			metadataSchema: new OpenApiSchema
-			{
-				Type = "object",
-				Properties =
-				{
-					{ "id", new OpenApiSchema { Type = "string", Format = "uuid" } },
-					{ "label", new OpenApiSchema { Type = "string" } },
-					{ "group", new OpenApiSchema { Type = "string" } },
-					{ "apiVersion", new OpenApiSchema { Type = "string" } },
-					{ "kindName", new OpenApiSchema { Type = "string" } }
-				}
-			},
-			new OpenApiSchema
-			{
-				Type = "object",
-				Properties =
-				{
-					{ "metadataSchema", new OpenApiSchema { Type = "object", AdditionalPropertiesAllowed = true } },
-					{ "specSchema", new OpenApiSchema { Type = "object", AdditionalPropertiesAllowed = true } },
-					{ "stateSchema", new OpenApiSchema { Type = "object", AdditionalPropertiesAllowed = true } }
-				}
-			},
-			null), null);
-
-		public static readonly Kind Host = new Kind("host", "hosts", KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, new KindSchema(
-				metadataSchema: new OpenApiSchema
-				{
-					Type = "object",
-					Properties =
-					{
-						{ "id", new OpenApiSchema { Type = "string", Format = "uuid" } },
-						{ "label", new OpenApiSchema { Type = "string" } },
-						{ "hostname", new OpenApiSchema { Type = "string" } }
-					},
-					Required = { "hostname" }
-				},
-				specSchema: new OpenApiSchema(),
-				stateSchema: new OpenApiSchema
-				{
-					Type = "object",
-					Properties =
-					{
-						{ "endpoint", new OpenApiSchema { Type = "string" } }
-					}
-				}
-			), null);*/
 	}
 }

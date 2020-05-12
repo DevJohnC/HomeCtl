@@ -22,4 +22,10 @@
     <PackageReference Include="Grpc.Net.Client" Version="2.27.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\homectl-clients-protocol\homectl-clients-protocol.csproj" />
+    <ProjectReference Include="..\homectl-events\homectl-events.csproj" />
+    <ProjectReference Include="..\homectl-servers-protocol\homectl-servers-protocol.csproj" />
+  </ItemGroup>
+
 </Project>

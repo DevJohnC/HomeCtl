@@ -1,7 +1,9 @@
 ﻿using HomeCtl.Kinds.Resources;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HomeCtl.Kinds
 {
@@ -11,15 +13,15 @@ namespace HomeCtl.Kinds
 			string groupName, string apiVersion, string kindName, string kindNamePlural,
 			Func<T, ResourceDocument?> convertToDocument,
 			Func<ResourceDocument, T?> convertToResource,
-			Action<MetadataBuilder> metadata,
-			Action<SpecBuilder>? spec = null,
-			Action<StateBuilder>? state = null,
+			Action<Builder> metadata,
+			Action<Builder>? spec = null,
+			Action<Builder>? state = null,
 			Kind? extendsKind = null)
 			where T : class, IResource
 		{
-			var metadataBuilder = new MetadataBuilder();
-			var specBuilder = spec != null ? new SpecBuilder() : default;
-			var stateBuilder = state != null ? new StateBuilder() : default;
+			var metadataBuilder = new Builder();
+			var specBuilder = spec != null ? new Builder() : default;
+			var stateBuilder = state != null ? new Builder() : default;
 
 			metadata(metadataBuilder);
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -37,23 +39,93 @@ namespace HomeCtl.Kinds
 				schema, extendsKind, convertToDocument, convertToResource);
 		}
 
-		public abstract class Builder<TBuilder>
-			where TBuilder : Builder<TBuilder>
+		public class Builder
 		{
-			private readonly TBuilder _this;
-
 			private bool _allowAdditionalProperties;
 
 			private readonly IDictionary<string, OpenApiSchema> _properties = new Dictionary<string, OpenApiSchema>();
 
 			private readonly ISet<string> _requiredProperties = new HashSet<string>();
 
-			public Builder()
+			public Builder Optional(string fieldName, OpenApiSchema typeSchema)
 			{
-				_this = (TBuilder)this;
+				_properties.Add(fieldName, typeSchema);
+				return this;
 			}
 
-			public TBuilder OptionalString(string fieldName, string? format = null)
+			public Builder Required(string fieldName, OpenApiSchema typeSchema)
+			{
+				_properties.Add(fieldName, typeSchema);
+				_requiredProperties.Add(fieldName);
+				return this;
+			}
+
+			private OpenApiSchema ObjectSchema(Action<Builder> builderAction)
+			{
+				var builder = new Builder();
+				builderAction?.Invoke(builder);
+				return builder.BuildSchema();
+			}
+
+			private OpenApiSchema ArraySchema(OpenApiSchema typeSchema)
+			{
+				return new OpenApiSchema
+				{
+					Type = "array",
+					Items = typeSchema
+				};
+			}
+
+			public Builder OptionalObject(string fieldName, Action<Builder> builderAction)
+			{
+				return Optional(fieldName, ObjectSchema(builderAction));
+			}
+
+			public Builder RequiredObject(string fieldName, Action<Builder> builderAction)
+			{
+				return Required(fieldName, ObjectSchema(builderAction));
+			}
+
+			public Builder OptionalObjectArray(string fieldName, Action<Builder> builderAction)
+			{
+				return Optional(fieldName, ArraySchema(ObjectSchema(builderAction)));
+			}
+
+			public Builder RequiredObjectArray(string fieldName, Action<Builder> builderAction)
+			{
+				return Required(fieldName, ArraySchema(ObjectSchema(builderAction)));
+			}
+
+			private OpenApiSchema EnumSchema(string[] possibleValues)
+			{
+				return new OpenApiSchema
+				{
+					Type = "string",
+					Enum = possibleValues.Select(q => new OpenApiString(q)).ToList<IOpenApiAny>()
+				};
+			}
+
+			public Builder OptionalEnum<T>(string fieldName) where T : Enum
+			{
+				return OptionalEnum(fieldName, Enum.GetNames(typeof(T)));
+			}
+
+			public Builder RequireEnum<T>(string fieldName) where T : Enum
+			{
+				return RequireEnum(fieldName, Enum.GetNames(typeof(T)));
+			}
+
+			public Builder OptionalEnum(string fieldName, params string[] possibleValues)
+			{
+				return Optional(fieldName, EnumSchema(possibleValues));
+			}
+
+			public Builder RequireEnum(string fieldName, params string[] possibleValues)
+			{
+				return Required(fieldName, EnumSchema(possibleValues));
+			}
+
+			private OpenApiSchema StringSchema(string? format)
 			{
 				var schema = new OpenApiSchema
 				{
@@ -62,21 +134,23 @@ namespace HomeCtl.Kinds
 				if (format != null)
 					schema.Format = format;
 
-				_properties.Add(fieldName, schema);
-				return _this;
+				return schema;
 			}
 
-			public TBuilder RequireString(string fieldName, string? format = null)
+			public Builder OptionalString(string fieldName, string? format = null)
 			{
-				OptionalString(fieldName, format);
-				_requiredProperties.Add(fieldName);
-				return _this;
+				return Optional(fieldName, StringSchema(format));
 			}
 
-			public TBuilder AllowAdditionalProperties(bool allowed = true)
+			public Builder RequireString(string fieldName, string? format = null)
+			{
+				return Required(fieldName, StringSchema(format));
+			}
+
+			public Builder AllowAdditionalProperties(bool allowed = true)
 			{
 				_allowAdditionalProperties = allowed;
-				return _this;
+				return this;
 			}
 
 			public OpenApiSchema BuildSchema()
@@ -89,18 +163,6 @@ namespace HomeCtl.Kinds
 					Required = _requiredProperties
 				};
 			}
-		}
-
-		public class MetadataBuilder : Builder<MetadataBuilder>
-		{
-		}
-
-		public class SpecBuilder : Builder<SpecBuilder>
-		{
-		}
-
-		public class StateBuilder : Builder<StateBuilder>
-		{
 		}
 	}
 }

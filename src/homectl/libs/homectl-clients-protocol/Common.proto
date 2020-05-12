@@ -56,9 +56,7 @@ message ResourceDocument {
 }
 
 message ResourceDocumentMetadata {
-	string id = 1;
-	string label = 2;
-	repeated ResourceDocumentField fields = 3;
+	repeated ResourceDocumentField fields = 1;
 }
 
 message ResourceDocumentSpec {
