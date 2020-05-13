@@ -15,7 +15,7 @@ namespace HomeCtl.Connection
 		private readonly IServerIdentityVerifier _serverIdentifyVerifier;
 
 		public ConnectionStatus ConnectionStatus { get; private set; } = ConnectionStatus.NotConnected;
-
+		public ServerEndpoint Endpoint { get; private set; }
 		public ChannelBase? ServicesChannel { get; private set; }
 
 		public EndpointConnectionManager(EventBus eventBus,
@@ -27,11 +27,16 @@ namespace HomeCtl.Connection
 			_serverIdentifyVerifier = serverIdentifyVerifier;
 		}
 
-		public async Task Run(IEnumerable<IServerEndpointProvider> endpointProviders, CancellationToken stoppingToken)
+		public async Task Run(IEnumerable<IServerEndpointProvider> endpointProviders,
+			IEnumerable<IServerLivelinessMonitor> livelinessMonitors,
+			CancellationToken stoppingToken)
 		{
-			var endpointProviderArray = endpointProviders.ToArray();
-			if (endpointProviderArray.Length == 0)
+			var endpointProviderArray = endpointProviders?.ToArray();
+			var livelinessMonitorsArray = livelinessMonitors?.ToArray();
+			if (endpointProviderArray == null || endpointProviderArray.Length == 0)
 				throw new Exception("Impossible to locate server, provide 1 or more endpoint providers.");
+			if (livelinessMonitorsArray == null || livelinessMonitorsArray.Length == 0)
+				throw new Exception("Impossible to monitor server connection, provide 1 or more liveliness monitors.");
 
 			while (!stoppingToken.IsCancellationRequested)
 			{
@@ -39,12 +44,9 @@ namespace HomeCtl.Connection
 				{
 					case ConnectionStatus.NotConnected:
 						await ConnectToServer(endpointProviderArray, stoppingToken);
-						EventBus.Publish(
-							new EndpointConnectionEvents.Connected(this)
-							);
 						break;
 					case ConnectionStatus.Connected:
-						await WaitForDisconnect(stoppingToken);
+						await WaitForDisconnect(livelinessMonitorsArray, stoppingToken);
 						break;
 				}
 			}
@@ -62,42 +64,80 @@ namespace HomeCtl.Connection
 			var endpointResolveTasks = endpointProviders.Select(q => q.GetServerEndpoint(cancellationSource.Token))
 				.ToList();
 
-			while (!stoppingToken.IsCancellationRequested && endpointResolveTasks.Count > 0)
+			try
 			{
-				var completedTask = await Task.WhenAny(endpointResolveTasks);
-				endpointResolveTasks.Remove(completedTask);
-
-				try
+				while (!stoppingToken.IsCancellationRequested && endpointResolveTasks.Count > 0 &&
+					ConnectionStatus != ConnectionStatus.Connected)
 				{
-					var endpoint = await completedTask;
+					var completedTask = await Task.WhenAny(endpointResolveTasks);
+					endpointResolveTasks.Remove(completedTask);
 
-					var httpClient = _endpointClientFactory.CreateHttpClient(endpoint);
+					try
+					{
+						var endpoint = await completedTask;
 
-					if (!(await _serverIdentifyVerifier.VerifyServer(endpoint, httpClient)))
-						continue;
+						var httpClient = _endpointClientFactory.CreateHttpClient(endpoint);
 
-					ServicesChannel = Grpc.Net.Client.GrpcChannel.ForAddress(
-						endpoint.Uri, new Grpc.Net.Client.GrpcChannelOptions
-						{
-							DisposeHttpClient = false,
-							HttpClient = httpClient
-						});
+						if (!(await _serverIdentifyVerifier.VerifyServer(endpoint, httpClient)))
+							continue;
 
-					ConnectionStatus = ConnectionStatus.Connected;
-					return;
+						Endpoint = endpoint;
+						ServicesChannel = Grpc.Net.Client.GrpcChannel.ForAddress(
+							endpoint.Uri, new Grpc.Net.Client.GrpcChannelOptions
+							{
+								DisposeHttpClient = false,
+								HttpClient = httpClient
+							});
+
+						ConnectionStatus = ConnectionStatus.Connected;
+
+						EventBus.Publish(
+							new EndpointConnectionEvents.Connected(this, Endpoint)
+							);
+					}
+					catch (Exception ex)
+					{
+						//  todo: log exception
+					}
 				}
-				catch (Exception ex)
-				{
-					//  todo: log exception
-				}
+			}
+			finally
+			{
+				stopConnectingToken.Cancel();
 			}
 		}
 
-		private Task WaitForDisconnect(CancellationToken stoppingToken)
+		private async Task WaitForDisconnect(IServerLivelinessMonitor[] livelinessMonitors, CancellationToken stoppingToken)
 		{
-			var tcs = new TaskCompletionSource<bool>();
-			stoppingToken.Register(() => tcs.SetCanceled());
-			return tcs.Task;
+			var cancellationSource = new CancellationTokenSource();
+			var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
+				stoppingToken, cancellationSource.Token
+				);
+
+			try
+			{
+				var monitoringTasks = livelinessMonitors
+					.Select(q => q.MonitorForDisconnect(combinedCancellationSource.Token))
+					.ToArray();
+
+				var finishedTask = await Task.WhenAny(monitoringTasks);
+				//  await the finished task to observe any exceptions
+				await finishedTask;
+
+				EventBus.Publish(
+					new EndpointConnectionEvents.Disconnected(this, Endpoint)
+					);
+			}
+			catch (Exception ex)
+			{
+				//  todo: log exception
+				throw;
+			}
+			finally
+			{
+				cancellationSource.Cancel();
+				ConnectionStatus = ConnectionStatus.NotConnected;
+			}
 		}
 	}
 
@@ -105,12 +145,28 @@ namespace HomeCtl.Connection
 	{
 		public class Connected
 		{
-			public Connected(EndpointConnectionManager endpointConnectionManager)
+			public Connected(EndpointConnectionManager endpointConnectionManager,
+				ServerEndpoint serverEndpoint)
 			{
 				EndpointConnectionManager = endpointConnectionManager;
+				ServerEndpoint = serverEndpoint;
 			}
 
 			public EndpointConnectionManager EndpointConnectionManager { get; }
+			public ServerEndpoint ServerEndpoint { get; }
+		}
+
+		public class Disconnected
+		{
+			public Disconnected(EndpointConnectionManager endpointConnectionManager,
+				ServerEndpoint serverEndpoint)
+			{
+				EndpointConnectionManager = endpointConnectionManager;
+				ServerEndpoint = serverEndpoint;
+			}
+
+			public EndpointConnectionManager EndpointConnectionManager { get; }
+			public ServerEndpoint ServerEndpoint { get; }
 		}
 	}
 }

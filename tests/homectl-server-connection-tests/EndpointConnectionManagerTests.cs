@@ -39,11 +39,42 @@ namespace homectl_server_connection_tests
 				);
 			await endpointConnectionManager.Run(
 				new[] { StaticApiServer.AnyOnUri("http://localhost/") },
+				new[] { new NeverDisconnects() },
 				stopTokenSource.Token
 				);
 			await grpcHost.StopAsync();
 
 			Assert.IsTrue(connectionWasEstablished);
+		}
+
+		[TestMethod]
+		public async Task Run_Disconnects_When_Monitor_Returns()
+		{
+			var timeout = TimeSpan.FromSeconds(2);
+			var grpcHost = await CreateGrpcServer();
+			var grpcClient = grpcHost.CreateFixedClient();
+			var stopTokenSource = new CancellationTokenSource(timeout);
+
+			var connectionWasLost = false;
+			var eventBus = new EventBus();
+			eventBus.Subscribe<EndpointConnectionEvents.Disconnected>(args =>
+			{
+				connectionWasLost = true;
+				stopTokenSource.Cancel();
+			});
+
+			var endpointConnectionManager = new EndpointConnectionManager(
+				eventBus, new DelegateClientFactory(endpoint => grpcClient),
+				new AlwaysYesServerVerifier()
+				);
+			await endpointConnectionManager.Run(
+				new[] { StaticApiServer.AnyOnUri("http://localhost/") },
+				new[] { new DisconnectsImmediately() },
+				stopTokenSource.Token
+				);
+			await grpcHost.StopAsync();
+
+			Assert.IsTrue(connectionWasLost);
 		}
 
 		private async Task<IHost> CreateGrpcServer()
@@ -90,6 +121,24 @@ namespace homectl_server_connection_tests
 			public HttpClient CreateHttpClient(ServerEndpoint serverEndpoint)
 			{
 				return _httpClientFactory(serverEndpoint);
+			}
+		}
+
+		private class NeverDisconnects : IServerLivelinessMonitor
+		{
+			public Task MonitorForDisconnect(CancellationToken stoppingToken)
+			{
+				var tcs = new TaskCompletionSource<bool>();
+				stoppingToken.Register(() => tcs.SetResult(true));
+				return tcs.Task;
+			}
+		}
+
+		private class DisconnectsImmediately : IServerLivelinessMonitor
+		{
+			public Task MonitorForDisconnect(CancellationToken stoppingToken)
+			{
+				return Task.CompletedTask;
 			}
 		}
 	}
