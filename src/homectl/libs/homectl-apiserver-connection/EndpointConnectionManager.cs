@@ -27,6 +27,32 @@ namespace HomeCtl.Connection
 			_serverIdentifyVerifier = serverIdentifyVerifier;
 		}
 
+		private void SetDisconnectedState()
+		{
+			var previousStatus = ConnectionStatus;
+			ConnectionStatus = ConnectionStatus.NotConnected;
+
+			if (previousStatus == ConnectionStatus.Connected)
+			{
+				EventBus.Publish(
+					new EndpointConnectionEvents.Disconnected(this, Endpoint)
+					);
+			}
+		}
+
+		private void SetConnectedState()
+		{
+			var previousStatus = ConnectionStatus;
+			ConnectionStatus = ConnectionStatus.Connected;
+
+			if (previousStatus == ConnectionStatus.NotConnected)
+			{
+				EventBus.Publish(
+					new EndpointConnectionEvents.Connected(this, Endpoint)
+					);
+			}
+		}
+
 		public async Task Run(IEnumerable<IServerEndpointProvider> endpointProviders,
 			IEnumerable<IServerLivelinessMonitor> livelinessMonitors,
 			CancellationToken stoppingToken)
@@ -43,10 +69,36 @@ namespace HomeCtl.Connection
 				switch (ConnectionStatus)
 				{
 					case ConnectionStatus.NotConnected:
-						await ConnectToServer(endpointProviderArray, stoppingToken);
+						try
+						{
+							await ConnectToServer(endpointProviderArray, stoppingToken);
+						}
+						catch (Exception ex) //  keep on attempting to connect despite exceptions
+						{
+							//  todo: log exceptions
+						}
+
+						if (!stoppingToken.IsCancellationRequested &&
+							ConnectionStatus != ConnectionStatus.Connected)
+						{
+							//  wait a cooldown before attempting to reconnect
+							try
+							{
+								await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+							}
+							catch { }
+						}
 						break;
 					case ConnectionStatus.Connected:
-						await WaitForDisconnect(livelinessMonitorsArray, stoppingToken);
+						try
+						{
+							await WaitForDisconnect(livelinessMonitorsArray, stoppingToken);
+						}
+						catch (Exception ex)
+						{
+							//  todo: log exceptions
+							SetDisconnectedState();
+						}
 						break;
 				}
 			}
@@ -76,6 +128,9 @@ namespace HomeCtl.Connection
 					{
 						var endpoint = await completedTask;
 
+						if (stoppingToken.IsCancellationRequested)
+							return;
+
 						var httpClient = _endpointClientFactory.CreateHttpClient(endpoint);
 
 						if (!(await _serverIdentifyVerifier.VerifyServer(endpoint, httpClient)))
@@ -89,11 +144,7 @@ namespace HomeCtl.Connection
 								HttpClient = httpClient
 							});
 
-						ConnectionStatus = ConnectionStatus.Connected;
-
-						EventBus.Publish(
-							new EndpointConnectionEvents.Connected(this, Endpoint)
-							);
+						SetConnectedState();
 					}
 					catch (Exception ex)
 					{
@@ -124,9 +175,10 @@ namespace HomeCtl.Connection
 				//  await the finished task to observe any exceptions
 				await finishedTask;
 
-				EventBus.Publish(
-					new EndpointConnectionEvents.Disconnected(this, Endpoint)
-					);
+				if (stoppingToken.IsCancellationRequested)
+					return;
+
+				SetDisconnectedState();
 			}
 			catch (Exception ex)
 			{
