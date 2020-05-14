@@ -141,6 +141,84 @@ namespace homectl_server_connection_tests
 			Assert.IsTrue(verifier.LastAttemptDelta.Value > TimeSpan.FromSeconds(4));
 		}
 
+		[TestMethod]
+		public async Task Run_Uses_2nd_Endpoint_Immediately_When_Failing_To_Connect()
+		{
+			var timeout = TimeSpan.FromSeconds(2);
+			var grpcHost = await CreateGrpcServer();
+			var grpcClient = grpcHost.CreateFixedClient();
+			var stopTokenSource = new CancellationTokenSource(timeout);
+			var verifier = new VerifiesOnSecondAttemptVerifier();
+
+			var connectionWasEstablished = false;
+			var connectedEndpoint = default(ServerEndpoint);
+			var eventBus = new EventBus();
+			eventBus.Subscribe<EndpointConnectionEvents.Connected>(args =>
+			{
+				connectedEndpoint = args.ServerEndpoint;
+				connectionWasEstablished = true;
+				stopTokenSource.Cancel();
+			});
+
+			var endpointConnectionManager = new EndpointConnectionManager(
+				eventBus, new DelegateClientFactory(endpoint => grpcClient),
+				verifier
+				);
+			await endpointConnectionManager.Run(
+				new[]
+				{
+					StaticApiServer.AnyOnUri("http://localhost-first/"),
+					StaticApiServer.AnyOnUri("http://localhost-second/")
+				},
+				new[] { new DisconnectsImmediately() },
+				stopTokenSource.Token
+				);
+			await grpcHost.StopAsync();
+
+			Assert.IsTrue(connectionWasEstablished);
+			Assert.AreEqual("http://localhost-second/", connectedEndpoint.Uri.OriginalString);
+		}
+
+		[TestMethod]
+		public async Task Run_Persists_Endpoint_Providers_Across_Failover()
+		{
+			var timeout = TimeSpan.FromSeconds(2);
+			var grpcHost = await CreateGrpcServer();
+			var grpcClient = grpcHost.CreateFixedClient();
+			var stopTokenSource = new CancellationTokenSource(timeout);
+			var verifier = new VerifiesOnSecondAttemptVerifier();
+
+			var connectionWasEstablished = false;
+			var connectedEndpoint = default(ServerEndpoint);
+			var eventBus = new EventBus();
+			eventBus.Subscribe<EndpointConnectionEvents.Connected>(args =>
+			{
+				connectedEndpoint = args.ServerEndpoint;
+				connectionWasEstablished = true;
+				stopTokenSource.Cancel();
+			});
+
+			var countingEndpointProvider = new CountingProxyEndpointProvider(
+				StaticApiServer.AnyOnUri("http://localhost/"));
+			var endpointConnectionManager = new EndpointConnectionManager(
+				eventBus, new DelegateClientFactory(endpoint => grpcClient),
+				verifier
+				);
+			await endpointConnectionManager.Run(
+				new IServerEndpointProvider[]
+				{
+					StaticApiServer.AnyOnUri("http://localhost/"),
+					countingEndpointProvider
+				},
+				new[] { new DisconnectsImmediately() },
+				stopTokenSource.Token
+				);
+			await grpcHost.StopAsync();
+
+			Assert.IsTrue(connectionWasEstablished);
+			Assert.AreEqual(1, countingEndpointProvider.CallCount);
+		}
+
 		private async Task<IHost> CreateGrpcServer()
 		{
 			var builder = new HostBuilder()
@@ -151,9 +229,27 @@ namespace homectl_server_connection_tests
 
 		private class AlwaysYesServerVerifier : IServerIdentityVerifier
 		{
-			public Task<bool> VerifyServer(ServerEndpoint serverEndpoint, HttpClient httpClient)
+			public Task<bool> VerifyServer(ServerEndpoint serverEndpoint, HttpClient httpClient, CancellationToken stoppingToken)
 			{
 				return Task.FromResult(true);
+			}
+		}
+
+		private class CountingProxyEndpointProvider : IServerEndpointProvider
+		{
+			private IServerEndpointProvider _proxySink;
+
+			public int CallCount { get; private set; }
+
+			public CountingProxyEndpointProvider(IServerEndpointProvider proxySink)
+			{
+				_proxySink = proxySink;
+			}
+
+			public Task<ServerEndpoint> GetServerEndpoint(CancellationToken stoppingToken)
+			{
+				CallCount++;
+				return _proxySink.GetServerEndpoint(stoppingToken);
 			}
 		}
 
@@ -165,7 +261,7 @@ namespace homectl_server_connection_tests
 
 			public TimeSpan? LastAttemptDelta { get; private set; }
 
-			public Task<bool> VerifyServer(ServerEndpoint serverEndpoint, HttpClient httpClient)
+			public Task<bool> VerifyServer(ServerEndpoint serverEndpoint, HttpClient httpClient, CancellationToken stoppingToken)
 			{
 				_count++;
 				if (_count == 2)
