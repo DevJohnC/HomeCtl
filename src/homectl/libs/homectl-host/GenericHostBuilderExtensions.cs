@@ -4,6 +4,7 @@ using HomeCtl.Host;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 
 namespace Microsoft.Extensions.Hosting
@@ -20,6 +21,11 @@ namespace Microsoft.Extensions.Hosting
 			configure?.Invoke(builder);
 			builder.ConfigureServices(svcs =>
 			{
+				svcs.Configure<HomeCtl.Host.HostOptions>(options => {
+					options.HostFile = "host.json";
+				});
+
+				svcs.AddSingleton<AppHost>(sP => sP.GetRequiredService<IOptions<HomeCtl.Host.HostOptions>>().Value.GetAppHost());
 				svcs.AddSingleton<EventBus>();
 				svcs.AddGrpc();
 				svcs.AddHostedService<HomeCtlHostService>();

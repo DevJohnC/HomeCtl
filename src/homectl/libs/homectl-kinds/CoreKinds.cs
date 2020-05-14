@@ -1,4 +1,5 @@
 ﻿using HomeCtl.Kinds.Resources;
+using System;
 using System.Collections.Generic;
 
 namespace HomeCtl.Kinds
@@ -51,6 +52,14 @@ namespace HomeCtl.Kinds
 			metadata: metadata => { }
 			);
 
+		private static string ReadStringField(ResourceFieldCollection? fields, string fieldName)
+		{
+			if (fields == null)
+				throw new MissingResourceFieldException(fieldName);
+			return fields[fieldName]?.GetString()
+				?? throw new MissingResourceFieldException(fieldName);
+		}
+
 		private static ResourceDocument? KindToDocument(Kind kind)
 		{
 			return new ResourceDocument(
@@ -86,10 +95,10 @@ namespace HomeCtl.Kinds
 				return null; //  not a kind
 
 			return new SchemaDrivenKind(
-				resourceDocument.Metadata["name"]?.GetString() ?? throw new MissingResourceFieldException("name"),
-				resourceDocument.Metadata["namePlural"]?.GetString() ?? throw new MissingResourceFieldException("namePlural"),
-				resourceDocument.Metadata["group"]?.GetString() ?? throw new MissingResourceFieldException("group"),
-				resourceDocument.Metadata["apiVersion"]?.GetString() ?? throw new MissingResourceFieldException("apiVersion"),
+				ReadStringField(resourceDocument.Metadata, "name"),
+				ReadStringField(resourceDocument.Metadata, "namePlural"),
+				ReadStringField(resourceDocument.Metadata, "group"),
+				ReadStringField(resourceDocument.Metadata, "apiVersion"),
 				KindSchema.FromKindSpec(resourceDocument.Spec ?? throw new MissingResourceFieldException("spec")),
 				null
 				);
@@ -97,12 +106,38 @@ namespace HomeCtl.Kinds
 
 		private static ResourceDocument? HostToDocument(Host host)
 		{
-			return null;
+			return new ResourceDocument(
+				new KindDescriptor(Host.Group, Host.ApiVersion, Host.KindName),
+				new ResourceMetadata(new List<ResourceField>
+				{
+					new ResourceField("hostId", ResourceFieldValue.String(host.Metadata.HostId.ToString())),
+					new ResourceField("machineName", ResourceFieldValue.String(host.Metadata.MachineName))
+				}),
+				state: new ResourceState(new List<ResourceField>
+				{
+					new ResourceField("endpoint", ResourceFieldValue.String(host.State.Endpoint)),
+					new ResourceField("connectedState", ResourceFieldValue.String(host.State.ConnectedState.ToString()))
+				}));
 		}
 
 		private static Host? DocumentToHost(ResourceDocument resourceDocument)
 		{
-			return null;
+			if (resourceDocument.Kind.Group != Host.Group ||
+				resourceDocument.Kind.ApiVersion != Host.ApiVersion ||
+				resourceDocument.Kind.KindName != Host.KindName)
+				return null; //  not a host
+
+			return new Host(
+				new Host.HostMetadata
+				{
+					HostId = Guid.Parse(ReadStringField(resourceDocument.Metadata, "hostId")),
+					MachineName = ReadStringField(resourceDocument.Metadata, "machineName")
+				},
+				new Host.HostState
+				{
+					Endpoint = ReadStringField(resourceDocument.State, "endpoint"),
+					ConnectedState = (Host.ConnectedState)Enum.Parse(typeof(Host.ConnectedState), ReadStringField(resourceDocument.State, "connectedState"))
+				});
 		}
 
 		private static ResourceDocument? ControllerToDocument(Controller controller)

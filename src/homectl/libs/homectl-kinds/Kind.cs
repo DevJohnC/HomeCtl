@@ -62,7 +62,7 @@ namespace HomeCtl.Kinds
 			return TryConvertToResourceInstanceImpl(resourceDocument, out resourceInstance);
 		}
 
-		public bool ConvertToDocument(IResource resourceInstance, out ResourceDocument? resourceDocument)
+		public bool TryConvertToDocument(IResource resourceInstance, out ResourceDocument? resourceDocument)
 		{
 			return TryConvertToDocumentImpl(resourceInstance, out resourceDocument);
 		}

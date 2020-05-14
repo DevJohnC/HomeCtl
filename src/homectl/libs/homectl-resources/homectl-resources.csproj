@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>HomeCtl.Resources</RootNamespace>
+    <Nullable>enable</Nullable>
+    <LangVersion>8.0</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>John Carruthers</Authors>
+    <Product>homectl</Product>
+    <Description>HomeCtl resource serialization and storage APIs.</Description>
+    <Copyright>John Carruthers 2020</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/DevJohnC/homectl</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DevJohnC/homectl</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>home automation</PackageTags>
+    <Version>1.0.0-indev1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\homectl-kinds\homectl-kinds.csproj" />
+  </ItemGroup>
+
+</Project>
