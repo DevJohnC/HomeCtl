@@ -19,9 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-clients-protocol", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-events", "libs\homectl-events\homectl-events.csproj", "{83B35806-5951-44DE-BF5C-94FC00315273}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-apiserver-connection", "libs\homectl-apiserver-connection\homectl-apiserver-connection.csproj", "{490668F4-5E67-47F0-A7A8-94D25D97D5C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-server-connection-tests", "..\..\tests\homectl-server-connection-tests\homectl-server-connection-tests.csproj", "{BEBF69DE-E7CB-40EF-B62F-5D532F0F1694}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-server-connection-tests", "..\..\tests\homectl-server-connection-tests\homectl-server-connection-tests.csproj", "{BEBF69DE-E7CB-40EF-B62F-5D532F0F1694}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "homectl-server-connection", "libs\homectl-server-connection\homectl-server-connection.csproj", "{1807FDF1-0967-4BAF-A149-61685311D6AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,14 +53,14 @@ Global
 		{83B35806-5951-44DE-BF5C-94FC00315273}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83B35806-5951-44DE-BF5C-94FC00315273}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83B35806-5951-44DE-BF5C-94FC00315273}.Release|Any CPU.Build.0 = Release|Any CPU
-		{490668F4-5E67-47F0-A7A8-94D25D97D5C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{490668F4-5E67-47F0-A7A8-94D25D97D5C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{490668F4-5E67-47F0-A7A8-94D25D97D5C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{490668F4-5E67-47F0-A7A8-94D25D97D5C9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BEBF69DE-E7CB-40EF-B62F-5D532F0F1694}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BEBF69DE-E7CB-40EF-B62F-5D532F0F1694}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEBF69DE-E7CB-40EF-B62F-5D532F0F1694}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BEBF69DE-E7CB-40EF-B62F-5D532F0F1694}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1807FDF1-0967-4BAF-A149-61685311D6AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1807FDF1-0967-4BAF-A149-61685311D6AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1807FDF1-0967-4BAF-A149-61685311D6AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1807FDF1-0967-4BAF-A149-61685311D6AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,8 +71,8 @@ Global
 		{B2A6D22E-0A92-45A1-A146-08640D2E8C84} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 		{77A801F7-5A6F-4971-BA58-B86A13358950} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 		{83B35806-5951-44DE-BF5C-94FC00315273} = {5079F661-0DA6-4F58-81BD-15796A108A92}
-		{490668F4-5E67-47F0-A7A8-94D25D97D5C9} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 		{BEBF69DE-E7CB-40EF-B62F-5D532F0F1694} = {D8BB7D0F-17ED-484C-BFE2-9D73028030F8}
+		{1807FDF1-0967-4BAF-A149-61685311D6AC} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {84ADA937-A738-4247-A437-DEFC9D1023FF}

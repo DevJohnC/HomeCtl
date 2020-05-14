@@ -27,8 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\homectl-apiserver-connection\homectl-apiserver-connection.csproj" />
     <ProjectReference Include="..\homectl-events\homectl-events.csproj" />
+    <ProjectReference Include="..\homectl-server-connection\homectl-server-connection.csproj" />
     <ProjectReference Include="..\homectl-servers-protocol\homectl-servers-protocol.csproj" />
   </ItemGroup>
 
