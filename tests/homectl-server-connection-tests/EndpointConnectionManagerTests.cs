@@ -1,5 +1,4 @@
-﻿using HomeCtl.ApiServer;
-using HomeCtl.Connection;
+﻿using HomeCtl.Connection;
 using HomeCtl.Events;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -142,7 +141,7 @@ namespace homectl_server_connection_tests
 		}
 
 		[TestMethod]
-		public async Task Run_Uses_2nd_Endpoint_Immediately_When_Failing_To_Connect()
+		public async Task Run_Uses_2nd_Endpoint_Immediately_When_Endpoint_Verification_Fails()
 		{
 			var timeout = TimeSpan.FromSeconds(2);
 			var grpcHost = await CreateGrpcServer();
@@ -219,6 +218,78 @@ namespace homectl_server_connection_tests
 			Assert.AreEqual(1, countingEndpointProvider.CallCount);
 		}
 
+		[TestMethod]
+		public async Task Run_Restarts_Endpoint_Provider_After_Throwing_Exception()
+		{
+			var timeout = TimeSpan.FromSeconds(2);
+			var grpcHost = await CreateGrpcServer();
+			var grpcClient = grpcHost.CreateFixedClient();
+			var stopTokenSource = new CancellationTokenSource(timeout);
+
+			var connectionWasEstablished = false;
+			var eventBus = new EventBus();
+			eventBus.Subscribe<EndpointConnectionEvents.Connected>(args =>
+			{
+				connectionWasEstablished = true;
+				stopTokenSource.Cancel();
+			});
+
+			var endpointConnectionManager = new EndpointConnectionManager(
+				eventBus, new DelegateClientFactory(endpoint => grpcClient),
+				new AlwaysYesServerVerifier()
+				);
+			await endpointConnectionManager.Run(
+				new IServerEndpointProvider[]
+				{
+					new ThrowsExceptionFirstEndpointProvider(
+						StaticApiServer.AnyOnUri("http://localhost/"))
+				},
+				new[] { new NeverDisconnects() },
+				stopTokenSource.Token
+				);
+			await grpcHost.StopAsync();
+
+			Assert.IsTrue(connectionWasEstablished);
+		}
+
+		[TestMethod]
+		public async Task Run_Uses_2nd_Endpoint_Immediately_When_1st_Throws_Exception()
+		{
+			var timeout = TimeSpan.FromSeconds(2);
+			var grpcHost = await CreateGrpcServer();
+			var grpcClient = grpcHost.CreateFixedClient();
+			var stopTokenSource = new CancellationTokenSource(timeout);
+			var verifier = new VerifiesOnSecondAttemptVerifier();
+
+			var connectionWasEstablished = false;
+			var connectedEndpoint = default(ServerEndpoint);
+			var eventBus = new EventBus();
+			eventBus.Subscribe<EndpointConnectionEvents.Connected>(args =>
+			{
+				connectedEndpoint = args.ServerEndpoint;
+				connectionWasEstablished = true;
+				stopTokenSource.Cancel();
+			});
+
+			var endpointConnectionManager = new EndpointConnectionManager(
+				eventBus, new DelegateClientFactory(endpoint => grpcClient),
+				verifier
+				);
+			await endpointConnectionManager.Run(
+				new IServerEndpointProvider[]
+				{
+					new ThrowsExceptionFirstEndpointProvider(StaticApiServer.AnyOnUri("http://localhost-first/")),
+					StaticApiServer.AnyOnUri("http://localhost-second/")
+				},
+				new[] { new NeverDisconnects() },
+				stopTokenSource.Token
+				);
+			await grpcHost.StopAsync();
+
+			Assert.IsTrue(connectionWasEstablished);
+			Assert.AreEqual("http://localhost-second/", connectedEndpoint.Uri.OriginalString);
+		}
+
 		private async Task<IHost> CreateGrpcServer()
 		{
 			var builder = new HostBuilder()
@@ -232,6 +303,27 @@ namespace homectl_server_connection_tests
 			public Task<bool> VerifyServer(ServerEndpoint serverEndpoint, HttpClient httpClient, CancellationToken stoppingToken)
 			{
 				return Task.FromResult(true);
+			}
+		}
+
+		private class ThrowsExceptionFirstEndpointProvider : IServerEndpointProvider
+		{
+
+			private IServerEndpointProvider _proxySink;
+
+			public int CallCount { get; private set; }
+
+			public ThrowsExceptionFirstEndpointProvider(IServerEndpointProvider proxySink)
+			{
+				_proxySink = proxySink;
+			}
+
+			public Task<ServerEndpoint> GetServerEndpoint(CancellationToken stoppingToken)
+			{
+				CallCount++;
+				if (CallCount == 1)
+					throw new Exception();
+				return _proxySink.GetServerEndpoint(stoppingToken);
 			}
 		}
 
