@@ -69,36 +69,10 @@ namespace HomeCtl.Connection
 				switch (ConnectionStatus)
 				{
 					case ConnectionStatus.NotConnected:
-						try
-						{
-							await ConnectToServer(endpointProviderArray, stoppingToken);
-						}
-						catch (Exception ex) //  keep on attempting to connect despite exceptions
-						{
-							//  todo: log exceptions
-						}
-
-						if (!stoppingToken.IsCancellationRequested &&
-							ConnectionStatus != ConnectionStatus.Connected)
-						{
-							//  wait a cooldown before attempting to reconnect
-							try
-							{
-								await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
-							}
-							catch { }
-						}
+						await ConnectToServer(endpointProviderArray, stoppingToken);
 						break;
 					case ConnectionStatus.Connected:
-						try
-						{
-							await WaitForDisconnect(livelinessMonitorsArray, stoppingToken);
-						}
-						catch (Exception ex)
-						{
-							//  todo: log exceptions
-							SetDisconnectedState();
-						}
+						await WaitForDisconnect(livelinessMonitorsArray, stoppingToken);
 						break;
 				}
 			}
@@ -106,89 +80,124 @@ namespace HomeCtl.Connection
 
 		private async Task ConnectToServer(IServerEndpointProvider[] endpointProviders, CancellationToken stoppingToken)
 		{
-			//  run all the endpoint providers simultaneously
-			//  attempt to connect to endpoints as they are available
-			var stopConnectingToken = new CancellationTokenSource();
-			var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
-				stoppingToken, stopConnectingToken.Token
-				);
-
-			var endpointResolveTasks = endpointProviders.Select(q => q.GetServerEndpoint(cancellationSource.Token))
-				.ToList();
-
-			try
+			while (!stoppingToken.IsCancellationRequested)
 			{
-				while (!stoppingToken.IsCancellationRequested && endpointResolveTasks.Count > 0 &&
-					ConnectionStatus != ConnectionStatus.Connected)
-				{
-					var completedTask = await Task.WhenAny(endpointResolveTasks);
-					endpointResolveTasks.Remove(completedTask);
+				await AttemptNextConnection(endpointProviders, stoppingToken);
 
-					try
-					{
-						var endpoint = await completedTask;
+				if (ConnectionStatus == ConnectionStatus.Connected)
+					return;
 
-						if (stoppingToken.IsCancellationRequested)
-							return;
-
-						var httpClient = _endpointClientFactory.CreateHttpClient(endpoint);
-
-						if (!(await _serverIdentifyVerifier.VerifyServer(endpoint, httpClient)))
-							continue;
-
-						Endpoint = endpoint;
-						ServicesChannel = Grpc.Net.Client.GrpcChannel.ForAddress(
-							endpoint.Uri, new Grpc.Net.Client.GrpcChannelOptions
-							{
-								DisposeHttpClient = false,
-								HttpClient = httpClient
-							});
-
-						SetConnectedState();
-					}
-					catch (Exception ex)
-					{
-						//  todo: log exception
-					}
-				}
-			}
-			finally
-			{
-				stopConnectingToken.Cancel();
+				if (!stoppingToken.IsCancellationRequested)
+					await Task.Delay(TimeSpan.FromSeconds(5));
 			}
 		}
 
-		private async Task WaitForDisconnect(IServerLivelinessMonitor[] livelinessMonitors, CancellationToken stoppingToken)
+		private async Task AttemptNextConnection(IServerEndpointProvider[] endpointProviders, CancellationToken stoppingToken)
 		{
-			var cancellationSource = new CancellationTokenSource();
-			var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
-				stoppingToken, cancellationSource.Token
-				);
-
 			try
 			{
-				var monitoringTasks = livelinessMonitors
-					.Select(q => q.MonitorForDisconnect(combinedCancellationSource.Token))
-					.ToArray();
-
-				var finishedTask = await Task.WhenAny(monitoringTasks);
-				//  await the finished task to observe any exceptions
-				await finishedTask;
-
-				if (stoppingToken.IsCancellationRequested)
+				//  get next endpoint from provider
+				var (serverEndpoint, endpointProvider) = await GetNextEndpoint(endpointProviders, stoppingToken);
+				//  create client
+				var httpClient = _endpointClientFactory.CreateHttpClient(serverEndpoint);
+				//  attempt to verify
+				if (!(await _serverIdentifyVerifier.VerifyServer(serverEndpoint, httpClient)))
 					return;
-
-				SetDisconnectedState();
+				//  setup connection
+				Endpoint = serverEndpoint;
+				ServicesChannel = Grpc.Net.Client.GrpcChannel.ForAddress(
+					serverEndpoint.Uri, new Grpc.Net.Client.GrpcChannelOptions
+					{
+						DisposeHttpClient = false,
+						HttpClient = httpClient
+					});
+				//  set status
+				SetConnectedState();
 			}
 			catch (Exception ex)
 			{
 				//  todo: log exception
-				throw;
 			}
-			finally
+		}
+
+		private async Task<(ServerEndpoint ServerEndpoint, IServerEndpointProvider EndpointProvider)> GetNextEndpoint(
+			IServerEndpointProvider[] endpointProviders, CancellationToken stoppingToken
+			)
+		{
+			using (var stopConnectingToken = new CancellationTokenSource())
 			{
-				cancellationSource.Cancel();
-				ConnectionStatus = ConnectionStatus.NotConnected;
+				var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
+					stoppingToken, stopConnectingToken.Token
+					);
+
+				var endpointResolveTasks = endpointProviders
+					.Select(q => GetEndpoint(q, cancellationSource.Token))
+					.ToList();
+
+				var finishedTask = await Task.WhenAny(endpointResolveTasks);
+
+				var result = await finishedTask;
+
+				stopConnectingToken.Cancel();
+
+				return result;
+			}
+		}
+
+		private async Task<(ServerEndpoint ServerEndpoint, IServerEndpointProvider EndpointProvider)> GetEndpoint(IServerEndpointProvider endpointProvider, CancellationToken stoppingToken)
+		{
+			while (!stoppingToken.IsCancellationRequested)
+			{
+				try
+				{
+					var endpoint = await endpointProvider.GetServerEndpoint(stoppingToken);
+					return (endpoint, endpointProvider);
+				}
+				catch (Exception ex)
+				{
+					//  todo: log exception
+				}
+			}
+
+			return (default, endpointProvider);
+		}
+
+		private async Task WaitForDisconnect(IServerLivelinessMonitor[] livelinessMonitors, CancellationToken stoppingToken)
+		{
+			using (var stopMonitoringSource = new CancellationTokenSource())
+			{
+				var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
+					stoppingToken, stopMonitoringSource.Token
+					);
+
+				//  wait for a monitor to complete or throw an exception
+				var monitorTasks = livelinessMonitors
+					.Select(q => RunLivelinessMonitor(q, cancellationSource.Token))
+					.ToList();
+
+				await Task.WhenAny(monitorTasks);
+
+				//  destroy connection
+				Endpoint = default;
+				await (ServicesChannel?.ShutdownAsync() ?? Task.CompletedTask);
+				ServicesChannel = null;
+
+				//  set state
+				SetDisconnectedState();
+
+				stopMonitoringSource.Cancel();
+			}
+		}
+
+		private async Task RunLivelinessMonitor(IServerLivelinessMonitor livelinessMonitor, CancellationToken stoppingToken)
+		{
+			try
+			{
+				await livelinessMonitor.MonitorForDisconnect(stoppingToken);
+			}
+			catch (Exception ex)
+			{
+				//  todo: log exception
 			}
 		}
 	}
