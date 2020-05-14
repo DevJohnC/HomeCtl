@@ -1,11 +1,28 @@
 ﻿using HomeCtl.Connection;
 using HomeCtl.Host;
 using HomeCtl.Kinds;
+using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
 	public static class ServiceExtensions
 	{
+		public static IServiceCollection AddStartupService<TService>(this IServiceCollection services)
+			where TService : class
+		{
+			services.AddSingleton<TService>();
+			services.AddSingleton<StartupService>(sP => new StartupService(sP.GetRequiredService<TService>()));
+			return services;
+		}
+
+		public static IServiceCollection AddStartupService<TService>(this IServiceCollection services, Func<IServiceProvider, TService> implementationFactory)
+			where TService : class
+		{
+			services.AddSingleton<TService>(implementationFactory);
+			services.AddSingleton<StartupService>(sP => new StartupService(sP.GetRequiredService<TService>()));
+			return services;
+		}
+
 		public static IServiceCollection AddApiServer(this IServiceCollection services, IServerEndpointProvider serverConnector)
 		{
 			services.AddSingleton(serverConnector);

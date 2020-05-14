@@ -21,6 +21,11 @@ namespace HomeCtl.Services
 				State?.ToState()
 				);
 		}
+
+		public static ResourceDocument FromResourceDocument(Kinds.Resources.ResourceDocument resourceDocument)
+		{
+			return default;
+		}
 	}
 
 	public partial class ResourceDocumentMetadata

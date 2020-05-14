@@ -25,7 +25,10 @@ namespace Microsoft.Extensions.Hosting
 					options.HostFile = "host.json";
 				});
 
-				svcs.AddSingleton<AppHost>(sP => sP.GetRequiredService<IOptions<HomeCtl.Host.HostOptions>>().Value.GetAppHost());
+				svcs.AddStartupService<HostRecordsService>();
+				svcs.AddStartupService<AppHost>(sP =>
+					sP.GetRequiredService<IOptions<HomeCtl.Host.HostOptions>>().Value.GetAppHost());
+
 				svcs.AddSingleton<EventBus>();
 				svcs.AddGrpc();
 				svcs.AddHostedService<HomeCtlHostService>();

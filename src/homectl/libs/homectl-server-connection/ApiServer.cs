@@ -1,6 +1,8 @@
 ﻿using HomeCtl.Events;
+using HomeCtl.Kinds;
 using HomeCtl.Services;
 using HomeCtl.Services.Server;
+using System.Threading.Tasks;
 
 namespace HomeCtl.Connection
 {
@@ -13,6 +15,24 @@ namespace HomeCtl.Connection
 		}
 
 		public ApiServerVersion ServerVersion { get; private set; }
+
+		public Task Apply(IResource resource)
+		{
+			if (!resource.Kind.TryConvertToDocument(resource, out var resourceDocument))
+				throw new System.Exception("Failed to convert resource to document.");
+
+			return Apply(resourceDocument);
+		}
+
+		public async Task Apply(Kinds.Resources.ResourceDocument resourceDocument)
+		{
+			var protoResourceDocument = ResourceDocument.FromResourceDocument(resourceDocument);
+			var client = new Control.ControlClient(ConnectionManager.ServicesChannel);
+			await client.ApplyDocumentAsync(new ApplyDocumentRequest
+			{
+				ResourceDocument = protoResourceDocument
+			});
+		}
 
 		private void RegisterEventHandlers(EventBus eventBus)
 		{

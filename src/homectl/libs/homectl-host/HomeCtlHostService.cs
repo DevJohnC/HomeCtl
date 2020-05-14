@@ -16,7 +16,7 @@ namespace HomeCtl.Host
 			EndpointConnectionManager connectionManager,
 			IEnumerable<IServerEndpointProvider> serverEndpointProviders,
 			IEnumerable<IServerLivelinessMonitor> livelinessMonitors,
-			ApiServer apiServer //  injected to ensure ApiServer has hooked into events
+			IEnumerable<StartupService> startupServices //  ensure startup services are constructed before this service runs
 			)
 		{
 			_connectionManager = connectionManager;

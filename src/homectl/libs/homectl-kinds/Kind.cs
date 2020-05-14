@@ -1,5 +1,6 @@
 ﻿using HomeCtl.Kinds.Resources;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HomeCtl.Kinds
 {
@@ -53,16 +54,16 @@ namespace HomeCtl.Kinds
 
 		Kind IResource.Kind => CoreKinds.Kind;
 
-		protected abstract bool TryConvertToResourceInstanceImpl(ResourceDocument resourceDocument, out IResource? resourceInstance);
+		protected abstract bool TryConvertToResourceInstanceImpl(ResourceDocument resourceDocument, [NotNullWhen(true)] out IResource? resourceInstance);
 
-		protected abstract bool TryConvertToDocumentImpl(IResource resourceInstance, out ResourceDocument? resourceDocument);
+		protected abstract bool TryConvertToDocumentImpl(IResource resourceInstance, [NotNullWhen(true)] out ResourceDocument? resourceDocument);
 
-		public bool TryConvertToResourceInstance(ResourceDocument resourceDocument, out IResource? resourceInstance)
+		public bool TryConvertToResourceInstance(ResourceDocument resourceDocument, [NotNullWhen(true)] out IResource? resourceInstance)
 		{
 			return TryConvertToResourceInstanceImpl(resourceDocument, out resourceInstance);
 		}
 
-		public bool TryConvertToDocument(IResource resourceInstance, out ResourceDocument? resourceDocument)
+		public bool TryConvertToDocument(IResource resourceInstance, [NotNullWhen(true)] out ResourceDocument? resourceDocument)
 		{
 			return TryConvertToDocumentImpl(resourceInstance, out resourceDocument);
 		}
@@ -83,14 +84,14 @@ namespace HomeCtl.Kinds
 			_convertToResource = convertToResource;
 		}
 
-		protected override bool TryConvertToResourceInstanceImpl(ResourceDocument resourceDocument, out IResource? resourceInstance)
+		protected override bool TryConvertToResourceInstanceImpl(ResourceDocument resourceDocument, [NotNullWhen(true)]  out IResource? resourceInstance)
 		{
 			var result = TryConvertToResourceInstance(resourceDocument, out T? typedResourceInstance);
 			resourceInstance = typedResourceInstance;
 			return result;
 		}
 
-		protected override bool TryConvertToDocumentImpl(IResource resourceInstance, out ResourceDocument? resourceDocument)
+		protected override bool TryConvertToDocumentImpl(IResource resourceInstance, [NotNullWhen(true)]  out ResourceDocument? resourceDocument)
 		{
 			var typedInstance = resourceInstance as T;
 			if (typedInstance == null)
@@ -102,7 +103,7 @@ namespace HomeCtl.Kinds
 			return TryConvertToDocument(typedInstance, out resourceDocument);
 		}
 
-		public bool TryConvertToDocument(T resourceInstance, out ResourceDocument? resourceDocument)
+		public bool TryConvertToDocument(T resourceInstance, [NotNullWhen(true)]  out ResourceDocument? resourceDocument)
 		{
 			try
 			{
@@ -116,7 +117,7 @@ namespace HomeCtl.Kinds
 			}
 		}
 
-		public bool TryConvertToResourceInstance(ResourceDocument resourceDocument, out T? resourceInstance)
+		public bool TryConvertToResourceInstance(ResourceDocument resourceDocument, [NotNullWhen(true)]  out T? resourceInstance)
 		{
 			try
 			{
