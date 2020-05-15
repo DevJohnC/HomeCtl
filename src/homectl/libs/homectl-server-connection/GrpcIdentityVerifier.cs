@@ -1,8 +1,6 @@
-﻿using Grpc.Core.Logging;
-using Grpc.Net.Client;
+﻿using Grpc.Net.Client;
 using HomeCtl.Services.Server;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;

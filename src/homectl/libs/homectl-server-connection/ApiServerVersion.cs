@@ -12,5 +12,10 @@
 		public int Major { get; }
 		public int Minor { get; }
 		public string Name { get; }
+
+		public override string ToString()
+		{
+			return $"{Major}.{Minor}-{Name}";
+		}
 	}
 }
