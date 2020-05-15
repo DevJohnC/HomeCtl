@@ -3,25 +3,21 @@ using HomeCtl.Events;
 using HomeCtl.Host;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Security.Cryptography;
 
 namespace Microsoft.Extensions.Hosting
 {
 	public static class GenericHostBuilderExtensions
 	{
-		public static IHostBuilder ConfigurHomeCtlHostDefaults(this IHostBuilder builder, Action<IWebHostBuilder> configure)
+		public static IHostBuilder ConfigureHomeCtlHostDefaults(this IHostBuilder builder, Action<IWebHostBuilder> configure)
 		{
 			return builder
-				.ConfigureWebHostDefaults(webBuilder => webBuilder.ConfigurHomeCtlHostDefaults(configure));
+				.ConfigureWebHostDefaults(webBuilder => webBuilder.ConfigureHomeCtlHostDefaults(configure));
 		}
 
-		private static IWebHostBuilder ConfigurHomeCtlHostDefaults(this IWebHostBuilder builder, Action<IWebHostBuilder> configure)
+		private static IWebHostBuilder ConfigureHomeCtlHostDefaults(this IWebHostBuilder builder, Action<IWebHostBuilder> configure)
 		{
 			var randomizedPort = PortRandomizer.GetRandomPort();
 
