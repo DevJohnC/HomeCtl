@@ -174,11 +174,11 @@ namespace HomeCtl.Connection
 
 				await Task.WhenAny(monitorTasks);
 
+				SetDisconnectedState();
+
 				Endpoint = default;
 				await (ServicesChannel?.ShutdownAsync() ?? Task.CompletedTask);
 				ServicesChannel = null;
-
-				SetDisconnectedState();
 
 				stopMonitoringSource.Cancel();
 			}

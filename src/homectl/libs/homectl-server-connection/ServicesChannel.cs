@@ -85,6 +85,7 @@ namespace HomeCtl.Connection
 			{
 				try
 				{
+					//  todo: monitor any Tasks in the result for exceptions
 					return _impl.AsyncDuplexStreamingCall(method, host, options);
 				}
 				catch (Exception ex)
@@ -98,7 +99,21 @@ namespace HomeCtl.Connection
 			{
 				try
 				{
+					//  todo: monitor any Tasks in the result for exceptions
 					return _impl.AsyncServerStreamingCall(method, host, options, request);
+				}
+				catch (Exception ex)
+				{
+					HandleException(ex);
+					throw;
+				}
+			}
+
+			private async Task<TResponse> MonitorResponse<TResponse>(Task<TResponse> originalTask)
+			{
+				try
+				{
+					return await originalTask;
 				}
 				catch (Exception ex)
 				{
@@ -111,7 +126,14 @@ namespace HomeCtl.Connection
 			{
 				try
 				{
-					return _impl.AsyncUnaryCall(method, host, options, request);
+					var result = _impl.AsyncUnaryCall(method, host, options, request);
+					return new AsyncUnaryCall<TResponse>(
+						MonitorResponse(result.ResponseAsync),
+						result.ResponseHeadersAsync,
+						result.GetStatus,
+						result.GetTrailers,
+						result.Dispose
+						);
 				}
 				catch (Exception ex)
 				{
