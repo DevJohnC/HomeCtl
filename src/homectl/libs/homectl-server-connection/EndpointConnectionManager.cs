@@ -1,5 +1,5 @@
-﻿using Grpc.Core;
-using HomeCtl.Events;
+﻿using HomeCtl.Events;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +13,7 @@ namespace HomeCtl.Connection
 		protected readonly EventBus EventBus;
 		private readonly IEndpointClientFactory _endpointClientFactory;
 		private readonly IServerIdentityVerifier _serverIdentifyVerifier;
+		private readonly ILogger<EndpointConnectionManager> _logger;
 
 		public ConnectionStatus ConnectionStatus { get; private set; } = ConnectionStatus.NotConnected;
 		public ServerEndpoint Endpoint { get; private set; }
@@ -20,11 +21,13 @@ namespace HomeCtl.Connection
 
 		public EndpointConnectionManager(EventBus eventBus,
 			IEndpointClientFactory endpointClientFactory,
-			IServerIdentityVerifier serverIdentifyVerifier)
+			IServerIdentityVerifier serverIdentifyVerifier,
+			ILogger<EndpointConnectionManager> logger)
 		{
 			EventBus = eventBus;
 			_endpointClientFactory = endpointClientFactory;
 			_serverIdentifyVerifier = serverIdentifyVerifier;
+			_logger = logger;
 		}
 
 		private void SetDisconnectedState()
@@ -34,6 +37,7 @@ namespace HomeCtl.Connection
 
 			if (previousStatus == ConnectionStatus.Connected)
 			{
+				_logger.LogDebug($"Disconnected from {Endpoint.Uri}");
 				EventBus.Publish(
 					new EndpointConnectionEvents.Disconnected(this, Endpoint)
 					);
@@ -47,6 +51,7 @@ namespace HomeCtl.Connection
 
 			if (previousStatus == ConnectionStatus.NotConnected)
 			{
+				_logger.LogDebug($"Connected established with {Endpoint.Uri}");
 				EventBus.Publish(
 					new EndpointConnectionEvents.Connected(this, Endpoint)
 					);
@@ -58,7 +63,7 @@ namespace HomeCtl.Connection
 			CancellationToken stoppingToken)
 		{
 			var endpointRunners = endpointProviders?.Select(
-				q => new EndpointProviderRunner(q))?.ToArray();
+				q => new EndpointProviderRunner(q, _logger))?.ToArray();
 			var livelinessMonitorsArray = livelinessMonitors?.ToArray();
 			if (endpointRunners == null || endpointRunners.Length == 0)
 				throw new Exception("Impossible to locate server, provide 1 or more endpoint providers.");
@@ -106,11 +111,12 @@ namespace HomeCtl.Connection
 			}
 			catch (Exception ex)
 			{
-				//  todo: log exception
+				_logger.LogError(ex, $"Connection attempt to {serverEndpoint} encountered an exception.");
 			}
 
 			if (ConnectionStatus != ConnectionStatus.Connected)
 			{
+				_logger.LogDebug($"Connection to {serverEndpoint.Uri} failed, waiting 5 seconds");
 				endpointRunner.CooldownFor(TimeSpan.FromSeconds(5));
 			}
 		}
@@ -118,6 +124,8 @@ namespace HomeCtl.Connection
 		private async Task AttemptEndpointConnection(EndpointProviderRunner endpointRunner, ServerEndpoint serverEndpoint,
 			CancellationToken stoppingToken)
 		{
+			_logger.LogDebug($"Attempting to connect with {serverEndpoint.Uri}");
+
 			var httpClient = _endpointClientFactory.CreateHttpClient(serverEndpoint);
 			if (!(await _serverIdentifyVerifier.VerifyServer(serverEndpoint, httpClient, stoppingToken)))
 				return;
@@ -153,6 +161,8 @@ namespace HomeCtl.Connection
 
 		private async Task WaitForDisconnect(IServerLivelinessMonitor[] livelinessMonitors, CancellationToken stoppingToken)
 		{
+			_logger.LogDebug($"Monitoring connection to {Endpoint.Uri} for disconnects");
+
 			using (var stopMonitoringSource = new CancellationTokenSource())
 			using (var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
 					stoppingToken, stopMonitoringSource.Token
@@ -182,19 +192,21 @@ namespace HomeCtl.Connection
 			}
 			catch (Exception ex)
 			{
-				//  todo: log exception
+				_logger.LogError(ex, $"Livelieness monitor `{livelinessMonitor.GetType().FullName}` encountered an exception.");
 			}
 		}
 
 		private class EndpointProviderRunner
 		{
-			public EndpointProviderRunner(IServerEndpointProvider serverEndpointProvider)
+			public EndpointProviderRunner(IServerEndpointProvider serverEndpointProvider, ILogger<EndpointConnectionManager> logger)
 			{
 				ServerEndpointProvider = serverEndpointProvider;
+				_logger = logger;
 			}
 
 			public IServerEndpointProvider ServerEndpointProvider { get; }
 
+			private readonly ILogger<EndpointConnectionManager> _logger;
 			private Task<(ServerEndpoint ServerEndpoint, EndpointProviderRunner ProviderRunner)>? _runningTask;
 			private DateTime? _cooldownUntil;
 			private readonly object _lock = new object();
@@ -227,7 +239,7 @@ namespace HomeCtl.Connection
 					}
 					catch (Exception ex)
 					{
-						//  todo: log exception
+						_logger.LogError(ex, $"Server endpoint provider `{ServerEndpointProvider.GetType().FullName}` encountered an exception.");
 					}
 				}
 
