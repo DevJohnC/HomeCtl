@@ -8,6 +8,6 @@ namespace HomeCtl.Connection
 	/// </summary>
 	public interface IServerLivelinessMonitor
 	{
-		Task MonitorForDisconnect(CancellationToken stoppingToken);
+		Task MonitorForDisconnect(ServerEndpoint serverEndpoint, CancellationToken stoppingToken);
 	}
 }

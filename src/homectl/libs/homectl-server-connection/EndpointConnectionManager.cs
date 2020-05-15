@@ -178,7 +178,7 @@ namespace HomeCtl.Connection
 		{
 			try
 			{
-				await livelinessMonitor.MonitorForDisconnect(stoppingToken);
+				await livelinessMonitor.MonitorForDisconnect(Endpoint, stoppingToken);
 			}
 			catch (Exception ex)
 			{

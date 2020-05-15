@@ -401,7 +401,7 @@ namespace homectl_server_connection_tests
 
 		private class NeverDisconnects : IServerLivelinessMonitor
 		{
-			public Task MonitorForDisconnect(CancellationToken stoppingToken)
+			public Task MonitorForDisconnect(ServerEndpoint serverEndpoint, CancellationToken stoppingToken)
 			{
 				var tcs = new TaskCompletionSource<bool>();
 				stoppingToken.Register(() => tcs.SetResult(true));
@@ -411,7 +411,7 @@ namespace homectl_server_connection_tests
 
 		private class DisconnectsImmediately : IServerLivelinessMonitor
 		{
-			public Task MonitorForDisconnect(CancellationToken stoppingToken)
+			public Task MonitorForDisconnect(ServerEndpoint serverEndpoint, CancellationToken stoppingToken)
 			{
 				return Task.CompletedTask;
 			}
