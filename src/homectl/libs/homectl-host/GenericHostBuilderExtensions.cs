@@ -43,6 +43,7 @@ namespace Microsoft.Extensions.Hosting
 				svcs.AddSingleton<IEndpointClientFactory>(sP =>
 					new ReuseSingleClientFactory(new System.Net.Http.HttpClient()));
 				svcs.AddSingleton<IServerIdentityVerifier, GrpcIdentityVerifier>();
+				svcs.AddSingleton<IServerLivelinessMonitor, NetworkErrorLivelinessMonitor>();
 
 				if (!svcs.Any(q => q.ServiceType == typeof(IServer)))
 				{
