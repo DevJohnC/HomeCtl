@@ -6,6 +6,8 @@ namespace HomeCtl.Host
 {
 	public class HostOptions
 	{
+		public int HostPort { get; internal set; }
+
 		public List<Kind> Kinds { get; } = new List<Kind>();
 
 		public string? HostFile { get; set; }

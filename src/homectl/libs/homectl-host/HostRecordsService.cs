@@ -1,5 +1,6 @@
 ﻿using HomeCtl.Connection;
 using HomeCtl.Events;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
 
@@ -7,11 +8,14 @@ namespace HomeCtl.Host
 {
 	internal class HostRecordsService
 	{
+		private readonly int _hostPort;
 		private readonly AppHost _appHost;
 		private readonly ApiServer _apiServer;
 
-		public HostRecordsService(EventBus eventBus, ApiServer apiServer, AppHost appHost)
+		public HostRecordsService(EventBus eventBus, ApiServer apiServer, AppHost appHost,
+			IOptions<HostOptions> hostOptions)
 		{
+			_hostPort = hostOptions.Value.HostPort;
 			_appHost = appHost;
 			_apiServer = apiServer;
 			RegisterEventHandlers(eventBus);
@@ -30,7 +34,7 @@ namespace HomeCtl.Host
 		private async Task UpdateLocalEndpoint()
 		{
 			var ipAddress = await _apiServer.GetPerceivedIpAddress();
-			_appHost.State.Endpoint = $"http://{ipAddress}:PORT/";
+			_appHost.State.Endpoint = $"http://{ipAddress}:{_hostPort}/";
 		}
 
 		private async Task ApplyHostConfigOnApiServer()

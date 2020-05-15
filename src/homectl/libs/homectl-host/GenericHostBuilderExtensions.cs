@@ -13,16 +13,24 @@ namespace Microsoft.Extensions.Hosting
 	{
 		public static IHostBuilder ConfigurHomeCtlHostDefaults(this IHostBuilder builder, Action<IWebHostBuilder> configure)
 		{
-			return builder.ConfigureWebHostDefaults(webBuilder => webBuilder.ConfigurHomeCtlHostDefaults(configure));
+			return builder
+				.ConfigureWebHostDefaults(webBuilder => webBuilder.ConfigurHomeCtlHostDefaults(configure));
 		}
 
-		public static IWebHostBuilder ConfigurHomeCtlHostDefaults(this IWebHostBuilder builder, Action<IWebHostBuilder> configure)
+		private static IWebHostBuilder ConfigurHomeCtlHostDefaults(this IWebHostBuilder builder, Action<IWebHostBuilder> configure)
 		{
+			var randomizedPort = PortRandomizer.GetRandomPort();
+
 			configure?.Invoke(builder);
+			builder.ConfigureKestrel(options =>
+			{
+				options.ListenAnyIP(randomizedPort);
+			});
 			builder.ConfigureServices(svcs =>
 			{
 				svcs.Configure<HomeCtl.Host.HostOptions>(options => {
 					options.HostFile = "host.json";
+					options.HostPort = randomizedPort;
 				});
 
 				svcs.AddStartupService<HostRecordsService>();
