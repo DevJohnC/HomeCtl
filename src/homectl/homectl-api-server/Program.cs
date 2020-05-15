@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("homectl-api-server-tests")]
 
 namespace HomeCtl.ApiServer
 {

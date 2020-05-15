@@ -54,6 +54,8 @@ namespace HomeCtl.Kinds
 
 		Kind IResource.Kind => CoreKinds.Kind;
 
+		public KindDescriptor GetKindDescriptor() => new KindDescriptor(Group, ApiVersion, KindName);
+
 		protected abstract bool TryConvertToResourceInstanceImpl(ResourceDocument resourceDocument, [NotNullWhen(true)] out IResource? resourceInstance);
 
 		protected abstract bool TryConvertToDocumentImpl(IResource resourceInstance, [NotNullWhen(true)] out ResourceDocument? resourceDocument);
@@ -132,21 +134,26 @@ namespace HomeCtl.Kinds
 		}
 	}
 
-	public class SchemaDrivenKind : Kind
+	public class SchemaDrivenKind : Kind<SchemaDrivenKind.DynamicResource>
 	{
 		public SchemaDrivenKind(string kindName, string kindNamePlural, string group, string apiVersion, KindSchema schema, Kind? extendsKind) :
-			base(kindName, kindNamePlural, group, apiVersion, schema, extendsKind)
+			base(kindName, kindNamePlural, group, apiVersion, schema, extendsKind, ConvertToDocument, ConvertToResource)
 		{
 		}
 
-		protected override bool TryConvertToDocumentImpl(IResource resourceInstance, out ResourceDocument? resourceDocument)
+		private static ResourceDocument? ConvertToDocument(DynamicResource dynamicResource)
 		{
-			throw new NotImplementedException();
+			return null;
 		}
 
-		protected override bool TryConvertToResourceInstanceImpl(ResourceDocument resourceDocument, out IResource? resourceInstance)
+		private static DynamicResource? ConvertToResource(ResourceDocument resourceDocument)
 		{
-			throw new NotImplementedException();
+			return null;
+		}
+
+		public class DynamicResource : IResource
+		{
+			public Kind Kind => throw new NotImplementedException();
 		}
 	}
 }

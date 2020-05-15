@@ -7,25 +7,17 @@ namespace HomeCtl.ApiServer.ProtocolServices
 {
 	class ControlService : Control.ControlBase
 	{
-		private ResourceDocumentStore _documentStore;
-		private ResourceManager _resourceManager;
+		private readonly ResourceOrchestrator _resourceOrchestrator;
 
-		public ControlService(ResourceDocumentStore documentStore, ResourceManager resourceManager)
+		public ControlService(ResourceOrchestrator resourceOrchestrator)
 		{
-			_documentStore = documentStore;
-			_resourceManager = resourceManager;
+			_resourceOrchestrator = resourceOrchestrator;
 		}
 
 		public override async Task<ApplyDocumentResponse> ApplyDocument(ApplyDocumentRequest request, ServerCallContext context)
 		{
 			var resourceDocument = request.ResourceDocument.ToResourceDocument();
-
-			var storeResult = await _documentStore.StoreResourceDocument(resourceDocument);
-			if (!storeResult.WasStored)
-				return new ApplyDocumentResponse();
-
-			_resourceManager.ApplyChanges(storeResult);
-
+			await _resourceOrchestrator.Apply(resourceDocument);
 			return new ApplyDocumentResponse();
 		}
 	}

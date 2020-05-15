@@ -1,5 +1,4 @@
-﻿using HomeCtl.ApiServer.Resources;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,17 +16,10 @@ namespace HomeCtl.ApiServer.Orchestration
 
 		private void SubscribeToEvents()
 		{
-			_eventBus.Subscribe<ResourceEvents.ResourceCreatedEvent>(ResourceCreated);
 		}
 
 		private void UnsubscribeFromEvents()
 		{
-			_eventBus.Unsubscribe<ResourceEvents.ResourceCreatedEvent>(ResourceCreated);
-		}
-
-		private void ResourceCreated(ResourceEvents.ResourceCreatedEvent eventData)
-		{
-
 		}
 
 		public async Task Run(CancellationToken stoppingToken)

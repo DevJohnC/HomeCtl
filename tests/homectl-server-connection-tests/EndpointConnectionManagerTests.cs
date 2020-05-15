@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Net.Http;
@@ -16,6 +17,8 @@ namespace homectl_server_connection_tests
 	[TestClass]
 	public class EndpointConnectionManagerTests
 	{
+		private static ILoggerFactory _loggerFactory = new LoggerFactory();
+
 		[TestMethod]
 		public async Task Run_Connects_To_Endpoint()
 		{
@@ -34,7 +37,7 @@ namespace homectl_server_connection_tests
 
 			var endpointConnectionManager = new EndpointConnectionManager(
 				eventBus, new DelegateClientFactory(endpoint => grpcClient),
-				new AlwaysYesServerVerifier()
+				new AlwaysYesServerVerifier(), _loggerFactory.CreateLogger<EndpointConnectionManager>()
 				);
 			await endpointConnectionManager.Run(
 				new[] { StaticApiServer.AnyOnUri("http://localhost/") },
@@ -64,7 +67,7 @@ namespace homectl_server_connection_tests
 
 			var endpointConnectionManager = new EndpointConnectionManager(
 				eventBus, new DelegateClientFactory(endpoint => grpcClient),
-				new AlwaysYesServerVerifier()
+				new AlwaysYesServerVerifier(), _loggerFactory.CreateLogger<EndpointConnectionManager>()
 				);
 			await endpointConnectionManager.Run(
 				new[] { StaticApiServer.AnyOnUri("http://localhost/") },
@@ -95,7 +98,7 @@ namespace homectl_server_connection_tests
 
 			var endpointConnectionManager = new EndpointConnectionManager(
 				eventBus, new DelegateClientFactory(endpoint => grpcClient),
-				new AlwaysYesServerVerifier()
+				new AlwaysYesServerVerifier(), _loggerFactory.CreateLogger<EndpointConnectionManager>()
 				);
 			await endpointConnectionManager.Run(
 				new[] { StaticApiServer.AnyOnUri("http://localhost/") },
@@ -126,7 +129,7 @@ namespace homectl_server_connection_tests
 
 			var endpointConnectionManager = new EndpointConnectionManager(
 				eventBus, new DelegateClientFactory(endpoint => grpcClient),
-				verifier
+				verifier, _loggerFactory.CreateLogger<EndpointConnectionManager>()
 				);
 			await endpointConnectionManager.Run(
 				new[] { StaticApiServer.AnyOnUri("http://localhost/") },
@@ -161,7 +164,7 @@ namespace homectl_server_connection_tests
 
 			var endpointConnectionManager = new EndpointConnectionManager(
 				eventBus, new DelegateClientFactory(endpoint => grpcClient),
-				verifier
+				verifier, _loggerFactory.CreateLogger<EndpointConnectionManager>()
 				);
 			await endpointConnectionManager.Run(
 				new[]
@@ -201,7 +204,7 @@ namespace homectl_server_connection_tests
 				StaticApiServer.AnyOnUri("http://localhost/"));
 			var endpointConnectionManager = new EndpointConnectionManager(
 				eventBus, new DelegateClientFactory(endpoint => grpcClient),
-				verifier
+				verifier, _loggerFactory.CreateLogger<EndpointConnectionManager>()
 				);
 			await endpointConnectionManager.Run(
 				new IServerEndpointProvider[]
@@ -236,7 +239,7 @@ namespace homectl_server_connection_tests
 
 			var endpointConnectionManager = new EndpointConnectionManager(
 				eventBus, new DelegateClientFactory(endpoint => grpcClient),
-				new AlwaysYesServerVerifier()
+				new AlwaysYesServerVerifier(), _loggerFactory.CreateLogger<EndpointConnectionManager>()
 				);
 			await endpointConnectionManager.Run(
 				new IServerEndpointProvider[]
@@ -273,7 +276,7 @@ namespace homectl_server_connection_tests
 
 			var endpointConnectionManager = new EndpointConnectionManager(
 				eventBus, new DelegateClientFactory(endpoint => grpcClient),
-				verifier
+				verifier, _loggerFactory.CreateLogger<EndpointConnectionManager>()
 				);
 			await endpointConnectionManager.Run(
 				new IServerEndpointProvider[]

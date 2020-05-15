@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-resources", "libs\h
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-kinds-tests", "..\..\tests\homectl-kinds-tests\homectl-kinds-tests.csproj", "{574DFB4C-8DE7-485A-B200-A3896CD67DCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "homectl-api-server-tests", "..\..\tests\homectl-api-server-tests\homectl-api-server-tests.csproj", "{615660D8-C27F-4432-99A8-86B43DDD9C31}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{574DFB4C-8DE7-485A-B200-A3896CD67DCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{574DFB4C-8DE7-485A-B200-A3896CD67DCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{574DFB4C-8DE7-485A-B200-A3896CD67DCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{615660D8-C27F-4432-99A8-86B43DDD9C31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{615660D8-C27F-4432-99A8-86B43DDD9C31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{615660D8-C27F-4432-99A8-86B43DDD9C31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{615660D8-C27F-4432-99A8-86B43DDD9C31}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,6 +93,7 @@ Global
 		{1807FDF1-0967-4BAF-A149-61685311D6AC} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 		{1C3A22AB-A2D0-4DE9-AF31-C66AACCDB05B} = {5079F661-0DA6-4F58-81BD-15796A108A92}
 		{574DFB4C-8DE7-485A-B200-A3896CD67DCD} = {D8BB7D0F-17ED-484C-BFE2-9D73028030F8}
+		{615660D8-C27F-4432-99A8-86B43DDD9C31} = {D8BB7D0F-17ED-484C-BFE2-9D73028030F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {84ADA937-A738-4247-A437-DEFC9D1023FF}
