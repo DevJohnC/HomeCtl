@@ -16,7 +16,7 @@ namespace HomeCtl.Connection
 
 		public ConnectionStatus ConnectionStatus { get; private set; } = ConnectionStatus.NotConnected;
 		public ServerEndpoint Endpoint { get; private set; }
-		public ChannelBase? ServicesChannel { get; private set; }
+		public ServicesChannel? ServicesChannel { get; private set; }
 
 		public EndpointConnectionManager(EventBus eventBus,
 			IEndpointClientFactory endpointClientFactory,
@@ -126,12 +126,12 @@ namespace HomeCtl.Connection
 				return;
 
 			Endpoint = serverEndpoint;
-			ServicesChannel = Grpc.Net.Client.GrpcChannel.ForAddress(
+			ServicesChannel = new ServicesChannel(EventBus, serverEndpoint, Grpc.Net.Client.GrpcChannel.ForAddress(
 				serverEndpoint.Uri, new Grpc.Net.Client.GrpcChannelOptions
 				{
 					DisposeHttpClient = false,
 					HttpClient = httpClient
-				});
+				}));
 
 			SetConnectedState();
 		}
