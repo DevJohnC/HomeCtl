@@ -5,19 +5,18 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System;
 
 namespace Microsoft.Extensions.Hosting
 {
 	public static class GenericHostBuilderExtensions
 	{
-		public static IHostBuilder ConfigureHomeCtlHostDefaults(this IHostBuilder builder, Action<IWebHostBuilder> configure)
+		public static IHostBuilder ConfigureHomeCtlHostDefaults(this IHostBuilder builder)
 		{
 			return builder
-				.ConfigureWebHostDefaults(webBuilder => webBuilder.ConfigureHomeCtlHostDefaults(configure));
+				.ConfigureWebHostDefaults(webBuilder => webBuilder.ConfigureHomeCtlHostDefaults());
 		}
 
-		private static IWebHostBuilder ConfigureHomeCtlHostDefaults(this IWebHostBuilder builder, Action<IWebHostBuilder> configure)
+		private static IWebHostBuilder ConfigureHomeCtlHostDefaults(this IWebHostBuilder builder)
 		{
 			var randomizedPort = PortRandomizer.GetRandomPort();
 
@@ -26,7 +25,6 @@ namespace Microsoft.Extensions.Hosting
 				options.ListenAnyIP(randomizedPort);
 			});
 
-			configure?.Invoke(builder);
 			builder.ConfigureServices(svcs =>
 			{
 				svcs.Configure<HomeCtl.Host.HostOptions>(options => {
@@ -48,6 +46,7 @@ namespace Microsoft.Extensions.Hosting
 				svcs.AddSingleton<IServerIdentityVerifier, GrpcIdentityVerifier>();
 				svcs.AddSingleton<IServerLivelinessMonitor, NetworkErrorLivelinessMonitor>();
 			});
+
 			builder.Configure(appBuilder =>
 			{
 				appBuilder.UseRouting();
@@ -56,6 +55,7 @@ namespace Microsoft.Extensions.Hosting
 					endpoints.MapGrpcService<HomeCtl.Host.ProtocolServices.HostInterfaceService>();
 				});
 			});
+
 			return builder;
 		}
 	}
