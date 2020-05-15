@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Security.Cryptography;
 
 namespace Microsoft.Extensions.Hosting
 {
@@ -22,6 +24,11 @@ namespace Microsoft.Extensions.Hosting
 		private static IWebHostBuilder ConfigurHomeCtlHostDefaults(this IWebHostBuilder builder, Action<IWebHostBuilder> configure)
 		{
 			var randomizedPort = PortRandomizer.GetRandomPort();
+
+			builder.ConfigureKestrel(options =>
+			{
+				options.ListenAnyIP(randomizedPort);
+			});
 
 			configure?.Invoke(builder);
 			builder.ConfigureServices(svcs =>
@@ -44,14 +51,6 @@ namespace Microsoft.Extensions.Hosting
 					new ReuseSingleClientFactory(new System.Net.Http.HttpClient()));
 				svcs.AddSingleton<IServerIdentityVerifier, GrpcIdentityVerifier>();
 				svcs.AddSingleton<IServerLivelinessMonitor, NetworkErrorLivelinessMonitor>();
-
-				if (!svcs.Any(q => q.ServiceType == typeof(IServer)))
-				{
-					builder.UseKestrel(options =>
-					{
-						options.ListenAnyIP(randomizedPort);
-					});
-				}
 			});
 			builder.Configure(appBuilder =>
 			{
