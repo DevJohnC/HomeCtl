@@ -24,7 +24,18 @@ namespace HomeCtl.Services
 
 		public static ResourceDocument FromResourceDocument(Kinds.Resources.ResourceDocument resourceDocument)
 		{
-			return default;
+			return new ResourceDocument
+			{
+				Kind = new KindIdentifier
+				{
+					KindName = resourceDocument.Kind.KindName,
+					KindGroup = resourceDocument.Kind.Group,
+					KindApiVersion = resourceDocument.Kind.ApiVersion
+				},
+				Metadata = ResourceDocumentMetadata.FromMetadata(resourceDocument.Metadata),
+				Spec = ResourceDocumentSpec.FromSpec(resourceDocument.Spec),
+				State = ResourceDocumentState.FromState(resourceDocument.State)
+			};
 		}
 	}
 
@@ -36,6 +47,14 @@ namespace HomeCtl.Services
 				ResourceDocumentFieldCollection.ConvertFields(Fields)
 				);
 		}
+
+		public static ResourceDocumentMetadata FromMetadata(ResourceMetadata resourceMetadata)
+		{
+			var ret = new ResourceDocumentMetadata();
+			foreach (var field in resourceMetadata.Fields)
+				ret.Fields.Add(ResourceDocumentField.FromField(field));
+			return ret;
+		}
 	}
 
 	public partial class ResourceDocumentSpec
@@ -46,6 +65,17 @@ namespace HomeCtl.Services
 				ResourceDocumentFieldCollection.ConvertFields(Fields)
 				);
 		}
+
+		public static ResourceDocumentSpec? FromSpec(ResourceSpec? resourceSpec)
+		{
+			if (resourceSpec == null)
+				return default;
+
+			var ret = new ResourceDocumentSpec();
+			foreach (var field in resourceSpec.Fields)
+				ret.Fields.Add(ResourceDocumentField.FromField(field));
+			return ret;
+		}
 	}
 
 	public partial class ResourceDocumentState
@@ -55,6 +85,17 @@ namespace HomeCtl.Services
 			return new ResourceState(
 				ResourceDocumentFieldCollection.ConvertFields(Fields)
 				);
+		}
+
+		public static ResourceDocumentState? FromState(ResourceState? resourceState)
+		{
+			if (resourceState == null)
+				return default;
+
+			var ret = new ResourceDocumentState();
+			foreach (var field in resourceState.Fields)
+				ret.Fields.Add(ResourceDocumentField.FromField(field));
+			return ret;
 		}
 	}
 
@@ -67,6 +108,15 @@ namespace HomeCtl.Services
 				FieldValue.ToFieldValue()
 				);
 		}
+
+		public static ResourceDocumentField FromField(ResourceField resourceField)
+		{
+			return new ResourceDocumentField
+			{
+				FieldName = resourceField.FieldName,
+				FieldValue = ResourceDocumentValue.FromFieldValue(resourceField.FieldValue)
+			};
+		}
 	}
 
 	public partial class ResourceDocumentFieldCollection
@@ -76,6 +126,14 @@ namespace HomeCtl.Services
 			return new ResourceFieldCollection(
 				ConvertFields(Fields)
 				);
+		}
+
+		public static ResourceDocumentFieldCollection FromFieldCollection(IEnumerable<ResourceField> resourceFields)
+		{
+			var ret = new ResourceDocumentFieldCollection();
+			foreach (var field in resourceFields)
+				ret.Fields.Add(ResourceDocumentField.FromField(field));
+			return ret;
 		}
 
 		internal static IList<ResourceField> ConvertFields(IEnumerable<ResourceDocumentField> fields)
@@ -95,6 +153,14 @@ namespace HomeCtl.Services
 			{
 				ret.Values.Add(value.ToFieldValue());
 			}
+			return ret;
+		}
+
+		public static ResourceDocumentValueCollection FromValueCollection(IEnumerable<ResourceFieldValue> values)
+		{
+			var ret = new ResourceDocumentValueCollection();
+			foreach (var value in values)
+				ret.Values.Add(ResourceDocumentValue.FromFieldValue(value));
 			return ret;
 		}
 	}
@@ -117,6 +183,46 @@ namespace HomeCtl.Services
 					return ResourceFieldValue.Object(ObjectValue.ToFieldCollection());
 				case ValueTypeOneofCase.ArrayOfValues:
 					return ResourceFieldValue.Array(ArrayOfValues.ToValueCollection());
+			}
+			throw new Exception("Invalid value type.");
+		}
+
+		public static ResourceDocumentValue FromFieldValue(ResourceFieldValue fieldValue)
+		{
+			switch (fieldValue.Type)
+			{
+				case ResourceFieldValue.ValueType.Bool:
+					return new ResourceDocumentValue
+					{
+						BoolValue = fieldValue.GetBool()
+					};
+				case ResourceFieldValue.ValueType.Int32:
+					return new ResourceDocumentValue
+					{
+						Int32Value = fieldValue.GetInt32()
+					};
+				case ResourceFieldValue.ValueType.Int64:
+					return new ResourceDocumentValue
+					{
+						Int64Value = fieldValue.GetInt64()
+					};
+				case ResourceFieldValue.ValueType.String:
+					return new ResourceDocumentValue
+					{
+						StringValue = fieldValue.GetString()
+					};
+				case ResourceFieldValue.ValueType.Object:
+					return new ResourceDocumentValue
+					{
+						ObjectValue = ResourceDocumentFieldCollection.FromFieldCollection(
+							fieldValue.GetObject()?.Fields ?? new ResourceField[0])
+					};
+				case ResourceFieldValue.ValueType.Array:
+					return new ResourceDocumentValue
+					{
+						ArrayOfValues = ResourceDocumentValueCollection.FromValueCollection(
+							fieldValue.GetArray().Values)
+					};
 			}
 			throw new Exception("Invalid value type.");
 		}
