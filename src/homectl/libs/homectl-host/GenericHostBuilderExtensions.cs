@@ -3,9 +3,11 @@ using HomeCtl.Events;
 using HomeCtl.Host;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 
 namespace Microsoft.Extensions.Hosting
 {
@@ -22,10 +24,6 @@ namespace Microsoft.Extensions.Hosting
 			var randomizedPort = PortRandomizer.GetRandomPort();
 
 			configure?.Invoke(builder);
-			builder.ConfigureKestrel(options =>
-			{
-				options.ListenAnyIP(randomizedPort);
-			});
 			builder.ConfigureServices(svcs =>
 			{
 				svcs.Configure<HomeCtl.Host.HostOptions>(options => {
@@ -42,6 +40,14 @@ namespace Microsoft.Extensions.Hosting
 				svcs.AddHostedService<HomeCtlHostService>();
 				svcs.AddSingleton<ApiServer>();
 				svcs.AddSingleton<EndpointConnectionManager>();
+
+				if (!svcs.Any(q => q.ServiceType == typeof(IServer)))
+				{
+					builder.UseKestrel(options =>
+					{
+						options.ListenAnyIP(randomizedPort);
+					});
+				}
 			});
 			builder.Configure(appBuilder =>
 			{
