@@ -20,7 +20,7 @@ namespace HomeCtl.Connection
 
 		public async Task<bool> VerifyServer(ServerEndpoint serverEndpoint, HttpClient httpClient, CancellationToken stoppingToken)
 		{
-			/*var channel = GrpcChannel.ForAddress(serverEndpoint.Uri, new GrpcChannelOptions
+			var channel = GrpcChannel.ForAddress(serverEndpoint.Uri, new GrpcChannelOptions
 			{
 				DisposeHttpClient = false,
 				HttpClient = httpClient
@@ -38,7 +38,7 @@ namespace HomeCtl.Connection
 				return false;
 			}
 
-			_logger.LogDebug($"Contacted server");*/
+			_logger.LogDebug($"Contacted server");
 
 			//  todo: query server for identity credentials
 			return serverEndpoint.IdentityPolicy.IsValid(
