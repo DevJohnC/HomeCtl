@@ -40,6 +40,7 @@ namespace Microsoft.Extensions.Hosting
 				svcs.AddHostedService<HomeCtlHostService>();
 				svcs.AddSingleton<ApiServer>();
 				svcs.AddSingleton<EndpointConnectionManager>();
+				svcs.AddSingleton<IEndpointClientFactory>(sP => new ReuseSingleClientFactory(new System.Net.Http.HttpClient()));
 
 				if (!svcs.Any(q => q.ServiceType == typeof(IServer)))
 				{
