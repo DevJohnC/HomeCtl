@@ -9,8 +9,8 @@ namespace HomeCtl.ApiServer
 
 		public static HttpClient CreateHttpClient()
 		{
-			//AppContext.TryGetSwitch(SWITCH_NAME, out var currentSwitchValue);
-			//if (currentSwitchValue == false)
+			AppContext.TryGetSwitch(SWITCH_NAME, out var currentSwitchValue);
+			if (currentSwitchValue == false)
 				AppContext.SetSwitch(SWITCH_NAME, true);
 
 			var client = new HttpClient
@@ -18,8 +18,8 @@ namespace HomeCtl.ApiServer
 				DefaultRequestVersion = new Version(2, 0)
 			};
 
-			//if (currentSwitchValue == false)
-			//	AppContext.SetSwitch(SWITCH_NAME, false);
+			if (currentSwitchValue == false)
+				AppContext.SetSwitch(SWITCH_NAME, false);
 
 			return client;
 		}
