@@ -28,34 +28,47 @@ namespace HomeCtl.ApiServer.Resources
 
 		protected abstract bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out TKey key);
 
-		public override Task CreateResource(ResourceDocument resourceDocument)
+		protected virtual Task OnResourceCreated(T resource)
+			=> Task.CompletedTask;
+
+		protected virtual Task OnResourceUpdated(T newResource, T oldResource)
+			=> Task.CompletedTask;
+
+		public override async Task CreateResource(ResourceDocument resourceDocument)
 		{
 			if (!TryGetKey(resourceDocument, out var key) ||
 				!TypedKind.TryConvertToResourceInstance(resourceDocument, out T? resource))
 			{
-				return Task.CompletedTask;
+				return;
 			}
 
 			_resources.Add(key, resource);
 
-			return Task.CompletedTask;
+			//  todo: save to a backing store
+
+			await OnResourceCreated(resource);
 		}
 
-		public override Task UpdateResource(IResource resource, ResourceDocument resourceDocument)
+		public override async Task UpdateResource(IResource resource, ResourceDocument resourceDocument)
 		{
 			if (resource.Kind != Kind)
 				throw new System.Exception("Mismatched kind.");
 
 			if (!TryGetKey(resourceDocument, out var key))
-				return Task.CompletedTask;
+			{
+				return;
+			}
 
+			var oldResource = _resources[key];
 			var typedResource = resource as T;
 			if (typedResource == null)
 				throw new System.Exception("Mismatched kind.");
 
 			_resources[key] = typedResource;
 
-			return Task.CompletedTask;
+			//  todo: save to a backing store
+
+			await OnResourceUpdated(typedResource, oldResource);
 		}
 
 		public override bool TryGetResource(ResourceDocument resourceDocument, [NotNullWhen(true)] out IResource? resource)

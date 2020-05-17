@@ -26,6 +26,7 @@
     <ProjectReference Include="..\libs\homectl-events\homectl-events.csproj" />
     <ProjectReference Include="..\libs\homectl-kinds\homectl-kinds.csproj" />
     <ProjectReference Include="..\libs\homectl-resources\homectl-resources.csproj" />
+    <ProjectReference Include="..\libs\homectl-server-connection\homectl-server-connection.csproj" />
     <ProjectReference Include="..\libs\homectl-servers-protocol\homectl-servers-protocol.csproj" />
   </ItemGroup>
 

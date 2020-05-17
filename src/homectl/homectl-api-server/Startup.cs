@@ -1,3 +1,4 @@
+using HomeCtl.Connection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,14 +17,23 @@ namespace HomeCtl.ApiServer
 
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddSingleton<IEndpointClientFactory, ReuseSingleClientFactory>(
+				sP => new ReuseSingleClientFactory(HttpClientHelper.CreateHttpClient())
+				);
+			services.AddSingleton<IServerIdentityVerifier, GrpcIdentityVerifier>();
+
+			services.AddSingleton<Connections.ConnectionManager>();
+			services.AddHostedService<Connections.ConnectionManagerHostestService>();
+
 			services.AddSingleton<Events.EventBus>();
+
+			services.AddSingleton<Connections.ConnectionManager>();
 
 			services.AddSingleton<Orchestration.OrchestrationConductor>();
 			services.AddHostedService<BackgroundServices.OrchestrationBackgroundService>();
 
 			services.AddSingleton<Resources.ResourceOrchestrator>();
 			services.AddSingleton<Resources.ResourceDocumentStore>();
-			services.AddSingleton<Resources.ResourceManager>();
 
 			AddCoreResourceManager<Resources.HostManager>(services);
 

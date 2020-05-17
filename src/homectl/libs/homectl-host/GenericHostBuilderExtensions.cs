@@ -10,19 +10,26 @@ namespace Microsoft.Extensions.Hosting
 {
 	public static class GenericHostBuilderExtensions
 	{
-		public static IHostBuilder ConfigureHomeCtlHostDefaults(this IHostBuilder builder)
+		public static IApplicationBuilder UseHomeCtlHost(this IApplicationBuilder applicationBuilder)
 		{
-			return builder
-				.ConfigureWebHostDefaults(webBuilder => webBuilder.ConfigureHomeCtlHostDefaults());
+			applicationBuilder.UseEndpoints(endpoints =>
+			{
+				endpoints.MapGrpcService<HomeCtl.Host.ProtocolServices.HostInterfaceService>();
+				endpoints.MapGrpcService<HomeCtl.Host.ProtocolServices.InformationService>();
+			});
+			return applicationBuilder;
 		}
 
-		private static IWebHostBuilder ConfigureHomeCtlHostDefaults(this IWebHostBuilder builder)
+		public static IWebHostBuilder ConfigureHomeCtlHostDefaults(this IWebHostBuilder builder)
 		{
 			var randomizedPort = PortRandomizer.GetRandomPort();
 
 			builder.ConfigureKestrel(options =>
 			{
-				options.ListenAnyIP(randomizedPort);
+				options.ListenAnyIP(randomizedPort, listenOptions =>
+				{
+					listenOptions.Protocols = AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+				});
 			});
 
 			builder.ConfigureServices(svcs =>
@@ -42,18 +49,9 @@ namespace Microsoft.Extensions.Hosting
 				svcs.AddSingleton<ApiServer>();
 				svcs.AddSingleton<EndpointConnectionManager>();
 				svcs.AddSingleton<IEndpointClientFactory>(sP =>
-					new ReuseSingleClientFactory(new System.Net.Http.HttpClient()));
+					new ReuseSingleClientFactory(new System.Net.Http.HttpClient { DefaultRequestVersion = new System.Version(2,0) }));
 				svcs.AddSingleton<IServerIdentityVerifier, GrpcIdentityVerifier>();
 				svcs.AddSingleton<IServerLivelinessMonitor, NetworkErrorLivelinessMonitor>();
-			});
-
-			builder.Configure(appBuilder =>
-			{
-				appBuilder.UseRouting();
-				appBuilder.UseEndpoints(endpoints =>
-				{
-					endpoints.MapGrpcService<HomeCtl.Host.ProtocolServices.HostInterfaceService>();
-				});
 			});
 
 			return builder;

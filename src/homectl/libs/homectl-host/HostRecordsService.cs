@@ -2,6 +2,7 @@
 using HomeCtl.Events;
 using Microsoft.Extensions.Options;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace HomeCtl.Host
@@ -34,7 +35,17 @@ namespace HomeCtl.Host
 		private async Task UpdateLocalEndpoint()
 		{
 			var ipAddress = await _apiServer.GetPerceivedIpAddress();
+			if (IsIPV6(ipAddress))
+				ipAddress = $"[{ipAddress}]";
 			_appHost.State.Endpoint = $"http://{ipAddress}:{_hostPort}/";
+		}
+
+		private bool IsIPV6(string ipAddressStr)
+		{
+			if (!IPAddress.TryParse(ipAddressStr, out var ipAddress))
+				return false;
+
+			return ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6;
 		}
 
 		private async Task ApplyHostConfigOnApiServer()
