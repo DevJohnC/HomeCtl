@@ -1,8 +1,8 @@
 ﻿namespace HomeCtl.Connection
 {
-	public struct ApiServerVersion
+	public struct ServerVersion
 	{
-		public ApiServerVersion(int major, int minor, string name)
+		public ServerVersion(int major, int minor, string name)
 		{
 			Major = major;
 			Minor = minor;

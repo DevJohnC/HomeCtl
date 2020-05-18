@@ -1,5 +1,4 @@
-﻿using Grpc.Core.Logging;
-using HomeCtl.Events;
+﻿using HomeCtl.Events;
 using HomeCtl.Kinds;
 using HomeCtl.Services;
 using HomeCtl.Services.Server;
@@ -10,17 +9,11 @@ namespace HomeCtl.Connection
 {
 	public class ApiServer : Server
 	{
-		private readonly ILogger<ApiServer> _logger;
-
 		public ApiServer(EndpointConnectionManager connectionManager, EventBus eventBus,
 			ILogger<ApiServer> logger) :
-			base(connectionManager)
+			base(connectionManager, eventBus, logger)
 		{
-			_logger = logger;
-			RegisterEventHandlers(eventBus);
 		}
-
-		public ApiServerVersion ServerVersion { get; private set; }
 
 		public Task Apply(IResource resource)
 		{
@@ -38,28 +31,6 @@ namespace HomeCtl.Connection
 			{
 				ResourceDocument = protoResourceDocument
 			});
-		}
-
-		private void RegisterEventHandlers(EventBus eventBus)
-		{
-			eventBus.Subscribe<EndpointConnectionEvents.Connected>(Handle_NewConnection);
-		}
-
-		private async void Handle_NewConnection(EndpointConnectionEvents.Connected connectedArgs)
-		{
-			try
-			{
-				var client = new Information.InformationClient(ConnectionManager.ServicesChannel);
-				var version = await client.GetServerVersionAsync(Empty.Instance);
-				ServerVersion = new ApiServerVersion(version.ApiServerVersion.Major, version.ApiServerVersion.Minor,
-					version.ApiServerVersion.Name);
-
-				_logger.LogDebug($"Connected to API server {ServerVersion} @ {connectedArgs.ServerEndpoint.Uri}");
-			}
-			catch
-			{
-				_logger.LogDebug($"Failed to determine the version of API server @ {connectedArgs.ServerEndpoint.Uri}");
-			}
 		}
 	}
 }

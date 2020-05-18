@@ -1,4 +1,5 @@
-﻿using HomeCtl.Connection;
+﻿using HomeCtl.ApiServer.Hosts;
+using HomeCtl.Connection;
 using HomeCtl.Events;
 using HomeCtl.Kinds;
 using HomeCtl.Services.Server;
@@ -30,54 +31,26 @@ namespace HomeCtl.ApiServer.Connections
 		private readonly Dictionary<Guid, EndpointConnectionRunner> _hostConnections =
 			new Dictionary<Guid, EndpointConnectionRunner>();
 		private readonly EventBus _eventBus;
-		private readonly IEndpointClientFactory _clientFactory;
-		private readonly IServerIdentityVerifier _identityVerifier;
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly ILogger<ConnectionManager> _logger;
 
-		public ConnectionManager(EventBus eventBus, IEndpointClientFactory clientFactory,
-			IServerIdentityVerifier identityVerifier, ILoggerFactory loggerFactory)
+		public ConnectionManager(EventBus eventBus, ILoggerFactory loggerFactory)
 		{
 			_eventBus = eventBus;
-			_clientFactory = clientFactory;
-			_identityVerifier = identityVerifier;
 			_loggerFactory = loggerFactory;
 			_logger = loggerFactory.CreateLogger<ConnectionManager>();
-			SubscribeToEvents();
 		}
 
-		private void SubscribeToEvents()
-		{
-			_eventBus.Subscribe<EndpointConnectionEvents.Connected>(ConnectedToEndpoint);
-		}
-
-		private async void ConnectedToEndpoint(EndpointConnectionEvents.Connected args)
-		{
-			var client = new Information.InformationClient(args.EndpointConnectionManager.ServicesChannel);
-
-			try
-			{
-				var version = await client.GetServerVersionAsync(Services.Empty.Instance);
-				var serverVersion = new ApiServerVersion(version.ApiServerVersion.Major, version.ApiServerVersion.Minor,
-					version.ApiServerVersion.Name);
-
-				_logger.LogDebug($"Connected to host server {serverVersion} @ {args.ServerEndpoint.Uri}");
-			}
-			catch
-			{
-			}
-		}
-
-		public void CreateConnection(Kinds.Host host)
+		public void CreateConnection(HostServer host)
 		{
 			_hostConnections.Add(
-				host.Metadata.HostId,
+				host.Host.Metadata.HostId,
 				new EndpointConnectionRunner(
-					host,
-					new EndpointConnectionManager(
-						_eventBus, _clientFactory, _identityVerifier,
-						_loggerFactory.CreateLogger<EndpointConnectionManager>()
-					), _logger, _eventBus, _loggerFactory));
+					host.Host,
+					host.ConnectionManager,
+					_logger,
+					_eventBus,
+					_loggerFactory));
 		}
 
 		private async Task<EndpointConnectionRunner?> Delay(TimeSpan timeSpan)
