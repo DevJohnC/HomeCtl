@@ -15,6 +15,8 @@ namespace HomeCtl.ApiServer.Resources
 		public abstract Task CreateResource(ResourceDocument resourceDocument);
 
 		public abstract Task UpdateResource(IResource resource, ResourceDocument resourceDocument);
+
+		public abstract Task StoreChanges(IResource resource);
 	}
 
 	abstract class ResourceManager<TKey, T> : ResourceManager
@@ -44,7 +46,7 @@ namespace HomeCtl.ApiServer.Resources
 
 			_resources.Add(key, resource);
 
-			//  todo: save to a backing store
+			await StoreResource(resourceDocument);
 
 			await OnResourceCreated(resource);
 		}
@@ -66,9 +68,26 @@ namespace HomeCtl.ApiServer.Resources
 
 			_resources[key] = typedResource;
 
-			//  todo: save to a backing store
+			await StoreResource(resourceDocument);
 
 			await OnResourceUpdated(typedResource, oldResource);
+		}
+
+		private Task StoreResource(ResourceDocument resourceDocument)
+		{
+			return Task.CompletedTask;
+		}
+
+		public override Task StoreChanges(IResource resource)
+		{
+			var typedResource = resource as T;
+			if (typedResource == null)
+				throw new System.Exception("Invalid resource type.");
+
+			if (!typedResource.Kind.TryConvertToDocument(resource, out var document))
+				throw new System.Exception("Failed to convert resource to document.");
+
+			return StoreResource(document);
 		}
 
 		public override bool TryGetResource(ResourceDocument resourceDocument, [NotNullWhen(true)] out IResource? resource)

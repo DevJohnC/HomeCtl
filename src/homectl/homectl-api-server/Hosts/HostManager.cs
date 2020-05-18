@@ -50,7 +50,8 @@ namespace HomeCtl.ApiServer.Hosts
 					_loggerFactory.CreateLogger<EndpointConnectionManager>()
 					),
 				_eventBus,
-				_loggerFactory.CreateLogger<HostServer>()
+				_loggerFactory.CreateLogger<HostServer>(),
+				this
 				);
 
 			lock (_lock)
