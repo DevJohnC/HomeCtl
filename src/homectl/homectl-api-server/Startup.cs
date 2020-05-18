@@ -32,8 +32,8 @@ namespace HomeCtl.ApiServer
 			services.AddSingleton<Orchestration.OrchestrationConductor>();
 			services.AddHostedService<BackgroundServices.OrchestrationBackgroundService>();
 
+			services.AddSingleton(typeof(Resources.IResourceDocumentStore<>), typeof(Resources.FileResourceDocumentStore<>));
 			services.AddSingleton<Resources.ResourceOrchestrator>();
-			services.AddSingleton<Resources.ResourceDocumentStore>();
 
 			AddCoreResourceManager<Hosts.HostManager>(services);
 

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.Hosts
 {
-	class HostManager : ResourceManager<Guid, Host>
+	class HostManager : ResourceManager<Host>
 	{
 		private readonly ConnectionManager _connectionManager;
 		private readonly EventBus _eventBus;
@@ -28,7 +28,8 @@ namespace HomeCtl.ApiServer.Hosts
 
 		public HostManager(ConnectionManager connectionManager, EventBus eventBus,
 			ILoggerFactory loggerFactory, IEndpointClientFactory endpointClientFactory,
-			IServerIdentityVerifier serverIdentityVerifier)
+			IServerIdentityVerifier serverIdentityVerifier, IResourceDocumentStore<Host> documentStore) :
+			base(documentStore)
 		{
 			_connectionManager = connectionManager;
 			_eventBus = eventBus;
@@ -37,9 +38,15 @@ namespace HomeCtl.ApiServer.Hosts
 			_serverIdentityVerifier = serverIdentityVerifier;
 		}
 
-		protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out Guid key)
+		protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key)
 		{
-			return Guid.TryParse(resourceDocument.Metadata["hostId"]?.GetString(), out key);
+			if (!Guid.TryParse(resourceDocument.Metadata["hostId"]?.GetString(), out var id))
+			{
+				key = null;
+				return false;
+			}
+			key = id.ToString();
+			return true;
 		}
 
 		protected override Task OnResourceCreated(Host resource)

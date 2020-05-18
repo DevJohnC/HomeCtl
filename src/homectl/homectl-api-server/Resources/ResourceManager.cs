@@ -19,16 +19,22 @@ namespace HomeCtl.ApiServer.Resources
 		public abstract Task StoreChanges(IResource resource);
 	}
 
-	abstract class ResourceManager<TKey, T> : ResourceManager
+	abstract class ResourceManager<T> : ResourceManager
 		where T : class, IResource
 	{
-		private readonly Dictionary<TKey, T> _resources = new Dictionary<TKey, T>();
+		private readonly Dictionary<string, T> _resources = new Dictionary<string, T>();
+		private readonly IResourceDocumentStore<T> _documentStore;
 
 		public override Kind Kind => TypedKind;
 
 		protected abstract Kind<T> TypedKind { get; }
 
-		protected abstract bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out TKey key);
+		public ResourceManager(IResourceDocumentStore<T> documentStore)
+		{
+			_documentStore = documentStore;
+		}
+
+		protected abstract bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key);
 
 		protected virtual Task OnResourceCreated(T resource)
 			=> Task.CompletedTask;
@@ -75,7 +81,9 @@ namespace HomeCtl.ApiServer.Resources
 
 		private Task StoreResource(ResourceDocument resourceDocument)
 		{
-			return Task.CompletedTask;
+			if (!TryGetKey(resourceDocument, out var key))
+				throw new System.Exception("Failed to store resource: couldn't determine key.");
+			return _documentStore.Store(key, resourceDocument);
 		}
 
 		public override Task StoreChanges(IResource resource)
