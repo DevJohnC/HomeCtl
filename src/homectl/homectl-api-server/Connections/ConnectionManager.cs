@@ -53,6 +53,14 @@ namespace HomeCtl.ApiServer.Connections
 					_loggerFactory));
 		}
 
+		public void UpdateConnection(HostServer host)
+		{
+			if (!_hostConnections.TryGetValue(host.Host.Metadata.HostId, out var runner))
+				return;
+
+			runner.EndpointProvider.HostUri = new Uri(host.Host.State.Endpoint);
+		}
+
 		private async Task<EndpointConnectionRunner?> Delay(TimeSpan timeSpan)
 		{
 			try
@@ -87,6 +95,8 @@ namespace HomeCtl.ApiServer.Connections
 		{
 			public Kinds.Host Host { get; }
 
+			public HostServerEndpointProvider EndpointProvider { get; }
+
 			private readonly EndpointConnectionManager _connectionManager;
 			private readonly ILogger<ConnectionManager> _logger;
 			private readonly EventBus _eventBus;
@@ -105,6 +115,7 @@ namespace HomeCtl.ApiServer.Connections
 				_logger = logger;
 				_eventBus = eventBus;
 				_loggerFactory = loggerFactory;
+				EndpointProvider = new HostServerEndpointProvider(new Uri(Host.State.Endpoint));
 			}
 
 			private async Task<EndpointConnectionRunner?> Run(CancellationToken stoppingToken)
@@ -112,7 +123,7 @@ namespace HomeCtl.ApiServer.Connections
 				try
 				{
 					await _connectionManager.Run(
-							new[] { StaticApiServer.AnyOnUri(Host.State.Endpoint) },
+							new[] { EndpointProvider },
 							new[] { new NetworkErrorLivelinessMonitor(_eventBus,
 								_loggerFactory.CreateLogger<NetworkErrorLivelinessMonitor>()) },
 							stoppingToken);
@@ -130,6 +141,21 @@ namespace HomeCtl.ApiServer.Connections
 				if (_runningTask == null)
 					_runningTask = Run(stoppingToken);
 				return _runningTask;
+			}
+		}
+
+		private class HostServerEndpointProvider : IServerEndpointProvider
+		{
+			public HostServerEndpointProvider(Uri hostUri)
+			{
+				HostUri = hostUri;
+			}
+
+			public Uri HostUri { get; set; }
+
+			public Task<ServerEndpoint> GetServerEndpoint(CancellationToken stoppingToken)
+			{
+				return Task.FromResult(new ServerEndpoint(HostUri, AnyServerIdentityPolicy.Instance));
 			}
 		}
 	}

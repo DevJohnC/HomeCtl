@@ -17,13 +17,15 @@ namespace HomeCtl.ApiServer.Resources
 		public abstract Task UpdateResource(IResource resource, ResourceDocument resourceDocument);
 
 		public abstract Task StoreChanges(IResource resource);
+
+		public abstract Task LoadResources();
 	}
 
 	abstract class ResourceManager<T> : ResourceManager
 		where T : class, IResource
 	{
 		private readonly Dictionary<string, T> _resources = new Dictionary<string, T>();
-		private readonly IResourceDocumentStore<T> _documentStore;
+		protected IResourceDocumentStore<T> DocumentStore { get; }
 
 		public override Kind Kind => TypedKind;
 
@@ -31,7 +33,7 @@ namespace HomeCtl.ApiServer.Resources
 
 		public ResourceManager(IResourceDocumentStore<T> documentStore)
 		{
-			_documentStore = documentStore;
+			DocumentStore = documentStore;
 		}
 
 		protected abstract bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key);
@@ -41,6 +43,26 @@ namespace HomeCtl.ApiServer.Resources
 
 		protected virtual Task OnResourceUpdated(T newResource, T oldResource)
 			=> Task.CompletedTask;
+
+		protected virtual Task OnResourceLoaded(T resource)
+			=> Task.CompletedTask;
+
+		public override async Task LoadResources()
+		{
+			foreach (var document in await DocumentStore.LoadAll())
+			{
+				if (!TryGetKey(document, out var key) || 
+					!TypedKind.TryConvertToResourceInstance(document, out T? resource))
+				{
+					//  todo: log failure
+					continue;
+				}
+
+				_resources.Add(key, resource);
+
+				await OnResourceLoaded(resource);
+			}
+		}
 
 		public override async Task CreateResource(ResourceDocument resourceDocument)
 		{
@@ -62,28 +84,22 @@ namespace HomeCtl.ApiServer.Resources
 			if (resource.Kind != Kind)
 				throw new System.Exception("Mismatched kind.");
 
-			if (!TryGetKey(resourceDocument, out var key))
-			{
-				return;
-			}
-
-			var oldResource = _resources[key];
 			var typedResource = resource as T;
 			if (typedResource == null)
 				throw new System.Exception("Mismatched kind.");
-
-			_resources[key] = typedResource;
+			if (!TypedKind.TryConvertToResourceInstance(resourceDocument, out T? newVersion))
+				throw new System.Exception("Failed to convert document to resource.");
 
 			await StoreResource(resourceDocument);
 
-			await OnResourceUpdated(typedResource, oldResource);
+			await OnResourceUpdated(newVersion, typedResource);
 		}
 
 		private Task StoreResource(ResourceDocument resourceDocument)
 		{
 			if (!TryGetKey(resourceDocument, out var key))
 				throw new System.Exception("Failed to store resource: couldn't determine key.");
-			return _documentStore.Store(key, resourceDocument);
+			return DocumentStore.Store(key, resourceDocument);
 		}
 
 		public override Task StoreChanges(IResource resource)

@@ -12,17 +12,21 @@ namespace HomeCtl.ApiServer.BackgroundServices
 	class OrchestrationBackgroundService : BackgroundService
 	{
 		private readonly OrchestrationConductor _orchestrationConductor;
+		private readonly ResourceOrchestrator _resourceOrchestrator;
 
 		public OrchestrationBackgroundService(
-			OrchestrationConductor orchestrationConductor
+			OrchestrationConductor orchestrationConductor,
+			ResourceOrchestrator resourceOrchestrator
 			)
 		{
 			_orchestrationConductor = orchestrationConductor;
+			_resourceOrchestrator = resourceOrchestrator;
 		}
 
-		protected override Task ExecuteAsync(CancellationToken stoppingToken)
+		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
-			return _orchestrationConductor.Run(stoppingToken);
+			await _resourceOrchestrator.LoadResources();
+			await _orchestrationConductor.Run(stoppingToken);
 		}
 	}
 }

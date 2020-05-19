@@ -70,9 +70,40 @@ namespace HomeCtl.ApiServer.Hosts
 			return base.OnResourceCreated(resource);
 		}
 
-		protected override Task OnResourceUpdated(Host newResource, Host oldResource)
+		protected override async Task OnResourceUpdated(Host newResource, Host oldResource)
 		{
-			return base.OnResourceUpdated(newResource, oldResource);
+			if (!_hosts.TryGetValue(newResource.Metadata.HostId, out var host))
+				return;
+
+			oldResource.Metadata = newResource.Metadata;
+			oldResource.State = newResource.State;
+			_connectionManager.UpdateConnection(host);
+
+			await base.OnResourceUpdated(newResource, oldResource);
+		}
+
+		protected override async Task OnResourceLoaded(Host resource)
+		{
+			resource.State.ConnectedState = Host.ConnectedState.NotConnected;
+			await StoreChanges(resource);
+
+			var hostServer = new HostServer(resource,
+				new EndpointConnectionManager(
+					_eventBus, _endpointClientFactory, _serverIdentityVerifier,
+					_loggerFactory.CreateLogger<EndpointConnectionManager>()
+					),
+				_eventBus,
+				_loggerFactory.CreateLogger<HostServer>(),
+				this
+				);
+
+			lock (_lock)
+			{
+				_hosts.Add(resource.Metadata.HostId, hostServer);
+			}
+
+			_connectionManager.CreateConnection(hostServer);
+			await base.OnResourceLoaded(resource);
 		}
 	}
 }

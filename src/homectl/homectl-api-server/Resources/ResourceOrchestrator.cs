@@ -14,6 +14,14 @@ namespace HomeCtl.ApiServer.Resources
 			_resourceManagers.AddRange(coreResourceManagers);
 		}
 
+		public async Task LoadResources()
+		{
+			foreach (var resourceManager in _resourceManagers.GetAll())
+			{
+				await resourceManager.LoadResources();
+			}
+		}
+
 		public Task Apply(ResourceDocument resourceDocument)
 		{
 			if (!_resourceManagers.TryGetResourceManager(resourceDocument.Kind, out var resourceManager))
@@ -37,6 +45,17 @@ namespace HomeCtl.ApiServer.Resources
 
 			private readonly Dictionary<KindDescriptor, ResourceManager> _resourceManagers
 				= new Dictionary<KindDescriptor, ResourceManager>();
+
+			public IEnumerable<ResourceManager> GetAll()
+			{
+				lock (_lock)
+				{
+					foreach (var kvp in _resourceManagers)
+					{
+						yield return kvp.Value;
+					}
+				}
+			}
 
 			public void Add(ResourceManager resourceManager)
 			{
