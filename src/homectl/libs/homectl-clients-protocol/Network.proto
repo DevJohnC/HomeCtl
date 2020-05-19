@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+import "homectl-clients-protocol/Common.proto";
+
+option csharp_namespace = "HomeCtl.Services.Server";
+
+package homectl.services.server;
+
+service Network {
+	//  Gets the network timing information from the server.
+	rpc GetNetworkTiming (homectl.services.Empty) returns (NetworkTimingResponse);
+}
+
+message NetworkTimingResponse {
+	int64 receivedAtUnixTime = 1;
+}

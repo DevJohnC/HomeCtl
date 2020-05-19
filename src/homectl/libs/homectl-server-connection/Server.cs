@@ -29,6 +29,8 @@ namespace HomeCtl.Connection
 
 		protected ILogger Logger { get; }
 
+		public NetworkTiming NetworkTiming { get; private set; }
+
 		protected virtual void SubscribeToEvents()
 		{
 			EventBus.Subscribe<EndpointConnectionEvents.Connected>(Handle_NewConnection);
@@ -85,6 +87,19 @@ namespace HomeCtl.Connection
 			var version = await client.GetServerVersionAsync(Empty.Instance);
 			return new ServerVersion(version.ApiServerVersion.Major, version.ApiServerVersion.Minor,
 				version.ApiServerVersion.Name);
+		}
+
+		public async Task<NetworkTiming> GetNetworkTiming()
+		{
+			var client = new Network.NetworkClient(ConnectionManager.ServicesChannel);
+			var startTime = DateTimeOffset.UtcNow;
+			var timingResponse = await client.GetNetworkTimingAsync(Empty.Instance);
+			var receivedAtTime = DateTimeOffset.FromUnixTimeMilliseconds(timingResponse.ReceivedAtUnixTime);
+			var endTime = DateTimeOffset.UtcNow;
+			var roundTripTime = endTime - startTime;
+			var ret = new NetworkTiming(roundTripTime, receivedAtTime - startTime);
+			NetworkTiming = ret;
+			return ret;
 		}
 	}
 }

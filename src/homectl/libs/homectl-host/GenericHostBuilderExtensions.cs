@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.Hosting
 			{
 				endpoints.MapGrpcService<HomeCtl.Host.ProtocolServices.HostInterfaceService>();
 				endpoints.MapGrpcService<HomeCtl.Host.ProtocolServices.InformationService>();
+				endpoints.MapGrpcService<HomeCtl.Host.ProtocolServices.NetworkService>();
 			});
 			return applicationBuilder;
 		}
@@ -52,6 +53,7 @@ namespace Microsoft.Extensions.Hosting
 					new ReuseSingleClientFactory(new System.Net.Http.HttpClient { DefaultRequestVersion = new System.Version(2,0) }));
 				svcs.AddSingleton<IServerIdentityVerifier, GrpcIdentityVerifier>();
 				svcs.AddSingleton<IServerLivelinessMonitor, NetworkErrorLivelinessMonitor>();
+				svcs.AddSingleton<IServerLivelinessMonitor>(sP => new NetworkTimingLivelinessMonitor(sP.GetRequiredService<ApiServer>()));
 			});
 
 			return builder;

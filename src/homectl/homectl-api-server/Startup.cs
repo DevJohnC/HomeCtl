@@ -53,6 +53,7 @@ namespace HomeCtl.ApiServer
 			{
 				endpoints.MapGrpcService<ProtocolServices.InformationService>();
 				endpoints.MapGrpcService<ProtocolServices.ControlService>();
+				endpoints.MapGrpcService<ProtocolServices.NetworkService>();
 			});
 		}
 	}

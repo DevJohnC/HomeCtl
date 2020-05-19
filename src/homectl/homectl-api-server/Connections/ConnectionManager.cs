@@ -46,7 +46,7 @@ namespace HomeCtl.ApiServer.Connections
 			_hostConnections.Add(
 				host.Host.Metadata.HostId,
 				new EndpointConnectionRunner(
-					host.Host,
+					host,
 					host.ConnectionManager,
 					_logger,
 					_eventBus,
@@ -93,9 +93,10 @@ namespace HomeCtl.ApiServer.Connections
 
 		private class EndpointConnectionRunner
 		{
-			public Kinds.Host Host { get; }
+			public Kinds.Host Host => HostServer.Host;
 
 			public HostServerEndpointProvider EndpointProvider { get; }
+			public HostServer HostServer { get; }
 
 			private readonly EndpointConnectionManager _connectionManager;
 			private readonly ILogger<ConnectionManager> _logger;
@@ -104,13 +105,13 @@ namespace HomeCtl.ApiServer.Connections
 			private Task<EndpointConnectionRunner?>? _runningTask;
 
 			public EndpointConnectionRunner(
-				Kinds.Host host,
+				HostServer host,
 				EndpointConnectionManager connectionManager,
 				ILogger<ConnectionManager> logger,
 				EventBus eventBus,
 				ILoggerFactory loggerFactory)
 			{
-				Host = host;
+				HostServer = host;
 				_connectionManager = connectionManager;
 				_logger = logger;
 				_eventBus = eventBus;
@@ -124,8 +125,12 @@ namespace HomeCtl.ApiServer.Connections
 				{
 					await _connectionManager.Run(
 							new[] { EndpointProvider },
-							new[] { new NetworkErrorLivelinessMonitor(_eventBus,
-								_loggerFactory.CreateLogger<NetworkErrorLivelinessMonitor>()) },
+							new IServerLivelinessMonitor[]
+							{
+								new NetworkErrorLivelinessMonitor(_eventBus,
+									_loggerFactory.CreateLogger<NetworkErrorLivelinessMonitor>()),
+								new NetworkTimingLivelinessMonitor(HostServer)
+							},
 							stoppingToken);
 				}
 				catch (Exception ex)
