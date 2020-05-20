@@ -81,7 +81,7 @@ namespace HomeCtl.Kinds
 				return Optional(fieldName, ObjectSchema(builderAction));
 			}
 
-			public Builder RequiredObject(string fieldName, Action<Builder> builderAction)
+			public Builder RequireObject(string fieldName, Action<Builder> builderAction)
 			{
 				return Required(fieldName, ObjectSchema(builderAction));
 			}
@@ -91,7 +91,7 @@ namespace HomeCtl.Kinds
 				return Optional(fieldName, ArraySchema(ObjectSchema(builderAction)));
 			}
 
-			public Builder RequiredObjectArray(string fieldName, Action<Builder> builderAction)
+			public Builder RequireObjectArray(string fieldName, Action<Builder> builderAction)
 			{
 				return Required(fieldName, ArraySchema(ObjectSchema(builderAction)));
 			}
@@ -145,6 +145,11 @@ namespace HomeCtl.Kinds
 			public Builder RequireString(string fieldName, string? format = null)
 			{
 				return Required(fieldName, StringSchema(format));
+			}
+
+			public Builder RequireStringArray(string fieldName, string? format = null)
+			{
+				return Required(fieldName, ArraySchema(StringSchema(format)));
 			}
 
 			public Builder AllowAdditionalProperties(bool allowed = true)

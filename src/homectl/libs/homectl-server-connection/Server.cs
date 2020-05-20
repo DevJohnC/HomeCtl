@@ -33,21 +33,21 @@ namespace HomeCtl.Connection
 
 		protected virtual void SubscribeToEvents()
 		{
-			EventBus.Subscribe<EndpointConnectionEvents.Connected>(Handle_NewConnection);
 		}
 
 		protected virtual void UnsubscribeFromEvents()
 		{
-			EventBus.Unsubscribe<EndpointConnectionEvents.Connected>(Handle_NewConnection);
 		}
 
 		private void SubscribeToEventsImpl()
 		{
+			EventBus.Subscribe<EndpointConnectionEvents.Connected>(Handle_NewConnection);
 			SubscribeToEvents();
 		}
 
 		private void UnsubscribeFromEventsImpl()
 		{
+			EventBus.Unsubscribe<EndpointConnectionEvents.Connected>(Handle_NewConnection);
 			UnsubscribeFromEvents();
 		}
 
