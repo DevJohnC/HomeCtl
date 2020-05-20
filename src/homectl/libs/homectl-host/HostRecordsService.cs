@@ -12,6 +12,7 @@ namespace HomeCtl.Host
 		private readonly int _hostPort;
 		private readonly AppHost _appHost;
 		private readonly ApiServer _apiServer;
+		private readonly EventBus _eventBus;
 
 		public HostRecordsService(EventBus eventBus, ApiServer apiServer, AppHost appHost,
 			IOptions<HostOptions> hostOptions)
@@ -19,12 +20,13 @@ namespace HomeCtl.Host
 			_hostPort = hostOptions.Value.HostPort;
 			_appHost = appHost;
 			_apiServer = apiServer;
-			RegisterEventHandlers(eventBus);
+			_eventBus = eventBus;
+			RegisterEventHandlers();
 		}
 
-		private void RegisterEventHandlers(EventBus eventBus)
+		private void RegisterEventHandlers()
 		{
-			eventBus.Subscribe<EndpointConnectionEvents.Connected>(Handle_NewConnection);
+			_eventBus.Subscribe<EndpointConnectionEvents.Connected>(Handle_NewConnection);
 		}
 
 		private async void Handle_NewConnection(EndpointConnectionEvents.Connected connectedArgs)
@@ -54,6 +56,7 @@ namespace HomeCtl.Host
 			{
 				await UpdateLocalEndpoint();
 				await _apiServer.Apply(_appHost);
+				_eventBus.Publish(new HostRecordsEvents.HostRecordApplied(_appHost));
 			}
 			catch (Exception ex)
 			{
@@ -62,4 +65,18 @@ namespace HomeCtl.Host
 			}
 		}
 	}
+
+	public static class HostRecordsEvents
+	{
+		public class HostRecordApplied
+		{
+			public HostRecordApplied(AppHost host)
+			{
+				Host = host;
+			}
+
+			public AppHost Host { get; }
+		}
+	}
+
 }

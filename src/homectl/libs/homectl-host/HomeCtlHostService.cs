@@ -40,10 +40,10 @@ namespace HomeCtl.Host
 
 		private void SubscribeToEvents()
 		{
-			_eventBus.Subscribe<EndpointConnectionEvents.Connected>(ConnectedToServer);
+			_eventBus.Subscribe<HostRecordsEvents.HostRecordApplied>(ConnectedToServer);
 		}
 
-		private async void ConnectedToServer(EndpointConnectionEvents.Connected connected)
+		private async void ConnectedToServer(HostRecordsEvents.HostRecordApplied connected)
 		{
 			var devices = _deviceProviders.SelectMany(q => q.AvailableDevices).ToList();
 			var kinds = devices.Select(q => q.Kind).GroupBy(q => q).Select(q => q.First()).ToList();
