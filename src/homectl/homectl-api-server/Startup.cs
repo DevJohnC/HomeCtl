@@ -35,6 +35,7 @@ namespace HomeCtl.ApiServer
 			services.AddSingleton(typeof(Resources.IResourceDocumentStore<>), typeof(Resources.FileResourceDocumentStore<>));
 			services.AddSingleton<Resources.ResourceOrchestrator>();
 
+			AddCoreResourceManager<Kinds.KindManager>(services);
 			AddCoreResourceManager<Hosts.HostManager>(services);
 
 			services.AddGrpc();

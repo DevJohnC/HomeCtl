@@ -36,7 +36,17 @@ namespace HomeCtl.ApiServer.Resources
 			DocumentStore = documentStore;
 		}
 
+		protected void Add(string key, T resource)
+		{
+			_resources.Add(key, resource);
+		}
+
 		protected abstract bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key);
+
+		protected virtual bool TryConvertToResourceInstance(ResourceDocument resourceDocument, [NotNullWhen(true)]  out T? resourceInstance)
+		{
+			return TypedKind.TryConvertToResourceInstance(resourceDocument, out resourceInstance);
+		}
 
 		protected virtual Task OnResourceCreated(T resource)
 			=> Task.CompletedTask;
@@ -52,13 +62,13 @@ namespace HomeCtl.ApiServer.Resources
 			foreach (var document in await DocumentStore.LoadAll())
 			{
 				if (!TryGetKey(document, out var key) || 
-					!TypedKind.TryConvertToResourceInstance(document, out T? resource))
+					!TryConvertToResourceInstance(document, out T? resource))
 				{
 					//  todo: log failure
 					continue;
 				}
 
-				_resources.Add(key, resource);
+				Add(key, resource);
 
 				await OnResourceLoaded(resource);
 			}
@@ -67,12 +77,12 @@ namespace HomeCtl.ApiServer.Resources
 		public override async Task CreateResource(ResourceDocument resourceDocument)
 		{
 			if (!TryGetKey(resourceDocument, out var key) ||
-				!TypedKind.TryConvertToResourceInstance(resourceDocument, out T? resource))
+				!TryConvertToResourceInstance(resourceDocument, out T? resource))
 			{
 				return;
 			}
 
-			_resources.Add(key, resource);
+			Add(key, resource);
 
 			await StoreResource(resourceDocument);
 
@@ -87,7 +97,7 @@ namespace HomeCtl.ApiServer.Resources
 			var typedResource = resource as T;
 			if (typedResource == null)
 				throw new System.Exception("Mismatched kind.");
-			if (!TypedKind.TryConvertToResourceInstance(resourceDocument, out T? newVersion))
+			if (!TryConvertToResourceInstance(resourceDocument, out T? newVersion))
 				throw new System.Exception("Failed to convert document to resource.");
 
 			await StoreResource(resourceDocument);
@@ -112,6 +122,11 @@ namespace HomeCtl.ApiServer.Resources
 				throw new System.Exception("Failed to convert resource to document.");
 
 			return StoreResource(document);
+		}
+
+		protected bool TryGetResource(string key, [NotNullWhen(true)] out T? resource)
+		{
+			return _resources.TryGetValue(key, out resource);
 		}
 
 		public override bool TryGetResource(ResourceDocument resourceDocument, [NotNullWhen(true)] out IResource? resource)

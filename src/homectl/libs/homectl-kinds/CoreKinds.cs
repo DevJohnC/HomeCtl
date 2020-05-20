@@ -1,6 +1,9 @@
 ﻿using HomeCtl.Kinds.Resources;
+using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Writers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace HomeCtl.Kinds
 {
@@ -60,6 +63,20 @@ namespace HomeCtl.Kinds
 				?? throw new MissingResourceFieldException(fieldName);
 		}
 
+		private static string? WriteToJson(OpenApiSchema? schema)
+		{
+			if (schema == null)
+				return null;
+
+			using (var stringWriter = new StringWriter())
+			{
+				var writer = new OpenApiJsonWriter(stringWriter);
+				schema.SerializeAsV3(writer);
+
+				return stringWriter.ToString();
+			}
+		}
+
 		private static ResourceDocument? KindToDocument(Kind kind)
 		{
 			return new ResourceDocument(
@@ -74,9 +91,9 @@ namespace HomeCtl.Kinds
 				}),
 				spec: new ResourceSpec(new List<ResourceField>
 				{
-					new ResourceField("metadataSchema", ResourceFieldValue.String("")),
-					new ResourceField("specSchema", ResourceFieldValue.String("")),
-					new ResourceField("stateSchema", ResourceFieldValue.String(""))
+					new ResourceField("metadataSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.MetadataSchema))),
+					new ResourceField("specSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.SpecSchema))),
+					new ResourceField("stateSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.StateSchema)))
 				}));
 
 			string GetExtendsKindValue()
@@ -89,6 +106,11 @@ namespace HomeCtl.Kinds
 
 		private static Kind? DocumentToKind(ResourceDocument resourceDocument)
 		{
+			return DocumentToKind(resourceDocument, null);
+		}
+
+		public static Kind? DocumentToKind(ResourceDocument resourceDocument, Func<KindDescriptor, Kind?>? resolveExtensionKind)
+		{
 			if (resourceDocument.Kind.Group != Kind.Group ||
 				resourceDocument.Kind.ApiVersion != Kind.ApiVersion ||
 				resourceDocument.Kind.KindName != Kind.KindName)
@@ -100,8 +122,18 @@ namespace HomeCtl.Kinds
 				ReadStringField(resourceDocument.Metadata, "group"),
 				ReadStringField(resourceDocument.Metadata, "apiVersion"),
 				KindSchema.FromKindSpec(resourceDocument.Spec ?? throw new MissingResourceFieldException("spec")),
-				null
+				ResolveExtensionKind(resourceDocument.Metadata["extendsKind"]?.GetString())
 				);
+
+			Kind? ResolveExtensionKind(string? kindDescriptorString)
+			{
+				if (string.IsNullOrWhiteSpace(kindDescriptorString))
+					return default;
+
+				var splitString = kindDescriptorString.Split('/');
+				var kindDescriptor = new KindDescriptor(splitString[0], splitString[1], splitString[2]);
+				return resolveExtensionKind?.Invoke(kindDescriptor);
+			}
 		}
 
 		private static ResourceDocument? HostToDocument(Host host)

@@ -93,7 +93,7 @@ namespace HomeCtl.ApiServer.Connections
 
 		private class EndpointConnectionRunner
 		{
-			public Kinds.Host Host => HostServer.Host;
+			public HomeCtl.Kinds.Host Host => HostServer.Host;
 
 			public HostServerEndpointProvider EndpointProvider { get; }
 			public HostServer HostServer { get; }
