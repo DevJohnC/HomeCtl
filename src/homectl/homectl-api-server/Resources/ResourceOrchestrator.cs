@@ -8,10 +8,23 @@ namespace HomeCtl.ApiServer.Resources
 	class ResourceOrchestrator
 	{
 		private readonly ResourceManagerCollection _resourceManagers = new ResourceManagerCollection();
+		private readonly ResourceManagerAccessor _resourceManagerAccessor;
 
-		public ResourceOrchestrator(IEnumerable<ResourceManager> coreResourceManagers)
+		public ResourceOrchestrator(
+			IEnumerable<ResourceManager> coreResourceManagers,
+			ResourceManagerAccessor resourceManagerAccessor
+			)
 		{
+			resourceManagerAccessor.Orchestrator = this;
+			_resourceManagerAccessor = resourceManagerAccessor;
 			_resourceManagers.AddRange(coreResourceManagers);
+			foreach (var resourceManager in _resourceManagers.GetAll())
+				_resourceManagerAccessor.Add(resourceManager);
+		}
+
+		public void AddResourceManager(ResourceManager resourceManager)
+		{
+			_resourceManagers.Add(resourceManager);
 		}
 
 		public async Task LoadResources()

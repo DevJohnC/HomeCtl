@@ -16,12 +16,18 @@ namespace HomeCtl.ApiServer.Resources
 	{
 		private readonly static ResourceDocument[] _empty = new ResourceDocument[0];
 
-		private readonly DirectoryInfo _storageDirectory = new DirectoryInfo($"resourceStore/{typeof(TKind).Name}");
+		private readonly DirectoryInfo _storageDirectory;
 		private readonly ILogger<FileResourceDocumentStore<TKind>> _logger;
 
-		public FileResourceDocumentStore(ILogger<FileResourceDocumentStore<TKind>> logger)
+		public FileResourceDocumentStore(ILogger<FileResourceDocumentStore<TKind>> logger) :
+			this(logger, typeof(TKind).Name)
+		{
+		}
+
+		public FileResourceDocumentStore(ILogger<FileResourceDocumentStore<TKind>> logger, string directoryName)
 		{
 			_logger = logger;
+			_storageDirectory = new DirectoryInfo($"resourceStore/{directoryName}");
 		}
 
 		private void EnsureDirectoryExists()
@@ -68,6 +74,24 @@ namespace HomeCtl.ApiServer.Resources
 			var filePath = Path.Combine(_storageDirectory.FullName, $"{key}.json");
 			var json = ResourceDocumentSerializer.SerializeToJson(resourceDocument);
 			return File.WriteAllTextAsync(filePath, json, Encoding.UTF8);
+		}
+	}
+
+	public class FileResourceDocumentStoreFactory : IDocumentStoreFactory
+	{
+		private readonly ILoggerFactory _loggerFactory;
+
+		public FileResourceDocumentStoreFactory(ILoggerFactory loggerFactory)
+		{
+			_loggerFactory = loggerFactory;
+		}
+
+		IResourceDocumentStore<T> IDocumentStoreFactory.CreateDocumentStore<T>(Kind<T> kind)
+		{
+			if (kind is SchemaDrivenKind)
+				return new FileResourceDocumentStore<T>(_loggerFactory.CreateLogger<FileResourceDocumentStore<T>>(), kind.KindName);
+
+			return new FileResourceDocumentStore<T>(_loggerFactory.CreateLogger<FileResourceDocumentStore<T>>());
 		}
 	}
 }

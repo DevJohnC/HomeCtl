@@ -32,11 +32,14 @@ namespace HomeCtl.ApiServer
 			services.AddSingleton<Orchestration.OrchestrationConductor>();
 			services.AddHostedService<BackgroundServices.OrchestrationBackgroundService>();
 
+			services.AddSingleton<Resources.ResourceManagerAccessor>();
 			services.AddSingleton(typeof(Resources.IResourceDocumentStore<>), typeof(Resources.FileResourceDocumentStore<>));
+			services.AddSingleton<Resources.IDocumentStoreFactory, Resources.FileResourceDocumentStoreFactory>();
 			services.AddSingleton<Resources.ResourceOrchestrator>();
 
 			AddCoreResourceManager<Kinds.KindManager>(services);
 			AddCoreResourceManager<Hosts.HostManager>(services);
+			AddCoreResourceManager<Devices.DeviceManager>(services);
 
 			services.AddGrpc();
 		}

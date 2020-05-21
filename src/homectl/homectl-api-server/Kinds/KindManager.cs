@@ -2,14 +2,22 @@
 using HomeCtl.Kinds;
 using HomeCtl.Kinds.Resources;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.Kinds
 {
 	class KindManager : ResourceManager<Kind>
 	{
-		public KindManager(IResourceDocumentStore<Kind> documentStore) :
+		private readonly IDocumentStoreFactory _documentStoreFactory;
+		private readonly ResourceManagerAccessor _resourceManagerAccessor;
+
+		public KindManager(IResourceDocumentStore<Kind> documentStore,
+			IDocumentStoreFactory documentStoreFactory,
+			ResourceManagerAccessor resourceManagerAccessor) :
 			base(documentStore)
 		{
+			_documentStoreFactory = documentStoreFactory;
+			_resourceManagerAccessor = resourceManagerAccessor;
 			AddCoreKind(CoreKinds.Kind);
 			AddCoreKind(CoreKinds.Host);
 			AddCoreKind(CoreKinds.Controller);
@@ -22,6 +30,32 @@ namespace HomeCtl.ApiServer.Kinds
 		}
 
 		protected override Kind<Kind> TypedKind => CoreKinds.Kind;
+
+		protected override Task OnResourceLoaded(Kind resource)
+		{
+			if (!(resource is SchemaDrivenKind schemaDrivenKind))
+				return Task.CompletedTask;
+
+			ResourceManager? extendsManager = null;
+
+			if (resource.ExtendsKind != null)
+			{
+				_resourceManagerAccessor.TryFind(q => q.Kind.Group == resource.ExtendsKind.Group &&
+					q.Kind.ApiVersion == resource.ExtendsKind.ApiVersion &&
+					q.Kind.KindName == resource.ExtendsKind.KindName,
+					out extendsManager);
+			}
+
+			var manager = new GenericKindManager(
+				_documentStoreFactory.CreateDocumentStore(schemaDrivenKind),
+				schemaDrivenKind,
+				extendsManager
+				);
+
+			_resourceManagerAccessor.Orchestrator.AddResourceManager(manager);
+
+			return manager.LoadResources();
+		}
 
 		protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key)
 		{
