@@ -230,7 +230,16 @@ namespace HomeCtl.Resources
 		{
 			public override ResourceFieldValueCollection ReadJson(JsonReader reader, Type objectType, ResourceFieldValueCollection? existingValue, bool hasExistingValue, JsonSerializer serializer)
 			{
-				throw new NotImplementedException();
+				reader.Read();
+				var result = new List<ResourceFieldValue>();
+				while (true)
+				{
+					var field = serializer.Deserialize<ResourceFieldValue>(reader);
+					if (field == null)
+						return new ResourceFieldValueCollection { Values = result };
+					result.Add(field);
+					reader.Read();
+				}
 			}
 
 			public override void WriteJson(JsonWriter writer, ResourceFieldValueCollection? value, JsonSerializer serializer)
@@ -254,7 +263,18 @@ namespace HomeCtl.Resources
 			public override ResourceFieldValue? ReadJson(JsonReader reader, Type objectType, ResourceFieldValue? existingValue, bool hasExistingValue, JsonSerializer serializer)
 			{
 				if (reader.ValueType == typeof(string))
-					return ResourceFieldValue.String((string?)reader.Value);
+				{
+					var result = ResourceFieldValue.String((string?)reader.Value);
+					return result;
+				}
+				else if (reader.TokenType == JsonToken.StartArray)
+				{
+					return ResourceFieldValue.Array(serializer.Deserialize<ResourceFieldValueCollection>(reader));
+				}
+				else if (reader.TokenType == JsonToken.StartObject)
+				{
+					return ResourceFieldValue.Object(serializer.Deserialize<ResourceFieldCollection>(reader));
+				}
 
 				return default;
 			}
