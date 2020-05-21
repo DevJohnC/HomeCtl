@@ -1,6 +1,7 @@
 ﻿using HomeCtl.Kinds.Resources;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.Resources
@@ -63,10 +64,7 @@ namespace HomeCtl.ApiServer.Resources
 			{
 				lock (_lock)
 				{
-					foreach (var kvp in _resourceManagers)
-					{
-						yield return kvp.Value;
-					}
+					return _resourceManagers.Values.ToList();
 				}
 			}
 

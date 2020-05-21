@@ -23,7 +23,14 @@ namespace HomeCtl.ApiServer.Resources
 
 		protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key)
 		{
-			throw new NotImplementedException();
+			key = resourceDocument.Metadata["identifier"]?.GetString();
+			return key != null;
+		}
+
+		protected override bool TryConvertToResourceInstance(ResourceDocument resourceDocument, [NotNullWhen(true)] out SchemaDrivenKind.DynamicResource? resourceInstance)
+		{
+			resourceInstance = new SchemaDrivenKind.DynamicResource(Kind, resourceDocument);
+			return true;
 		}
 	}
 }

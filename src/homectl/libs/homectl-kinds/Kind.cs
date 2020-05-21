@@ -110,7 +110,7 @@ namespace HomeCtl.Kinds
 			try
 			{
 				resourceDocument = _convertToDocument(resourceInstance);
-				return true;
+				return resourceDocument != null;
 			}
 			catch
 			{
@@ -143,7 +143,7 @@ namespace HomeCtl.Kinds
 
 		private static ResourceDocument? ConvertToDocument(DynamicResource dynamicResource)
 		{
-			return null;
+			return dynamicResource.ResourceDocument;
 		}
 
 		private static DynamicResource? ConvertToResource(ResourceDocument resourceDocument)
@@ -153,7 +153,15 @@ namespace HomeCtl.Kinds
 
 		public class DynamicResource : IResource
 		{
-			public Kind Kind => throw new NotImplementedException();
+			public DynamicResource(Kind kind, ResourceDocument resourceDocument)
+			{
+				Kind = kind;
+				ResourceDocument = resourceDocument;
+			}
+
+			public Kind Kind { get; }
+
+			public ResourceDocument ResourceDocument { get; }
 		}
 	}
 }

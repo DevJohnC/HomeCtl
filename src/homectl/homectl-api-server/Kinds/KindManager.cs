@@ -31,18 +31,15 @@ namespace HomeCtl.ApiServer.Kinds
 
 		protected override Kind<Kind> TypedKind => CoreKinds.Kind;
 
-		protected override Task OnResourceLoaded(Kind resource)
+		private GenericKindManager CreateManager(SchemaDrivenKind schemaDrivenKind)
 		{
-			if (!(resource is SchemaDrivenKind schemaDrivenKind))
-				return Task.CompletedTask;
-
 			ResourceManager? extendsManager = null;
 
-			if (resource.ExtendsKind != null)
+			if (schemaDrivenKind.ExtendsKind != null)
 			{
-				_resourceManagerAccessor.TryFind(q => q.Kind.Group == resource.ExtendsKind.Group &&
-					q.Kind.ApiVersion == resource.ExtendsKind.ApiVersion &&
-					q.Kind.KindName == resource.ExtendsKind.KindName,
+				_resourceManagerAccessor.TryFind(q => q.Kind.Group == schemaDrivenKind.ExtendsKind.Group &&
+					q.Kind.ApiVersion == schemaDrivenKind.ExtendsKind.ApiVersion &&
+					q.Kind.KindName == schemaDrivenKind.ExtendsKind.KindName,
 					out extendsManager);
 			}
 
@@ -54,7 +51,27 @@ namespace HomeCtl.ApiServer.Kinds
 
 			_resourceManagerAccessor.Orchestrator.AddResourceManager(manager);
 
+			return manager;
+		}
+
+		protected override Task OnResourceLoaded(Kind resource)
+		{
+			if (!(resource is SchemaDrivenKind schemaDrivenKind))
+				return Task.CompletedTask;
+
+			var manager = CreateManager(schemaDrivenKind);
+
 			return manager.LoadResources();
+		}
+
+		protected override Task OnResourceCreated(Kind resource)
+		{
+			if (!(resource is SchemaDrivenKind schemaDrivenKind))
+				return Task.CompletedTask;
+
+			CreateManager(schemaDrivenKind);
+
+			return Task.CompletedTask;
 		}
 
 		protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key)
