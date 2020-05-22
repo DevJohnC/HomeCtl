@@ -1,7 +1,6 @@
 ﻿using HomeCtl.Kinds.Resources;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
-using System.Xml;
 
 namespace HomeCtl.Kinds
 {
@@ -10,9 +9,12 @@ namespace HomeCtl.Kinds
 	/// </summary>
 	public class KindSchema
 	{
-		public KindSchema(OpenApiSchema metadataSchema, OpenApiSchema? specSchema, OpenApiSchema? stateSchema)
+		public KindSchema(OpenApiSchema metadataSchema,
+			OpenApiSchema definitionSchema,
+			OpenApiSchema? specSchema, OpenApiSchema? stateSchema)
 		{
 			MetadataSchema = metadataSchema;
+			DefinitionSchema = definitionSchema;
 			SpecSchema = specSchema;
 			StateSchema = stateSchema;
 		}
@@ -21,6 +23,11 @@ namespace HomeCtl.Kinds
 		/// Gets an OpenApi type schema that describes the structure of the kinds metadata.
 		/// </summary>
 		public OpenApiSchema MetadataSchema { get; }
+
+		/// <summary>
+		/// GEts an OpenApi type schema that describes the structure of the kinds definition.
+		/// </summary>
+		public OpenApiSchema DefinitionSchema { get; }
 
 		/// <summary>
 		/// Gets an OpenApi type schema that describes the structure of the kinds spec.
@@ -32,24 +39,27 @@ namespace HomeCtl.Kinds
 		/// </summary>
 		public OpenApiSchema? StateSchema { get; }
 
-		public static KindSchema FromKindSpec(ResourceSpec resourceSpec)
+		public static KindSchema FromKindDefinition(ResourceDefinition resourceDefinition)
 		{
 			var reader = new OpenApiStringReader();
-			var metadataSchema = reader.ReadFragment<OpenApiSchema>(resourceSpec["metadataSchema"]?.GetString() ?? throw new MissingResourceFieldException("metadataSchema"),
+			var metadataSchema = reader.ReadFragment<OpenApiSchema>(resourceDefinition["metadataSchema"]?.GetString() ?? throw new MissingResourceFieldException("metadataSchema"),
+				Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_0, out var _);
+
+			var definitionSchema = reader.ReadFragment<OpenApiSchema>(resourceDefinition["definitionSchema"]?.GetString() ?? throw new MissingResourceFieldException("definitionSchema"),
 				Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_0, out var _);
 
 			var specSchema = default(OpenApiSchema);
 			var stateSchema = default(OpenApiSchema);
 
-			if (resourceSpec["specSchema"] != null)
-				specSchema = reader.ReadFragment<OpenApiSchema>(resourceSpec["specSchema"].GetString(),
+			if (resourceDefinition["specSchema"] != null)
+				specSchema = reader.ReadFragment<OpenApiSchema>(resourceDefinition["specSchema"].GetString(),
 					Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_0, out var _);
 
-			if (resourceSpec["stateSchema"] != null)
-				stateSchema = reader.ReadFragment<OpenApiSchema>(resourceSpec["stateSchema"].GetString(),
+			if (resourceDefinition["stateSchema"] != null)
+				stateSchema = reader.ReadFragment<OpenApiSchema>(resourceDefinition["stateSchema"].GetString(),
 					Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_0, out var _);
 
-			return new KindSchema(metadataSchema, specSchema, stateSchema);
+			return new KindSchema(metadataSchema, definitionSchema, specSchema, stateSchema);
 		}
 	}
 }

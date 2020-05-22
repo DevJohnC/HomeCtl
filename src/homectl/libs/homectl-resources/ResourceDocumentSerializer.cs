@@ -70,6 +70,7 @@ namespace HomeCtl.Resources
 
 				KindDescriptor kindDescriptor = default;
 				ResourceMetadata? resourceMetadata = default;
+				ResourceDefinition? resourceDefinition = default;
 				ResourceSpec? resourceSpec = default;
 				ResourceState? resourceState = default;
 
@@ -85,6 +86,13 @@ namespace HomeCtl.Resources
 								var fieldCollection = serializer.Deserialize<ResourceFieldCollection>(reader);
 								if (fieldCollection != null)
 									resourceMetadata = new ResourceMetadata(fieldCollection.Fields);
+							}
+							break;
+						case "definition":
+							{
+								var fieldCollection = serializer.Deserialize<ResourceFieldCollection>(reader);
+								if (fieldCollection != null)
+									resourceDefinition = new ResourceDefinition(fieldCollection.Fields);
 							}
 							break;
 						case "spec":
@@ -106,9 +114,11 @@ namespace HomeCtl.Resources
 
 				if (resourceMetadata == null)
 					throw new Exception("Member `metadata` missing from json.");
+				if (resourceDefinition == null)
+					throw new Exception("Member `definition` missing from json.");
 
 				return new ResourceDocument(kindDescriptor, resourceMetadata,
-					resourceSpec, resourceState);
+					resourceDefinition, resourceSpec, resourceState);
 			}
 
 			public override void WriteJson(JsonWriter writer, ResourceDocument? value, JsonSerializer serializer)
@@ -122,6 +132,9 @@ namespace HomeCtl.Resources
 
 					writer.WritePropertyName("metadata");
 					serializer.Serialize(writer, value.Metadata, typeof(ResourceFieldCollection));
+
+					writer.WritePropertyName("definition");
+					serializer.Serialize(writer, value.Definition, typeof(ResourceFieldCollection));
 
 					if (value.Spec != null)
 					{

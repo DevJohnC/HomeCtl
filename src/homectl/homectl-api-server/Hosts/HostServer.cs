@@ -1,5 +1,4 @@
-﻿using HomeCtl.ApiServer.Resources;
-using HomeCtl.Connection;
+﻿using HomeCtl.Connection;
 using HomeCtl.Events;
 using HomeCtl.Kinds;
 using Microsoft.Extensions.Logging;
@@ -36,20 +35,22 @@ namespace HomeCtl.ApiServer.Hosts
 
 		private async void Handle_Connected(EndpointConnectionEvents.Connected args)
 		{
-			if (args.ServerEndpoint.Uri.OriginalString != Host.State.Endpoint)
+			if (args.ServerEndpoint.Uri.OriginalString != Host.Endpoint)
 				return;
 
-			Host.State.ConnectedState = Host.ConnectedState.Connected;
+			//  todo: API to store resource state
+			//Host.State.ConnectedState = Host.ConnectedState.Connected;
 
 			await _hostManager.StoreChanges(Host);
 		}
 
 		private async void Handle_Disconnected(EndpointConnectionEvents.Disconnected args)
 		{
-			if (args.ServerEndpoint.Uri.OriginalString != Host.State.Endpoint)
+			if (args.ServerEndpoint.Uri.OriginalString != Host.Endpoint)
 				return;
 
-			Host.State.ConnectedState = Host.ConnectedState.NotConnected;
+			//  todo: API to store resource state
+			//Host.State.ConnectedState = Host.ConnectedState.NotConnected;
 
 			await _hostManager.StoreChanges(Host);
 		}

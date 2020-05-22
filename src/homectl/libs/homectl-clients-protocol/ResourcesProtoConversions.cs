@@ -17,6 +17,7 @@ namespace HomeCtl.Services
 					Kind.KindGroup, Kind.KindApiVersion,
 					Kind.KindName),
 				Metadata.ToMetadata(),
+				Definition.ToDefinition(),
 				Spec?.ToSpec(),
 				State?.ToState()
 				);
@@ -33,6 +34,7 @@ namespace HomeCtl.Services
 					KindApiVersion = resourceDocument.Kind.ApiVersion
 				},
 				Metadata = ResourceDocumentMetadata.FromMetadata(resourceDocument.Metadata),
+				Definition = ResourceDocumentDefinition.FromDefinition(resourceDocument.Definition),
 				Spec = ResourceDocumentSpec.FromSpec(resourceDocument.Spec),
 				State = ResourceDocumentState.FromState(resourceDocument.State)
 			};
@@ -52,6 +54,24 @@ namespace HomeCtl.Services
 		{
 			var ret = new ResourceDocumentMetadata();
 			foreach (var field in resourceMetadata.Fields)
+				ret.Fields.Add(ResourceDocumentField.FromField(field));
+			return ret;
+		}
+	}
+
+	public partial class ResourceDocumentDefinition
+	{
+		public ResourceDefinition ToDefinition()
+		{
+			return new ResourceDefinition(
+				ResourceDocumentFieldCollection.ConvertFields(Fields)
+				);
+		}
+
+		public static ResourceDocumentDefinition FromDefinition(ResourceDefinition resourceDefinition)
+		{
+			var ret = new ResourceDocumentDefinition();
+			foreach (var field in resourceDefinition.Fields)
 				ret.Fields.Add(ResourceDocumentField.FromField(field));
 			return ret;
 		}

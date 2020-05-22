@@ -26,7 +26,7 @@ namespace HomeCtl.ApiServer.Kinds
 
 		private void AddCoreKind(Kind kind)
 		{
-			Add($"{kind.Group}-{kind.ApiVersion}-{kind.KindName}", kind);
+			Add($"{kind.Group}/{kind.ApiVersion}/{kind.KindName}", kind);
 		}
 
 		protected override Kind<Kind> TypedKind => CoreKinds.Kind;
@@ -74,12 +74,6 @@ namespace HomeCtl.ApiServer.Kinds
 			return Task.CompletedTask;
 		}
 
-		protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key)
-		{
-			key = $"{resourceDocument.Metadata["group"].GetString()}-{resourceDocument.Metadata["apiVersion"].GetString()}-{resourceDocument.Metadata["name"].GetString()}";
-			return true;
-		}
-
 		protected override bool TryConvertToResourceInstance(ResourceDocument resourceDocument, [NotNullWhen(true)] out Kind? resourceInstance)
 		{
 			var kind = CoreKinds.DocumentToKind(resourceDocument, ResolveKind);
@@ -95,7 +89,7 @@ namespace HomeCtl.ApiServer.Kinds
 
 		private Kind? ResolveKind(KindDescriptor kindDescriptor)
 		{
-			var key = $"{kindDescriptor.Group}-{kindDescriptor.ApiVersion}-{kindDescriptor.KindName}";
+			var key = $"{kindDescriptor.Group}/{kindDescriptor.ApiVersion}/{kindDescriptor.KindName}";
 			if (TryGetResource(key, out var kind))
 				return kind;
 			return default;

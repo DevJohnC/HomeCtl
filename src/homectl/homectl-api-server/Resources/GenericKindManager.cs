@@ -21,12 +21,6 @@ namespace HomeCtl.ApiServer.Resources
 
 		protected override Kind<SchemaDrivenKind.DynamicResource> TypedKind { get; }
 
-		protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key)
-		{
-			key = resourceDocument.Metadata["identifier"]?.GetString();
-			return key != null;
-		}
-
 		protected override bool TryConvertToResourceInstance(ResourceDocument resourceDocument, [NotNullWhen(true)] out SchemaDrivenKind.DynamicResource? resourceInstance)
 		{
 			resourceInstance = new SchemaDrivenKind.DynamicResource(Kind, resourceDocument);

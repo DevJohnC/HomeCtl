@@ -38,17 +38,6 @@ namespace HomeCtl.ApiServer.Hosts
 			_serverIdentityVerifier = serverIdentityVerifier;
 		}
 
-		protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key)
-		{
-			if (!Guid.TryParse(resourceDocument.Metadata["hostId"]?.GetString(), out var id))
-			{
-				key = null;
-				return false;
-			}
-			key = id.ToString();
-			return true;
-		}
-
 		protected override Task OnResourceCreated(Host resource)
 		{
 			var hostServer = new HostServer(resource,
@@ -63,7 +52,7 @@ namespace HomeCtl.ApiServer.Hosts
 
 			lock (_lock)
 			{
-				_hosts.Add(resource.Metadata.HostId, hostServer);
+				_hosts.Add(resource.HostId, hostServer);
 			}
 
 			_connectionManager.CreateConnection(hostServer);
@@ -72,11 +61,11 @@ namespace HomeCtl.ApiServer.Hosts
 
 		protected override async Task OnResourceUpdated(Host newResource, Host oldResource)
 		{
-			if (!_hosts.TryGetValue(newResource.Metadata.HostId, out var host))
+			if (!_hosts.TryGetValue(newResource.HostId, out var host))
 				return;
 
-			oldResource.Metadata = newResource.Metadata;
-			oldResource.State = newResource.State;
+			oldResource.Endpoint = newResource.Endpoint;
+			oldResource.MachineName = newResource.MachineName;
 			_connectionManager.UpdateConnection(host);
 
 			await base.OnResourceUpdated(newResource, oldResource);
@@ -84,7 +73,8 @@ namespace HomeCtl.ApiServer.Hosts
 
 		protected override async Task OnResourceLoaded(Host resource)
 		{
-			resource.State.ConnectedState = Host.ConnectedState.NotConnected;
+			//  todo: API to store resource state
+			//resource.State.ConnectedState = Host.ConnectedState.NotConnected;
 			await StoreChanges(resource);
 
 			var hostServer = new HostServer(resource,
@@ -99,7 +89,7 @@ namespace HomeCtl.ApiServer.Hosts
 
 			lock (_lock)
 			{
-				_hosts.Add(resource.Metadata.HostId, hostServer);
+				_hosts.Add(resource.HostId, hostServer);
 			}
 
 			_connectionManager.CreateConnection(hostServer);

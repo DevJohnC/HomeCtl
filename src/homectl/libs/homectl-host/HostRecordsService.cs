@@ -39,7 +39,7 @@ namespace HomeCtl.Host
 			var ipAddress = await _apiServer.GetPerceivedIpAddress();
 			if (IsIPV6(ipAddress))
 				ipAddress = $"[{ipAddress}]";
-			_appHost.State.Endpoint = $"http://{ipAddress}:{_hostPort}/";
+			_appHost.Endpoint = $"http://{ipAddress}:{_hostPort}/";
 		}
 
 		private bool IsIPV6(string ipAddressStr)

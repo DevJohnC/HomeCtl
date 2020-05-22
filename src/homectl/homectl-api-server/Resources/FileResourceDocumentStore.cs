@@ -71,7 +71,7 @@ namespace HomeCtl.ApiServer.Resources
 		{
 			EnsureDirectoryExists();
 
-			var filePath = Path.Combine(_storageDirectory.FullName, $"{key}.json");
+			var filePath = Path.Combine(_storageDirectory.FullName, $"{key.Replace('/', '-')}.json");
 			var json = ResourceDocumentSerializer.SerializeToJson(resourceDocument);
 			return File.WriteAllTextAsync(filePath, json, Encoding.UTF8);
 		}

@@ -15,11 +15,11 @@ namespace homectl_api_server_tests.Resources
 		[TestMethod]
 		public async Task Apply_Creates_Resource_In_Correct_Manager_When_No_Match_Exists()
 		{
-			var testClassManager = new TestKinds.TestClassManager();
+			var testClassManager = new TestKinds.TestClassManager(new DoNothingResourceStore<TestKinds.TestClass>());
 			var resourceOrchestrator = new ResourceOrchestrator(new[]
 			{
 				testClassManager
-			});
+			}, new ResourceManagerAccessor());
 
 			var testObjOrigin = new TestKinds.TestClass { Id = Guid.NewGuid() };
 			if (!testObjOrigin.Kind.TryConvertToDocument(testObjOrigin, out var resourceDocument))
@@ -33,11 +33,11 @@ namespace homectl_api_server_tests.Resources
 		[TestMethod]
 		public async Task Apply_Updates_Resource_In_Correct_Manager_When_Match_Exists()
 		{
-			var testClassManager = new TestKinds.TestClassManager();
+			var testClassManager = new TestKinds.TestClassManager(new DoNothingResourceStore<TestKinds.TestClass>());
 			var resourceOrchestrator = new ResourceOrchestrator(new[]
 			{
 				testClassManager
-			});
+			}, new ResourceManagerAccessor());
 
 			var testObjOrigin = new TestKinds.TestClass { Id = Guid.NewGuid() };
 			if (!testObjOrigin.Kind.TryConvertToDocument(testObjOrigin, out var resourceDocument))
@@ -49,16 +49,35 @@ namespace homectl_api_server_tests.Resources
 			Assert.AreEqual(1, testClassManager.UpdateCount);
 		}
 
+		private class DoNothingResourceStore<T> : IResourceDocumentStore<T>
+			where T : class, IResource
+		{
+			public Task<IReadOnlyList<ResourceDocument>> LoadAll()
+			{
+				throw new NotImplementedException();
+			}
+
+			public Task Store(string key, ResourceDocument resourceDocument)
+			{
+				throw new NotImplementedException();
+			}
+		}
+
 		private static class TestKinds
 		{
 			public static readonly Kind<TestClass> TestClassKind = KindBuilder.Build(
 				"tests", "testing", "testClass", "testClasses",
 				TestClass.ConvertToDocument, TestClass.ConvertToResource,
-				metadata => metadata.RequireString("id")
+				metadata => metadata.RequireString("id"),
+				definition => definition.RequireString("identity")
 				);
 
-			public class TestClassManager : ResourceManager<Guid, TestClass>
+			public class TestClassManager : ResourceManager<TestClass>
 			{
+				public TestClassManager(IResourceDocumentStore<TestClass> documentStore) : base(documentStore)
+				{
+				}
+
 				protected override Kind<TestClass> TypedKind => TestClassKind;
 
 				public int CreateCount { get; private set; }
@@ -77,9 +96,9 @@ namespace homectl_api_server_tests.Resources
 					return base.UpdateResource(resource, resourceDocument);
 				}
 
-				protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out Guid key)
+				protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string key)
 				{
-					key = Guid.Parse(resourceDocument.Metadata["id"].GetString());
+					key = resourceDocument.Metadata["id"].GetString();
 					return true;
 				}
 			}
@@ -97,6 +116,10 @@ namespace homectl_api_server_tests.Resources
 						new ResourceMetadata(new List<ResourceField>
 						{
 							new ResourceField("id", ResourceFieldValue.String(obj.Id.ToString()))
+						}),
+						new ResourceDefinition(new List<ResourceField>
+						{
+							new ResourceField("identity", ResourceFieldValue.String(obj.Id.ToString()))
 						}));
 				}
 

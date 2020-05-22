@@ -5,14 +5,15 @@ namespace HomeCtl.Host
 {
 	public class AppHost : Kinds.Host
 	{
-		public AppHost(HostMetadata metadata, HostState state) :
-			base(metadata, state)
+		public AppHost()
 		{
 		}
 
-		public AppHost(Kinds.Host copy) :
-			this(copy.Metadata, copy.State)
+		public AppHost(Kinds.Host copy)
 		{
+			HostId = copy.HostId;
+			Endpoint = copy.Endpoint;
+			MachineName = copy.MachineName;
 		}
 
 		public void SaveToFile(string filePath)
@@ -27,10 +28,11 @@ namespace HomeCtl.Host
 
 		public static AppHost FromLocalEnvironment(Guid hostId)
 		{
-			return new AppHost(
-				new HostMetadata { HostId = hostId, MachineName = Environment.MachineName },
-				new HostState { }
-				);
+			return new AppHost
+			{
+				HostId = hostId,
+				MachineName = Environment.MachineName
+			};
 		}
 
 		public static AppHost FromFile(string filePath)

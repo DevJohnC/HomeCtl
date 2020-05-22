@@ -14,16 +14,19 @@ namespace HomeCtl.Kinds
 			Func<T, ResourceDocument?> convertToDocument,
 			Func<ResourceDocument, T?> convertToResource,
 			Action<Builder> metadata,
+			Action<Builder> definition,
 			Action<Builder>? spec = null,
 			Action<Builder>? state = null,
 			Kind? extendsKind = null)
 			where T : class, IResource
 		{
 			var metadataBuilder = new Builder();
+			var definitionBuilder = new Builder();
 			var specBuilder = spec != null ? new Builder() : default;
 			var stateBuilder = state != null ? new Builder() : default;
 
 			metadata(metadataBuilder);
+			definition(definitionBuilder);
 #pragma warning disable CS8604 // Possible null reference argument.
 			spec?.Invoke(specBuilder);
 			state?.Invoke(stateBuilder);
@@ -31,6 +34,7 @@ namespace HomeCtl.Kinds
 
 			var schema = new KindSchema(
 				metadataBuilder.BuildSchema(),
+				definitionBuilder.BuildSchema(),
 				specBuilder?.BuildSchema(),
 				stateBuilder?.BuildSchema()
 				);

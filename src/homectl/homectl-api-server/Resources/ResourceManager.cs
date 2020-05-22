@@ -41,7 +41,11 @@ namespace HomeCtl.ApiServer.Resources
 			_resources.Add(key, resource);
 		}
 
-		protected abstract bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key);
+		protected bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key)
+		{
+			key = resourceDocument.Definition["identity"]?.GetString();
+			return key != null;
+		}
 
 		protected virtual bool TryConvertToResourceInstance(ResourceDocument resourceDocument, [NotNullWhen(true)]  out T? resourceInstance)
 		{

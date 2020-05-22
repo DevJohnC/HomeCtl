@@ -13,10 +13,5 @@ namespace HomeCtl.ApiServer.Devices
 		}
 
 		protected override Kind<Device> TypedKind => CoreKinds.Device;
-
-		protected override bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key)
-		{
-			throw new System.NotImplementedException();
-		}
 	}
 }

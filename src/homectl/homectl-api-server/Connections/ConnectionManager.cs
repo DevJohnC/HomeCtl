@@ -44,7 +44,7 @@ namespace HomeCtl.ApiServer.Connections
 		public void CreateConnection(HostServer host)
 		{
 			_hostConnections.Add(
-				host.Host.Metadata.HostId,
+				host.Host.HostId,
 				new EndpointConnectionRunner(
 					host,
 					host.ConnectionManager,
@@ -55,10 +55,10 @@ namespace HomeCtl.ApiServer.Connections
 
 		public void UpdateConnection(HostServer host)
 		{
-			if (!_hostConnections.TryGetValue(host.Host.Metadata.HostId, out var runner))
+			if (!_hostConnections.TryGetValue(host.Host.HostId, out var runner))
 				return;
 
-			runner.EndpointProvider.HostUri = new Uri(host.Host.State.Endpoint);
+			runner.EndpointProvider.HostUri = new Uri(host.Host.Endpoint);
 		}
 
 		private async Task<EndpointConnectionRunner?> Delay(TimeSpan timeSpan)
@@ -87,7 +87,7 @@ namespace HomeCtl.ApiServer.Connections
 				if (runner == null) // delay task
 					continue;
 
-				_hostConnections.Remove(runner.Host.Metadata.HostId);
+				_hostConnections.Remove(runner.Host.HostId);
 			}
 		}
 
@@ -116,7 +116,7 @@ namespace HomeCtl.ApiServer.Connections
 				_logger = logger;
 				_eventBus = eventBus;
 				_loggerFactory = loggerFactory;
-				EndpointProvider = new HostServerEndpointProvider(new Uri(Host.State.Endpoint));
+				EndpointProvider = new HostServerEndpointProvider(new Uri(Host.Endpoint));
 			}
 
 			private async Task<EndpointConnectionRunner?> Run(CancellationToken stoppingToken)

@@ -21,6 +21,7 @@ namespace HomeCtl.Kinds
 				.RequireString("name")
 				.RequireString("namePlural")
 				.RequireString("extendsKind"),
+			definition: def => def.RequireString("identity"),
 			spec: spec => spec
 				.RequireString("metadataSchema", "json")
 				.OptionalString("specSchema", "json")
@@ -31,10 +32,11 @@ namespace HomeCtl.Kinds
 			KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, "host", "hosts",
 			HostToDocument, DocumentToHost,
 			metadata: metadata => metadata
-				.RequireString("hostId", format: "uuid")
 				.RequireString("machineName"),
+			definition: def => def
+				.RequireString("identity")
+				.RequireString("endpoint"),
 			state: state => state
-				.RequireString("endpoint")
 				.RequireEnum<Host.ConnectedState>("connectedState")
 			);
 
@@ -43,6 +45,7 @@ namespace HomeCtl.Kinds
 			ControllerToDocument, DocumentToController,
 			metadata: metadata => metadata
 				.RequireString("hostId", format: "uuid"),
+			definition: def => def.RequireString("identity"),
 			state: state => state
 				.OptionalObjectArray("intentFilters", filters => filters
 					.OptionalString("action")
@@ -52,7 +55,8 @@ namespace HomeCtl.Kinds
 		public static readonly Kind<Device> Device = KindBuilder.Build(
 			KIND_GROUP_CORE, KIND_VERSION_V1ALPHA1, "device", "devices",
 			DeviceToDocument, DocumentToDevice,
-			metadata: metadata => { }
+			metadata: metadata => { },
+			definition: def => def.RequireString("identity")
 			);
 
 		private static string ReadStringField(ResourceFieldCollection? fields, string fieldName)
@@ -89,9 +93,11 @@ namespace HomeCtl.Kinds
 					new ResourceField("namePlural", ResourceFieldValue.String(kind.KindNamePlural)),
 					new ResourceField("extendsKind", ResourceFieldValue.String(GetExtendsKindValue())),
 				}),
-				spec: new ResourceSpec(new List<ResourceField>
+				new ResourceDefinition(new List<ResourceField>
 				{
+					new ResourceField("identity", ResourceFieldValue.String($"{kind.Group}/{kind.ApiVersion}/{kind.KindName}")),
 					new ResourceField("metadataSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.MetadataSchema))),
+					new ResourceField("definitionSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.DefinitionSchema))),
 					new ResourceField("specSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.SpecSchema))),
 					new ResourceField("stateSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.StateSchema)))
 				}));
@@ -121,7 +127,7 @@ namespace HomeCtl.Kinds
 				ReadStringField(resourceDocument.Metadata, "namePlural"),
 				ReadStringField(resourceDocument.Metadata, "group"),
 				ReadStringField(resourceDocument.Metadata, "apiVersion"),
-				KindSchema.FromKindSpec(resourceDocument.Spec ?? throw new MissingResourceFieldException("spec")),
+				KindSchema.FromKindDefinition(resourceDocument.Definition ?? throw new MissingResourceFieldException("definition")),
 				ResolveExtensionKind(resourceDocument.Metadata["extendsKind"]?.GetString())
 				);
 
@@ -142,13 +148,12 @@ namespace HomeCtl.Kinds
 				new KindDescriptor(Host.Group, Host.ApiVersion, Host.KindName),
 				new ResourceMetadata(new List<ResourceField>
 				{
-					new ResourceField("hostId", ResourceFieldValue.String(host.Metadata.HostId.ToString())),
-					new ResourceField("machineName", ResourceFieldValue.String(host.Metadata.MachineName))
+					new ResourceField("machineName", ResourceFieldValue.String(host.MachineName))
 				}),
-				state: new ResourceState(new List<ResourceField>
+				new ResourceDefinition(new List<ResourceField>
 				{
-					new ResourceField("endpoint", ResourceFieldValue.String(host.State.Endpoint)),
-					new ResourceField("connectedState", ResourceFieldValue.String(host.State.ConnectedState.ToString()))
+					new ResourceField("identity", ResourceFieldValue.String(host.HostId.ToString())),
+					new ResourceField("endpoint", ResourceFieldValue.String(host.Endpoint))
 				}));
 		}
 
@@ -159,17 +164,12 @@ namespace HomeCtl.Kinds
 				resourceDocument.Kind.KindName != Host.KindName)
 				return null; //  not a host
 
-			return new Host(
-				new Host.HostMetadata
-				{
-					HostId = Guid.Parse(ReadStringField(resourceDocument.Metadata, "hostId")),
-					MachineName = ReadStringField(resourceDocument.Metadata, "machineName")
-				},
-				new Host.HostState
-				{
-					Endpoint = ReadStringField(resourceDocument.State, "endpoint"),
-					ConnectedState = (Host.ConnectedState)Enum.Parse(typeof(Host.ConnectedState), ReadStringField(resourceDocument.State, "connectedState"))
-				});
+			return new Host
+			{
+				HostId = Guid.Parse(ReadStringField(resourceDocument.Definition, "identity")),
+				Endpoint = ReadStringField(resourceDocument.Definition, "endpoint"),
+				MachineName = ReadStringField(resourceDocument.Metadata, "machineName")
+			};
 		}
 
 		private static ResourceDocument? ControllerToDocument(Controller controller)

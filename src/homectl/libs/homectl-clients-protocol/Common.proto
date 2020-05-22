@@ -51,11 +51,16 @@ message KindIdentifier {
 message ResourceDocument {
 	KindIdentifier kind = 1;
 	ResourceDocumentMetadata metadata = 2;
-	ResourceDocumentSpec spec = 3;
-	ResourceDocumentState state = 4;
+	ResourceDocumentDefinition definition = 3;
+	ResourceDocumentSpec spec = 4;
+	ResourceDocumentState state = 5;
 }
 
 message ResourceDocumentMetadata {
+	repeated ResourceDocumentField fields = 1;
+}
+
+message ResourceDocumentDefinition {
 	repeated ResourceDocumentField fields = 1;
 }
 
