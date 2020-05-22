@@ -9,35 +9,41 @@ namespace HomeCtl.Services
 	{
 		public Kinds.Resources.ResourceDocument ToResourceDocument()
 		{
-			if (Metadata == null)
-				throw new Exception("Metadata required.");
+			if (Definition == null)
+				throw new Exception("Definition required.");
 
 			return new Kinds.Resources.ResourceDocument(
+				Definition.ToDefinition(),
+				Metadata?.ToMetadata(),
+				Spec?.ToSpec(),
+				State?.ToState(),
 				new KindDescriptor(
 					Kind.KindGroup, Kind.KindApiVersion,
-					Kind.KindName),
-				Metadata.ToMetadata(),
-				Definition.ToDefinition(),
-				Spec?.ToSpec(),
-				State?.ToState()
+					Kind.KindName)
 				);
 		}
 
 		public static ResourceDocument FromResourceDocument(Kinds.Resources.ResourceDocument resourceDocument)
 		{
-			return new ResourceDocument
+			var document = new ResourceDocument
 			{
-				Kind = new KindIdentifier
-				{
-					KindName = resourceDocument.Kind.KindName,
-					KindGroup = resourceDocument.Kind.Group,
-					KindApiVersion = resourceDocument.Kind.ApiVersion
-				},
 				Metadata = ResourceDocumentMetadata.FromMetadata(resourceDocument.Metadata),
 				Definition = ResourceDocumentDefinition.FromDefinition(resourceDocument.Definition),
 				Spec = ResourceDocumentSpec.FromSpec(resourceDocument.Spec),
 				State = ResourceDocumentState.FromState(resourceDocument.State)
 			};
+
+			if (resourceDocument.Kind != null)
+			{
+				document.Kind = new KindIdentifier
+				{
+					KindName = resourceDocument.Kind.Value.KindName,
+					KindGroup = resourceDocument.Kind.Value.Group,
+					KindApiVersion = resourceDocument.Kind.Value.ApiVersion
+				};
+			}
+
+			return document;
 		}
 	}
 
@@ -50,8 +56,11 @@ namespace HomeCtl.Services
 				);
 		}
 
-		public static ResourceDocumentMetadata FromMetadata(ResourceMetadata resourceMetadata)
+		public static ResourceDocumentMetadata? FromMetadata(ResourceMetadata? resourceMetadata)
 		{
+			if (resourceMetadata == null)
+				return null;
+
 			var ret = new ResourceDocumentMetadata();
 			foreach (var field in resourceMetadata.Fields)
 				ret.Fields.Add(ResourceDocumentField.FromField(field));

@@ -1,12 +1,12 @@
-﻿using System;
-
-namespace HomeCtl.Kinds.Resources
+﻿namespace HomeCtl.Kinds.Resources
 {
 	public class ResourceDocument
 	{
-		public ResourceDocument(KindDescriptor kind, ResourceMetadata metadata,
-			ResourceDefinition definition,
-			ResourceSpec? spec = null, ResourceState? state = null)
+		public ResourceDocument(ResourceDefinition definition,
+			ResourceMetadata? metadata = null,
+			ResourceSpec? spec = null,
+			ResourceState? state = null,
+			KindDescriptor? kind = null)
 		{
 			Kind = kind;
 			Metadata = metadata;
@@ -15,9 +15,9 @@ namespace HomeCtl.Kinds.Resources
 			State = state;
 		}
 
-		public KindDescriptor Kind { get; set; }
+		public KindDescriptor? Kind { get; set; }
 
-		public ResourceMetadata Metadata { get; set; }
+		public ResourceMetadata? Metadata { get; set; }
 
 		public ResourceDefinition Definition { get; }
 
