@@ -15,6 +15,11 @@ namespace HomeCtl.Kinds
 
 		public string Endpoint { get; set; } = "";
 
+		public string GetIdentity()
+		{
+			return HostId.ToString();
+		}
+
 		public enum ConnectedState
 		{
 			NotConnected,

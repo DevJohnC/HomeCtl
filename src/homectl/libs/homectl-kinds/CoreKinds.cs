@@ -84,7 +84,14 @@ namespace HomeCtl.Kinds
 		private static ResourceDocument? KindToDocument(Kind kind)
 		{
 			return new ResourceDocument(
-				new KindDescriptor(Kind.Group, Kind.ApiVersion, Kind.KindName),
+				new ResourceDefinition(new List<ResourceField>
+				{
+					new ResourceField("identity", ResourceFieldValue.String($"{kind.Group}/{kind.ApiVersion}/{kind.KindName}")),
+					new ResourceField("metadataSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.MetadataSchema))),
+					new ResourceField("definitionSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.DefinitionSchema))),
+					new ResourceField("specSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.SpecSchema))),
+					new ResourceField("stateSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.StateSchema)))
+				}),
 				new ResourceMetadata(new List<ResourceField>
 				{
 					new ResourceField("group", ResourceFieldValue.String(kind.Group)),
@@ -93,14 +100,7 @@ namespace HomeCtl.Kinds
 					new ResourceField("namePlural", ResourceFieldValue.String(kind.KindNamePlural)),
 					new ResourceField("extendsKind", ResourceFieldValue.String(GetExtendsKindValue())),
 				}),
-				new ResourceDefinition(new List<ResourceField>
-				{
-					new ResourceField("identity", ResourceFieldValue.String($"{kind.Group}/{kind.ApiVersion}/{kind.KindName}")),
-					new ResourceField("metadataSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.MetadataSchema))),
-					new ResourceField("definitionSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.DefinitionSchema))),
-					new ResourceField("specSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.SpecSchema))),
-					new ResourceField("stateSchema", ResourceFieldValue.String(WriteToJson(kind.Schema.StateSchema)))
-				}));
+				kind: new KindDescriptor(Kind.Group, Kind.ApiVersion, Kind.KindName));
 
 			string GetExtendsKindValue()
 			{
@@ -117,9 +117,9 @@ namespace HomeCtl.Kinds
 
 		public static Kind? DocumentToKind(ResourceDocument resourceDocument, Func<KindDescriptor, Kind?>? resolveExtensionKind)
 		{
-			if (resourceDocument.Kind.Group != Kind.Group ||
-				resourceDocument.Kind.ApiVersion != Kind.ApiVersion ||
-				resourceDocument.Kind.KindName != Kind.KindName)
+			if (resourceDocument.Kind?.Group != Kind.Group ||
+				resourceDocument.Kind?.ApiVersion != Kind.ApiVersion ||
+				resourceDocument.Kind?.KindName != Kind.KindName)
 				return null; //  not a kind
 
 			return new SchemaDrivenKind(
@@ -128,7 +128,7 @@ namespace HomeCtl.Kinds
 				ReadStringField(resourceDocument.Metadata, "group"),
 				ReadStringField(resourceDocument.Metadata, "apiVersion"),
 				KindSchema.FromKindDefinition(resourceDocument.Definition ?? throw new MissingResourceFieldException("definition")),
-				ResolveExtensionKind(resourceDocument.Metadata["extendsKind"]?.GetString())
+				ResolveExtensionKind(resourceDocument?.Metadata["extendsKind"]?.GetString())
 				);
 
 			Kind? ResolveExtensionKind(string? kindDescriptorString)
@@ -145,23 +145,23 @@ namespace HomeCtl.Kinds
 		private static ResourceDocument? HostToDocument(Host host)
 		{
 			return new ResourceDocument(
-				new KindDescriptor(Host.Group, Host.ApiVersion, Host.KindName),
-				new ResourceMetadata(new List<ResourceField>
-				{
-					new ResourceField("machineName", ResourceFieldValue.String(host.MachineName))
-				}),
 				new ResourceDefinition(new List<ResourceField>
 				{
 					new ResourceField("identity", ResourceFieldValue.String(host.HostId.ToString())),
 					new ResourceField("endpoint", ResourceFieldValue.String(host.Endpoint))
-				}));
+				}),
+				new ResourceMetadata(new List<ResourceField>
+				{
+					new ResourceField("machineName", ResourceFieldValue.String(host.MachineName))
+				}),
+				kind: new KindDescriptor(Host.Group, Host.ApiVersion, Host.KindName));
 		}
 
 		private static Host? DocumentToHost(ResourceDocument resourceDocument)
 		{
-			if (resourceDocument.Kind.Group != Host.Group ||
-				resourceDocument.Kind.ApiVersion != Host.ApiVersion ||
-				resourceDocument.Kind.KindName != Host.KindName)
+			if (resourceDocument.Kind?.Group != Host.Group ||
+				resourceDocument.Kind?.ApiVersion != Host.ApiVersion ||
+				resourceDocument.Kind?.KindName != Host.KindName)
 				return null; //  not a host
 
 			return new Host

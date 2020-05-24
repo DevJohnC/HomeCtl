@@ -2,6 +2,7 @@
 using HomeCtl.Kinds.Resources;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.Resources
@@ -10,13 +11,11 @@ namespace HomeCtl.ApiServer.Resources
 	{
 		public abstract Kind Kind { get; }
 
-		public abstract bool TryGetResource(ResourceDocument resourceDocument, [NotNullWhen(true)] out IResource? resource);
+		public abstract IReadOnlyList<IResource> Resources { get; }
 
-		public abstract Task CreateResource(ResourceDocument resourceDocument);
+		public abstract Task<IResource?> CreateResource(ResourceDocument resourceDocument);
 
-		public abstract Task UpdateResource(IResource resource, ResourceDocument resourceDocument);
-
-		public abstract Task StoreChanges(IResource resource);
+		public abstract bool TryGetResource(string identity, [NotNullWhen(true)] out IResource? resource);
 
 		public abstract Task LoadResources();
 	}
@@ -27,6 +26,8 @@ namespace HomeCtl.ApiServer.Resources
 		private readonly Dictionary<string, T> _resources = new Dictionary<string, T>();
 		protected IResourceDocumentStore<T> DocumentStore { get; }
 
+		public override IReadOnlyList<IResource> Resources => _resources.Values.ToList();
+
 		public override Kind Kind => TypedKind;
 
 		protected abstract Kind<T> TypedKind { get; }
@@ -36,114 +37,57 @@ namespace HomeCtl.ApiServer.Resources
 			DocumentStore = documentStore;
 		}
 
-		protected void Add(string key, T resource)
+		public override async Task<IResource?> CreateResource(ResourceDocument resourceDocument)
 		{
-			_resources.Add(key, resource);
+			var resource = CreateFromDocument(resourceDocument);
+			AddResource(resource);
+			if (resource != null)
+				await Created(resource);
+			return resource;
 		}
-
-		protected bool TryGetKey(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? key)
-		{
-			key = resourceDocument.Definition["identity"]?.GetString();
-			return key != null;
-		}
-
-		protected virtual bool TryConvertToResourceInstance(ResourceDocument resourceDocument, [NotNullWhen(true)]  out T? resourceInstance)
-		{
-			return TypedKind.TryConvertToResourceInstance(resourceDocument, out resourceInstance);
-		}
-
-		protected virtual Task OnResourceCreated(T resource)
-			=> Task.CompletedTask;
-
-		protected virtual Task OnResourceUpdated(T newResource, T oldResource)
-			=> Task.CompletedTask;
-
-		protected virtual Task OnResourceLoaded(T resource)
-			=> Task.CompletedTask;
 
 		public override async Task LoadResources()
 		{
-			foreach (var document in await DocumentStore.LoadAll())
+			var documents = await DocumentStore.LoadAll();
+			foreach (var document in documents)
 			{
-				if (!TryGetKey(document, out var key) || 
-					!TryConvertToResourceInstance(document, out T? resource))
+				var resource = CreateFromDocument(document);
+				AddResource(resource);
+				if (resource == null)
 				{
-					//  todo: log failure
-					continue;
+					//  todo: log failure to load
 				}
-
-				Add(key, resource);
-
-				await OnResourceLoaded(resource);
+				else
+				{
+					await Loaded(resource);
+				}
 			}
 		}
 
-		public override async Task CreateResource(ResourceDocument resourceDocument)
+		protected void AddResource(T? resource)
 		{
-			if (!TryGetKey(resourceDocument, out var key) ||
-				!TryConvertToResourceInstance(resourceDocument, out T? resource))
-			{
+			if (resource == null)
 				return;
-			}
 
-			Add(key, resource);
-
-			await StoreResource(resourceDocument);
-
-			await OnResourceCreated(resource);
+			_resources.Add(resource.GetIdentity(), resource);
 		}
 
-		public override async Task UpdateResource(IResource resource, ResourceDocument resourceDocument)
+		public override bool TryGetResource(string identity, [NotNullWhen(true)] out IResource? resource)
 		{
-			if (resource.Kind != Kind)
-				throw new System.Exception("Mismatched kind.");
-
-			var typedResource = resource as T;
-			if (typedResource == null)
-				throw new System.Exception("Mismatched kind.");
-			if (!TryConvertToResourceInstance(resourceDocument, out T? newVersion))
-				throw new System.Exception("Failed to convert document to resource.");
-
-			await StoreResource(resourceDocument);
-
-			await OnResourceUpdated(newVersion, typedResource);
-		}
-
-		private Task StoreResource(ResourceDocument resourceDocument)
-		{
-			if (!TryGetKey(resourceDocument, out var key))
-				throw new System.Exception("Failed to store resource: couldn't determine key.");
-			return DocumentStore.Store(key, resourceDocument);
-		}
-
-		public override Task StoreChanges(IResource resource)
-		{
-			var typedResource = resource as T;
-			if (typedResource == null)
-				throw new System.Exception("Invalid resource type.");
-
-			if (!typedResource.Kind.TryConvertToDocument(resource, out var document))
-				throw new System.Exception("Failed to convert resource to document.");
-
-			return StoreResource(document);
-		}
-
-		protected bool TryGetResource(string key, [NotNullWhen(true)] out T? resource)
-		{
-			return _resources.TryGetValue(key, out resource);
-		}
-
-		public override bool TryGetResource(ResourceDocument resourceDocument, [NotNullWhen(true)] out IResource? resource)
-		{
-			if (!TryGetKey(resourceDocument, out var key) ||
-				!_resources.TryGetValue(key, out var storedResource))
+			if (!_resources.TryGetValue(identity, out var typedResource))
 			{
 				resource = default;
 				return false;
 			}
 
-			resource = storedResource;
+			resource = typedResource;
 			return true;
 		}
+
+		protected abstract T? CreateFromDocument(ResourceDocument resourceDocument);
+
+		protected abstract Task Created(T resource);
+
+		protected abstract Task Loaded(T resource);
 	}
 }

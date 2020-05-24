@@ -1,4 +1,5 @@
-﻿using HomeCtl.Kinds.Resources;
+﻿using HomeCtl.Kinds;
+using HomeCtl.Kinds.Resources;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -10,17 +11,23 @@ namespace HomeCtl.ApiServer.Resources
 	{
 		private readonly ResourceManagerCollection _resourceManagers = new ResourceManagerCollection();
 		private readonly ResourceManagerAccessor _resourceManagerAccessor;
+		private readonly Dictionary<string, ResourceManager> _resourceIdentityIndex = new Dictionary<string, ResourceManager>();
 
 		public ResourceOrchestrator(
 			IEnumerable<ResourceManager> coreResourceManagers,
 			ResourceManagerAccessor resourceManagerAccessor
 			)
 		{
-			resourceManagerAccessor.Orchestrator = this;
 			_resourceManagerAccessor = resourceManagerAccessor;
 			_resourceManagers.AddRange(coreResourceManagers);
 			foreach (var resourceManager in _resourceManagers.GetAll())
 				_resourceManagerAccessor.Add(resourceManager);
+		}
+
+		private bool TryGetIdentity(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? identity)
+		{
+			identity = resourceDocument.Definition["identity"]?.GetString();
+			return identity != null;
 		}
 
 		public void AddResourceManager(ResourceManager resourceManager)
@@ -30,27 +37,74 @@ namespace HomeCtl.ApiServer.Resources
 
 		public async Task LoadResources()
 		{
-			foreach (var resourceManager in _resourceManagers.GetAll())
+			foreach (var resourceManager in _resourceManagerAccessor.Managers.ToArray())
 			{
 				await resourceManager.LoadResources();
 			}
+
+			foreach (var resourceManager in _resourceManagerAccessor.Managers)
+			{
+				foreach (var resource in resourceManager.Resources)
+				{
+					_resourceIdentityIndex.Add(resource.GetIdentity(), resourceManager);
+				}
+			}
 		}
 
-		public Task Apply(ResourceDocument resourceDocument)
+		private async Task<IResource> CreateResource(string identity, ResourceDocument resourceDocument)
 		{
-			if (!_resourceManagers.TryGetResourceManager(resourceDocument.Kind, out var resourceManager))
+			if (resourceDocument.Kind == null)
 			{
-				return Task.CompletedTask;
+				throw new System.Exception("Kind must be specified to create a resource.");
 			}
 
-			//  todo: validate the document
-
-			if (!resourceManager.TryGetResource(resourceDocument, out var resource))
+			if (!_resourceManagers.TryGetResourceManager(resourceDocument.Kind.Value, out var resourceManager))
 			{
-				return resourceManager.CreateResource(resourceDocument);
+				throw new System.Exception("Unknown kind.");
 			}
 
-			return resourceManager.UpdateResource(resource, resourceDocument);
+			var ret = await resourceManager.CreateResource(resourceDocument);
+
+			if (ret == null)
+			{
+				throw new System.Exception("Unable to create resource.");
+			}
+
+			_resourceIdentityIndex.Add(identity, resourceManager);
+			return ret;
+		}
+
+		public async Task Apply(ResourceDocument resourceDocument)
+		{
+			if (!TryGetIdentity(resourceDocument, out var identity))
+			{
+				throw new System.Exception("Identity field is required.");
+			}
+
+			var resource = default(IResource);
+
+			if (!_resourceIdentityIndex.TryGetValue(identity, out var resourceManager))
+			{
+				resource = await CreateResource(identity, resourceDocument);
+			}
+			else if (!resourceManager.TryGetResource(identity, out resource))
+			{
+				throw new System.Exception("Update failed, resource missing.");
+			}
+
+			//  copy definition fields to `resource`
+
+			if (resourceDocument.Metadata != null)
+			{
+				//  copy metadata fields to `resource`
+			}
+
+			if (resourceDocument.Spec != null)
+			{
+				//  set new spec fields for `resource`
+			}
+
+			//  save
 		}
 
 		private class ResourceManagerCollection

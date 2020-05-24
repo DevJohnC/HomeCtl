@@ -2,6 +2,7 @@
 using HomeCtl.Kinds.Resources;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.Resources
 {
@@ -21,10 +22,19 @@ namespace HomeCtl.ApiServer.Resources
 
 		protected override Kind<SchemaDrivenKind.DynamicResource> TypedKind { get; }
 
-		protected override bool TryConvertToResourceInstance(ResourceDocument resourceDocument, [NotNullWhen(true)] out SchemaDrivenKind.DynamicResource? resourceInstance)
+		protected override Task Created(SchemaDrivenKind.DynamicResource resource)
 		{
-			resourceInstance = new SchemaDrivenKind.DynamicResource(Kind, resourceDocument);
-			return true;
+			return Task.CompletedTask;
+		}
+
+		protected override Task Loaded(SchemaDrivenKind.DynamicResource resource)
+		{
+			return Task.CompletedTask;
+		}
+
+		protected override SchemaDrivenKind.DynamicResource? CreateFromDocument(ResourceDocument resourceDocument)
+		{
+			return new SchemaDrivenKind.DynamicResource(Kind, resourceDocument);
 		}
 	}
 }

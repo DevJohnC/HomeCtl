@@ -12,5 +12,11 @@
 		/// Gets the kind this resource is an instance of.
 		/// </summary>
 		Kind Kind { get; }
+
+		/// <summary>
+		/// Gets the unique identity of the resource.
+		/// </summary>
+		/// <returns></returns>
+		string GetIdentity();
 	}
 }

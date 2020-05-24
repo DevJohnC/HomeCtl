@@ -40,8 +40,7 @@ namespace HomeCtl.ApiServer.Hosts
 
 			//  todo: API to store resource state
 			//Host.State.ConnectedState = Host.ConnectedState.Connected;
-
-			await _hostManager.StoreChanges(Host);
+			//await _hostManager.StoreChanges(Host);
 		}
 
 		private async void Handle_Disconnected(EndpointConnectionEvents.Disconnected args)
@@ -51,8 +50,7 @@ namespace HomeCtl.ApiServer.Hosts
 
 			//  todo: API to store resource state
 			//Host.State.ConnectedState = Host.ConnectedState.NotConnected;
-
-			await _hostManager.StoreChanges(Host);
+			//await _hostManager.StoreChanges(Host);
 		}
 	}
 }

@@ -7,7 +7,6 @@ using HomeCtl.Kinds.Resources;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.Hosts
@@ -38,7 +37,7 @@ namespace HomeCtl.ApiServer.Hosts
 			_serverIdentityVerifier = serverIdentityVerifier;
 		}
 
-		protected override Task OnResourceCreated(Host resource)
+		protected override Task Created(Host resource)
 		{
 			var hostServer = new HostServer(resource,
 				new EndpointConnectionManager(
@@ -56,9 +55,23 @@ namespace HomeCtl.ApiServer.Hosts
 			}
 
 			_connectionManager.CreateConnection(hostServer);
-			return base.OnResourceCreated(resource);
+
+			return Task.CompletedTask;
 		}
 
+		protected override Task Loaded(Host resource)
+		{
+			//  todo: update current state to notconnected
+			return Created(resource);
+		}
+
+		protected override Host? CreateFromDocument(ResourceDocument resourceDocument)
+		{
+			CoreKinds.Host.TryConvertToResourceInstance(resourceDocument, out var host);
+			return host;
+		}
+
+		/*
 		protected override async Task OnResourceUpdated(Host newResource, Host oldResource)
 		{
 			if (!_hosts.TryGetValue(newResource.HostId, out var host))
@@ -70,30 +83,6 @@ namespace HomeCtl.ApiServer.Hosts
 
 			await base.OnResourceUpdated(newResource, oldResource);
 		}
-
-		protected override async Task OnResourceLoaded(Host resource)
-		{
-			//  todo: API to store resource state
-			//resource.State.ConnectedState = Host.ConnectedState.NotConnected;
-			await StoreChanges(resource);
-
-			var hostServer = new HostServer(resource,
-				new EndpointConnectionManager(
-					_eventBus, _endpointClientFactory, _serverIdentityVerifier,
-					_loggerFactory.CreateLogger<EndpointConnectionManager>()
-					),
-				_eventBus,
-				_loggerFactory.CreateLogger<HostServer>(),
-				this
-				);
-
-			lock (_lock)
-			{
-				_hosts.Add(resource.HostId, hostServer);
-			}
-
-			_connectionManager.CreateConnection(hostServer);
-			await base.OnResourceLoaded(resource);
-		}
+		*/
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using HomeCtl.ApiServer.Resources;
 using HomeCtl.Kinds;
 using HomeCtl.Kinds.Resources;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.Kinds
@@ -18,18 +17,47 @@ namespace HomeCtl.ApiServer.Kinds
 		{
 			_documentStoreFactory = documentStoreFactory;
 			_resourceManagerAccessor = resourceManagerAccessor;
-			AddCoreKind(CoreKinds.Kind);
-			AddCoreKind(CoreKinds.Host);
-			AddCoreKind(CoreKinds.Controller);
-			AddCoreKind(CoreKinds.Device);
-		}
 
-		private void AddCoreKind(Kind kind)
-		{
-			Add($"{kind.Group}/{kind.ApiVersion}/{kind.KindName}", kind);
+			AddResource(CoreKinds.Kind);
+			AddResource(CoreKinds.Host);
+			AddResource(CoreKinds.Controller);
+			AddResource(CoreKinds.Device);
 		}
 
 		protected override Kind<Kind> TypedKind => CoreKinds.Kind;
+
+		protected override Task Created(Kind resource)
+		{
+			if (!(resource is SchemaDrivenKind schemaDrivenKind))
+				return Task.CompletedTask;
+
+			CreateManager(schemaDrivenKind);
+
+			return Task.CompletedTask;
+		}
+
+		protected override Task Loaded(Kind resource)
+		{
+			if (!(resource is SchemaDrivenKind schemaDrivenKind))
+				return Task.CompletedTask;
+
+			var manager = CreateManager(schemaDrivenKind);
+
+			return manager.LoadResources();
+		}
+
+		protected override Kind? CreateFromDocument(ResourceDocument resourceDocument)
+		{
+			return CoreKinds.DocumentToKind(resourceDocument, ResolveKind);
+		}
+
+		private Kind? ResolveKind(KindDescriptor kindDescriptor)
+		{
+			var key = $"{kindDescriptor.Group}/{kindDescriptor.ApiVersion}/{kindDescriptor.KindName}";
+			if (TryGetResource(key, out var kind))
+				return kind as Kind;
+			return default;
+		}
 
 		private GenericKindManager CreateManager(SchemaDrivenKind schemaDrivenKind)
 		{
@@ -49,50 +77,9 @@ namespace HomeCtl.ApiServer.Kinds
 				extendsManager
 				);
 
-			_resourceManagerAccessor.Orchestrator.AddResourceManager(manager);
+			_resourceManagerAccessor.Add(manager);
 
 			return manager;
-		}
-
-		protected override Task OnResourceLoaded(Kind resource)
-		{
-			if (!(resource is SchemaDrivenKind schemaDrivenKind))
-				return Task.CompletedTask;
-
-			var manager = CreateManager(schemaDrivenKind);
-
-			return manager.LoadResources();
-		}
-
-		protected override Task OnResourceCreated(Kind resource)
-		{
-			if (!(resource is SchemaDrivenKind schemaDrivenKind))
-				return Task.CompletedTask;
-
-			CreateManager(schemaDrivenKind);
-
-			return Task.CompletedTask;
-		}
-
-		protected override bool TryConvertToResourceInstance(ResourceDocument resourceDocument, [NotNullWhen(true)] out Kind? resourceInstance)
-		{
-			var kind = CoreKinds.DocumentToKind(resourceDocument, ResolveKind);
-			if (kind == null)
-			{
-				resourceInstance = default;
-				return false;
-			}
-
-			resourceInstance = kind;
-			return true;
-		}
-
-		private Kind? ResolveKind(KindDescriptor kindDescriptor)
-		{
-			var key = $"{kindDescriptor.Group}/{kindDescriptor.ApiVersion}/{kindDescriptor.KindName}";
-			if (TryGetResource(key, out var kind))
-				return kind;
-			return default;
 		}
 	}
 }

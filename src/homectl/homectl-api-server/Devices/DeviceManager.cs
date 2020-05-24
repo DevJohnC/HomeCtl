@@ -1,7 +1,7 @@
 ﻿using HomeCtl.ApiServer.Resources;
 using HomeCtl.Kinds;
 using HomeCtl.Kinds.Resources;
-using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.Devices
 {
@@ -13,5 +13,20 @@ namespace HomeCtl.ApiServer.Devices
 		}
 
 		protected override Kind<Device> TypedKind => CoreKinds.Device;
+
+		protected override Task Created(Device resource)
+		{
+			return Task.CompletedTask;
+		}
+
+		protected override Task Loaded(Device resource)
+		{
+			return Task.CompletedTask;
+		}
+
+		protected override Device? CreateFromDocument(ResourceDocument resourceDocument)
+		{
+			return null;
+		}
 	}
 }

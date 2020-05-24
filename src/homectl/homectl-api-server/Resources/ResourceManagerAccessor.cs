@@ -10,7 +10,7 @@ namespace HomeCtl.ApiServer.Resources
 		private readonly object _lock = new object();
 		private readonly List<ResourceManager> _resourceManagers = new List<ResourceManager>();
 
-		public ResourceOrchestrator Orchestrator { get; set; }
+		public IReadOnlyList<ResourceManager> Managers => _resourceManagers;
 
 		public void Add(ResourceManager resourceManager)
 		{

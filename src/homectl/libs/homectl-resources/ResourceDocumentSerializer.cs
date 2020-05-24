@@ -112,13 +112,11 @@ namespace HomeCtl.Resources
 					}
 				}
 
-				if (resourceMetadata == null)
-					throw new Exception("Member `metadata` missing from json.");
 				if (resourceDefinition == null)
 					throw new Exception("Member `definition` missing from json.");
 
-				return new ResourceDocument(kindDescriptor, resourceMetadata,
-					resourceDefinition, resourceSpec, resourceState);
+				return new ResourceDocument(resourceDefinition, resourceMetadata,
+					resourceSpec, resourceState, kindDescriptor);
 			}
 
 			public override void WriteJson(JsonWriter writer, ResourceDocument? value, JsonSerializer serializer)

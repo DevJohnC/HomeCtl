@@ -69,6 +69,11 @@ namespace HomeCtl.Kinds
 		{
 			return TryConvertToDocumentImpl(resourceInstance, out resourceDocument);
 		}
+
+		public string GetIdentity()
+		{
+			return $"{Group}/{ApiVersion}/{KindName}";
+		}
 	}
 
 	public class Kind<T> : Kind
@@ -162,6 +167,12 @@ namespace HomeCtl.Kinds
 			public Kind Kind { get; }
 
 			public ResourceDocument ResourceDocument { get; }
+
+			public string GetIdentity()
+			{
+				return ResourceDocument.Definition["identity"]?.GetString() ??
+					throw new Exception("Missing identity.");
+			}
 		}
 	}
 }
