@@ -36,16 +36,6 @@ namespace HomeCtl.ApiServer.Kinds
 			return Task.CompletedTask;
 		}
 
-		protected override Task Loaded(Kind resource)
-		{
-			if (!(resource is SchemaDrivenKind schemaDrivenKind))
-				return Task.CompletedTask;
-
-			var manager = CreateManager(schemaDrivenKind);
-
-			return manager.LoadResources();
-		}
-
 		protected override Kind? CreateFromDocument(ResourceDocument resourceDocument)
 		{
 			return CoreKinds.DocumentToKind(resourceDocument, ResolveKind);
@@ -80,6 +70,22 @@ namespace HomeCtl.ApiServer.Kinds
 			_resourceManagerAccessor.Add(manager);
 
 			return manager;
+		}
+
+		protected override void CopyData(Kind target, Kind source)
+		{
+			//  no-op for now
+			//  updating Kinds isn't supported
+			//  but an exception would tell clients that a failure occured
+			//  todo: verify target matches source else throw exception
+		}
+
+		protected override Task Updated(Kind resource)
+		{
+			//  no-op for now
+			//  updating Kinds isn't supported
+			//  exceptional cases handled by CopyData
+			return Task.CompletedTask;
 		}
 	}
 }

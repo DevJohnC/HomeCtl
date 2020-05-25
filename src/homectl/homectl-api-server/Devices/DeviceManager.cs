@@ -19,14 +19,18 @@ namespace HomeCtl.ApiServer.Devices
 			return Task.CompletedTask;
 		}
 
-		protected override Task Loaded(Device resource)
-		{
-			return Task.CompletedTask;
-		}
-
 		protected override Device? CreateFromDocument(ResourceDocument resourceDocument)
 		{
 			return null;
+		}
+
+		protected override void CopyData(Device target, Device source)
+		{
+		}
+
+		protected override Task Updated(Device resource)
+		{
+			return Task.CompletedTask;
 		}
 	}
 }

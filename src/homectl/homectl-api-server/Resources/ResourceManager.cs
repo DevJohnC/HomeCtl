@@ -13,11 +13,9 @@ namespace HomeCtl.ApiServer.Resources
 
 		public abstract IReadOnlyList<IResource> Resources { get; }
 
-		public abstract Task<IResource?> CreateResource(ResourceDocument resourceDocument);
+		public abstract Task Save(ResourceState resourceState);
 
-		public abstract bool TryGetResource(string identity, [NotNullWhen(true)] out IResource? resource);
-
-		public abstract Task LoadResources();
+		public abstract Task Load(ResourceOrchestrator orchestrator);
 	}
 
 	abstract class ResourceManager<T> : ResourceManager
@@ -37,30 +35,35 @@ namespace HomeCtl.ApiServer.Resources
 			DocumentStore = documentStore;
 		}
 
-		public override async Task<IResource?> CreateResource(ResourceDocument resourceDocument)
-		{
-			var resource = CreateFromDocument(resourceDocument);
-			AddResource(resource);
-			if (resource != null)
-				await Created(resource);
-			return resource;
-		}
-
-		public override async Task LoadResources()
+		public override async Task Load(ResourceOrchestrator orchestrator)
 		{
 			var documents = await DocumentStore.LoadAll();
 			foreach (var document in documents)
 			{
-				var resource = CreateFromDocument(document);
-				AddResource(resource);
-				if (resource == null)
-				{
-					//  todo: log failure to load
-				}
-				else
-				{
-					await Loaded(resource);
-				}
+				await orchestrator.Load(document);
+			}
+		}
+
+		public override async Task Save(ResourceState resourceState)
+		{
+			await DocumentStore.Store(resourceState.Identity, resourceState.FullDocument);
+
+			var newResource = CreateFromDocument(resourceState.FullDocument);
+			if (newResource == null)
+			{
+				//  todo: couldn't create resource instance, log error and continue?
+				return;
+			}
+
+			if (!TryGetResource(resourceState.Identity, out var oldResource))
+			{
+				_resources.Add(resourceState.Identity, newResource);
+				await Created(newResource);
+			}
+			else
+			{
+				CopyData(oldResource, newResource);
+				await Updated(newResource);
 			}
 		}
 
@@ -72,22 +75,17 @@ namespace HomeCtl.ApiServer.Resources
 			_resources.Add(resource.GetIdentity(), resource);
 		}
 
-		public override bool TryGetResource(string identity, [NotNullWhen(true)] out IResource? resource)
+		protected bool TryGetResource(string identifier, [NotNullWhen(true)] out T? resource)
 		{
-			if (!_resources.TryGetValue(identity, out var typedResource))
-			{
-				resource = default;
-				return false;
-			}
-
-			resource = typedResource;
-			return true;
+			return _resources.TryGetValue(identifier, out resource);
 		}
 
 		protected abstract T? CreateFromDocument(ResourceDocument resourceDocument);
 
 		protected abstract Task Created(T resource);
 
-		protected abstract Task Loaded(T resource);
+		protected abstract void CopyData(T target, T source);
+
+		protected abstract Task Updated(T resource);
 	}
 }

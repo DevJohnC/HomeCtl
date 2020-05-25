@@ -166,7 +166,7 @@ namespace HomeCtl.Kinds
 
 			public Kind Kind { get; }
 
-			public ResourceDocument ResourceDocument { get; }
+			public ResourceDocument ResourceDocument { get; set; }
 
 			public string GetIdentity()
 			{

@@ -1,9 +1,13 @@
-﻿using HomeCtl.Kinds;
+﻿using HomeCtl.ApiServer.Kinds;
+using HomeCtl.Events;
+using HomeCtl.Kinds;
 using HomeCtl.Kinds.Resources;
+using HomeCtl.Services;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using ResourceDocument = HomeCtl.Kinds.Resources.ResourceDocument;
 
 namespace HomeCtl.ApiServer.Resources
 {
@@ -11,17 +15,21 @@ namespace HomeCtl.ApiServer.Resources
 	{
 		private readonly ResourceManagerCollection _resourceManagers = new ResourceManagerCollection();
 		private readonly ResourceManagerAccessor _resourceManagerAccessor;
-		private readonly Dictionary<string, ResourceManager> _resourceIdentityIndex = new Dictionary<string, ResourceManager>();
+		private readonly Dictionary<string, ResourceState> _resourceIdentityIndex = new Dictionary<string, ResourceState>();
 
 		public ResourceOrchestrator(
 			IEnumerable<ResourceManager> coreResourceManagers,
-			ResourceManagerAccessor resourceManagerAccessor
+			ResourceManagerAccessor resourceManagerAccessor,
+			EventBus eventBus
 			)
 		{
 			_resourceManagerAccessor = resourceManagerAccessor;
 			_resourceManagers.AddRange(coreResourceManagers);
 			foreach (var resourceManager in _resourceManagers.GetAll())
 				_resourceManagerAccessor.Add(resourceManager);
+
+			eventBus.Subscribe<ResourceManagerAccessorEvents.ResourceManagerAdded>(
+				args => EnsureResourceManagerIsPresent(args.ResourceManager));
 		}
 
 		private bool TryGetIdentity(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? identity)
@@ -30,81 +38,116 @@ namespace HomeCtl.ApiServer.Resources
 			return identity != null;
 		}
 
-		public void AddResourceManager(ResourceManager resourceManager)
-		{
-			_resourceManagers.Add(resourceManager);
-		}
-
 		public async Task LoadResources()
 		{
-			foreach (var resourceManager in _resourceManagerAccessor.Managers.ToArray())
+			foreach (var resourceManager in _resourceManagers.GetAll())
 			{
-				await resourceManager.LoadResources();
+				await resourceManager.Load(this);
+			}
+		}
+
+		private void EnsureResourceManagerIsPresent(ResourceManager resourceManager)
+		{
+			if (!_resourceManagers.TryGetResourceManager(resourceManager.Kind.GetKindDescriptor(), out var _))
+			{
+				_resourceManagers.Add(resourceManager);
+			}
+		}
+
+		private bool TryGetResourceState(string identity, out ResourceState fullResourceState)
+		{
+			return _resourceIdentityIndex.TryGetValue(identity, out fullResourceState);
+		}
+
+		private void CommitResourceState(ResourceState resourceState)
+		{
+			_resourceIdentityIndex[resourceState.Identity] = resourceState;
+		}
+
+		private bool TryGetKindManager(ResourceDocument partialResourceDocument, [NotNullWhen(true)] out ResourceManager? kindManager)
+		{
+			if (partialResourceDocument.Kind == null)
+			{
+				kindManager = default;
+				return false;
 			}
 
-			foreach (var resourceManager in _resourceManagerAccessor.Managers)
-			{
-				foreach (var resource in resourceManager.Resources)
+			return _resourceManagers.TryGetResourceManager(partialResourceDocument.Kind.Value, out kindManager);
+		}
+
+		private ResourceState CreateDefaultState(string identity, ResourceDocument partialResourceState)
+		{
+			if (!TryGetKindManager(partialResourceState, out var manager))
+				throw new System.Exception("Valid kind required.");
+
+			//  todo: create default document from kind schema
+			var stateDoc = new ResourceDocument(
+				new ResourceDefinition(new List<ResourceField>
 				{
-					_resourceIdentityIndex.Add(resource.GetIdentity(), resourceManager);
-				}
-			}
+					new ResourceField("identity", ResourceFieldValue.String(identity))
+				}));
+
+			return new ResourceState(manager, identity, stateDoc);
 		}
 
-		private async Task<IResource> CreateResource(string identity, ResourceDocument resourceDocument)
+		private ResourceState ApplyFields(ResourceDocument partialResourceState, ResourceState existingState)
 		{
-			if (resourceDocument.Kind == null)
-			{
-				throw new System.Exception("Kind must be specified to create a resource.");
-			}
-
-			if (!_resourceManagers.TryGetResourceManager(resourceDocument.Kind.Value, out var resourceManager))
-			{
-				throw new System.Exception("Unknown kind.");
-			}
-
-			var ret = await resourceManager.CreateResource(resourceDocument);
-
-			if (ret == null)
-			{
-				throw new System.Exception("Unable to create resource.");
-			}
-
-			_resourceIdentityIndex.Add(identity, resourceManager);
-			return ret;
+			return existingState;
 		}
 
-		public async Task Apply(ResourceDocument resourceDocument)
+		public bool Validate(ResourceState resourceState)
 		{
-			if (!TryGetIdentity(resourceDocument, out var identity))
+			return true;
+		}
+
+		public Task Load(ResourceDocument fullResourceState)
+		{
+			if (!TryGetIdentity(fullResourceState, out var identity))
 			{
 				throw new System.Exception("Identity field is required.");
 			}
 
-			var resource = default(IResource);
-
-			if (!_resourceIdentityIndex.TryGetValue(identity, out var resourceManager))
+			if (!TryGetKindManager(fullResourceState, out var manager))
 			{
-				resource = await CreateResource(identity, resourceDocument);
-			}
-			else if (!resourceManager.TryGetResource(identity, out resource))
-			{
-				throw new System.Exception("Update failed, resource missing.");
+				throw new System.Exception("Valid kind required.");
 			}
 
-			//  copy definition fields to `resource`
+			var newState = new ResourceState(
+				manager, identity, fullResourceState
+				);
 
-			if (resourceDocument.Metadata != null)
+			if (!Validate(newState))
 			{
-				//  copy metadata fields to `resource`
+				throw new System.Exception("Invalid resource parameters specified.");
 			}
 
-			if (resourceDocument.Spec != null)
+			CommitResourceState(newState);
+
+			return newState.Manager.Save(newState);
+		}
+
+		public Task Apply(ResourceDocument partialResourceState)
+		{
+			if (!TryGetIdentity(partialResourceState, out var identity))
 			{
-				//  set new spec fields for `resource`
+				throw new System.Exception("Identity field is required.");
 			}
 
-			//  save
+			if (!TryGetResourceState(identity, out var existingState))
+			{
+				existingState = CreateDefaultState(identity, partialResourceState);
+			}
+
+			var newState = ApplyFields(partialResourceState, existingState);
+
+			if (!Validate(newState))
+			{
+				throw new System.Exception("Invalid resource parameters specified.");
+			}
+
+			CommitResourceState(newState);
+
+			return newState.Manager.Save(newState);
 		}
 
 		private class ResourceManagerCollection

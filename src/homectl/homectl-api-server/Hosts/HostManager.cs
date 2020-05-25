@@ -39,6 +39,8 @@ namespace HomeCtl.ApiServer.Hosts
 
 		protected override Task Created(Host resource)
 		{
+			//  todo: update state to disconnected and store in the resource store
+
 			var hostServer = new HostServer(resource,
 				new EndpointConnectionManager(
 					_eventBus, _endpointClientFactory, _serverIdentityVerifier,
@@ -59,30 +61,25 @@ namespace HomeCtl.ApiServer.Hosts
 			return Task.CompletedTask;
 		}
 
-		protected override Task Loaded(Host resource)
-		{
-			//  todo: update current state to notconnected
-			return Created(resource);
-		}
-
 		protected override Host? CreateFromDocument(ResourceDocument resourceDocument)
 		{
 			CoreKinds.Host.TryConvertToResourceInstance(resourceDocument, out var host);
 			return host;
 		}
 
-		/*
-		protected override async Task OnResourceUpdated(Host newResource, Host oldResource)
+		protected override void CopyData(Host target, Host source)
 		{
-			if (!_hosts.TryGetValue(newResource.HostId, out var host))
-				return;
-
-			oldResource.Endpoint = newResource.Endpoint;
-			oldResource.MachineName = newResource.MachineName;
-			_connectionManager.UpdateConnection(host);
-
-			await base.OnResourceUpdated(newResource, oldResource);
+			target.Endpoint = source.Endpoint;
+			target.MachineName = source.MachineName;
 		}
-		*/
+
+		protected override Task Updated(Host resource)
+		{
+			if (!_hosts.TryGetValue(resource.HostId, out var host))
+				return Task.CompletedTask;
+
+			_connectionManager.UpdateConnection(host);
+			return Task.CompletedTask;
+		}
 	}
 }

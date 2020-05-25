@@ -1,7 +1,5 @@
 ﻿using HomeCtl.Kinds;
 using HomeCtl.Kinds.Resources;
-using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace HomeCtl.ApiServer.Resources
@@ -27,14 +25,19 @@ namespace HomeCtl.ApiServer.Resources
 			return Task.CompletedTask;
 		}
 
-		protected override Task Loaded(SchemaDrivenKind.DynamicResource resource)
-		{
-			return Task.CompletedTask;
-		}
-
 		protected override SchemaDrivenKind.DynamicResource? CreateFromDocument(ResourceDocument resourceDocument)
 		{
 			return new SchemaDrivenKind.DynamicResource(Kind, resourceDocument);
+		}
+
+		protected override void CopyData(SchemaDrivenKind.DynamicResource target, SchemaDrivenKind.DynamicResource source)
+		{
+			target.ResourceDocument = source.ResourceDocument;
+		}
+
+		protected override Task Updated(SchemaDrivenKind.DynamicResource resource)
+		{
+			return Task.CompletedTask;
 		}
 	}
 }
