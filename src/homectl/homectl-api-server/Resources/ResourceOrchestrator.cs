@@ -1,8 +1,5 @@
-﻿using HomeCtl.ApiServer.Kinds;
-using HomeCtl.Events;
-using HomeCtl.Kinds;
+﻿using HomeCtl.Events;
 using HomeCtl.Kinds.Resources;
-using HomeCtl.Services;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -85,14 +82,19 @@ namespace HomeCtl.ApiServer.Resources
 				new ResourceDefinition(new List<ResourceField>
 				{
 					new ResourceField("identity", ResourceFieldValue.String(identity))
-				}));
+				}),
+				kind: manager.Kind.GetKindDescriptor());
 
 			return new ResourceState(manager, identity, stateDoc);
 		}
 
 		private ResourceState ApplyFields(ResourceDocument partialResourceState, ResourceState existingState)
 		{
-			return existingState;
+			return new ResourceState(
+				existingState.Manager,
+				existingState.Identity,
+				existingState.FullDocument.Patch(partialResourceState)
+				);
 		}
 
 		public bool Validate(ResourceState resourceState)

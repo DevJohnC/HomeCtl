@@ -24,5 +24,16 @@
 		public ResourceSpec? Spec { get; set; }
 
 		public ResourceState? State { get; set; }
+
+		public ResourceDocument Patch(ResourceDocument patchDocument)
+		{
+			return new ResourceDocument(
+				new ResourceDefinition(ResourceFieldCollection.Patch(Definition.Fields, patchDocument.Definition.Fields)),
+				new ResourceMetadata(ResourceFieldCollection.Patch(Metadata?.Fields, patchDocument.Metadata?.Fields)),
+				new ResourceSpec(ResourceFieldCollection.Patch(Spec?.Fields, patchDocument.Spec?.Fields)),
+				State,
+				Kind
+				);
+		}
 	}
 }
