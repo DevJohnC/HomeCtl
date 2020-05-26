@@ -140,6 +140,9 @@ namespace HomeCtl.ApiServer.Resources
 				existingState = CreateDefaultState(identity, partialResourceState);
 			}
 
+			//  ignore any state in case it was present
+			partialResourceState.State = null;
+
 			var newState = ApplyFields(partialResourceState, existingState);
 
 			if (!Validate(newState))

@@ -27,11 +27,17 @@
 
 		public ResourceDocument Patch(ResourceDocument patchDocument)
 		{
+			var definition = new ResourceDefinition(ResourceFieldCollection.Patch(Definition.Fields, patchDocument.Definition.Fields));
+			var metadata = (Metadata != null) ?
+				new ResourceMetadata(ResourceFieldCollection.Patch(Metadata?.Fields, patchDocument.Metadata?.Fields)) : null;
+			var spec = (Spec != null) ?
+				new ResourceSpec(ResourceFieldCollection.Patch(Spec?.Fields, patchDocument.Spec?.Fields)) : null;
+			var state = (State != null) ?
+				new ResourceState(ResourceFieldCollection.Patch(State?.Fields, patchDocument.State?.Fields)) : null;
+
 			return new ResourceDocument(
-				new ResourceDefinition(ResourceFieldCollection.Patch(Definition.Fields, patchDocument.Definition.Fields)),
-				new ResourceMetadata(ResourceFieldCollection.Patch(Metadata?.Fields, patchDocument.Metadata?.Fields)),
-				new ResourceSpec(ResourceFieldCollection.Patch(Spec?.Fields, patchDocument.Spec?.Fields)),
-				State,
+				definition, metadata,
+				spec, state,
 				Kind
 				);
 		}
