@@ -10,12 +10,6 @@ namespace HomeCtl.ApiServer.Resources
 	{
 		private readonly object _lock = new object();
 		private readonly List<ResourceManager> _resourceManagers = new List<ResourceManager>();
-		private readonly EventBus _eventBus;
-
-		public ResourceManagerContainer(EventBus eventBus)
-		{
-			_eventBus = eventBus;
-		}
 
 		public IReadOnlyList<ResourceManager> Managers => _resourceManagers;
 
@@ -23,7 +17,6 @@ namespace HomeCtl.ApiServer.Resources
 		{
 			lock (_lock)
 				_resourceManagers.Add(resourceManager);
-			_eventBus.Publish(new ResourceManagerContainerEvents.ResourceManagerAdded(resourceManager));
 		}
 
 		public bool TryFind(Func<ResourceManager, bool> predicate, [NotNullWhen(true)] out ResourceManager? resourceManager)
@@ -33,19 +26,6 @@ namespace HomeCtl.ApiServer.Resources
 				resourceManager = _resourceManagers.FirstOrDefault(predicate);
 				return resourceManager != null;
 			}
-		}
-	}
-
-	static class ResourceManagerContainerEvents
-	{
-		public class ResourceManagerAdded
-		{
-			public ResourceManagerAdded(ResourceManager resourceManager)
-			{
-				ResourceManager = resourceManager;
-			}
-
-			public ResourceManager ResourceManager { get; }
 		}
 	}
 }
