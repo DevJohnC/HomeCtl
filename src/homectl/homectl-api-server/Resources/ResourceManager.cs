@@ -9,13 +9,18 @@ namespace HomeCtl.ApiServer.Resources
 {
 	abstract class ResourceManager
 	{
+		public ResourceManager(ResourceManagerContainer resourceManagers)
+		{
+			resourceManagers.Add(this);
+		}
+
 		public abstract Kind Kind { get; }
 
 		public abstract IReadOnlyList<IResource> Resources { get; }
 
 		public abstract Task Save(ResourceState resourceState);
 
-		public abstract Task Load(ResourceOrchestrator orchestrator);
+		public abstract Task Load(ResourceStateStore orchestrator);
 	}
 
 	abstract class ResourceManager<T> : ResourceManager
@@ -30,12 +35,14 @@ namespace HomeCtl.ApiServer.Resources
 
 		protected abstract Kind<T> TypedKind { get; }
 
-		public ResourceManager(IResourceDocumentStore<T> documentStore)
+		public ResourceManager(IResourceDocumentStore<T> documentStore,
+			ResourceManagerContainer resourceManagers) :
+			base(resourceManagers)
 		{
 			DocumentStore = documentStore;
 		}
 
-		public override async Task Load(ResourceOrchestrator orchestrator)
+		public override async Task Load(ResourceStateStore orchestrator)
 		{
 			var documents = await DocumentStore.LoadAll();
 			foreach (var document in documents)

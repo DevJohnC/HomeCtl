@@ -7,8 +7,8 @@ namespace HomeCtl.ApiServer.Devices
 {
 	class DeviceManager : ResourceManager<Device>
 	{
-		public DeviceManager(IResourceDocumentStore<Device> documentStore) :
-			base(documentStore)
+		public DeviceManager(IResourceDocumentStore<Device> documentStore, ResourceManagerContainer resourceManagers) :
+			base(documentStore, resourceManagers)
 		{
 		}
 

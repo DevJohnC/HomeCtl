@@ -1,6 +1,7 @@
 ﻿using HomeCtl.ApiServer.Orchestration;
 using HomeCtl.ApiServer.Resources;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,11 +13,12 @@ namespace HomeCtl.ApiServer.BackgroundServices
 	class OrchestrationBackgroundService : BackgroundService
 	{
 		private readonly OrchestrationConductor _orchestrationConductor;
-		private readonly ResourceOrchestrator _resourceOrchestrator;
+		private readonly ResourceStateStore _resourceOrchestrator;
 
 		public OrchestrationBackgroundService(
 			OrchestrationConductor orchestrationConductor,
-			ResourceOrchestrator resourceOrchestrator
+			ResourceStateStore resourceOrchestrator,
+			IEnumerable<StartupService> startupServices
 			)
 		{
 			_orchestrationConductor = orchestrationConductor;

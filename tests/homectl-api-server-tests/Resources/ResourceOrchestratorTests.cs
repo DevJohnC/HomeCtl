@@ -16,10 +16,10 @@ namespace homectl_api_server_tests.Resources
 		public async Task Apply_Creates_Resource_In_Correct_Manager_When_No_Match_Exists()
 		{
 			var testClassManager = new TestKinds.TestClassManager(new DoNothingResourceStore<TestKinds.TestClass>());
-			var resourceOrchestrator = new ResourceOrchestrator(new[]
+			var resourceOrchestrator = new ResourceStateStore(new[]
 			{
 				testClassManager
-			}, new ResourceManagerAccessor());
+			}, new ResourceManagerContainer());
 
 			var testObjOrigin = new TestKinds.TestClass { Id = Guid.NewGuid() };
 			if (!testObjOrigin.Kind.TryConvertToDocument(testObjOrigin, out var resourceDocument))
@@ -34,10 +34,10 @@ namespace homectl_api_server_tests.Resources
 		public async Task Apply_Updates_Resource_In_Correct_Manager_When_Match_Exists()
 		{
 			var testClassManager = new TestKinds.TestClassManager(new DoNothingResourceStore<TestKinds.TestClass>());
-			var resourceOrchestrator = new ResourceOrchestrator(new[]
+			var resourceOrchestrator = new ResourceStateStore(new[]
 			{
 				testClassManager
-			}, new ResourceManagerAccessor());
+			}, new ResourceManagerContainer());
 
 			var testObjOrigin = new TestKinds.TestClass { Id = Guid.NewGuid() };
 			if (!testObjOrigin.Kind.TryConvertToDocument(testObjOrigin, out var resourceDocument))

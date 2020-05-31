@@ -7,9 +7,9 @@ namespace HomeCtl.ApiServer.ProtocolServices
 {
 	class ControlService : Control.ControlBase
 	{
-		private readonly ResourceOrchestrator _resourceOrchestrator;
+		private readonly ResourceStateStore _resourceOrchestrator;
 
-		public ControlService(ResourceOrchestrator resourceOrchestrator)
+		public ControlService(ResourceStateStore resourceOrchestrator)
 		{
 			_resourceOrchestrator = resourceOrchestrator;
 		}

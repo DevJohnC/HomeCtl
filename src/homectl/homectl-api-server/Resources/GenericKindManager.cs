@@ -11,8 +11,9 @@ namespace HomeCtl.ApiServer.Resources
 		public GenericKindManager(
 			IResourceDocumentStore<SchemaDrivenKind.DynamicResource> documentStore,
 			Kind<SchemaDrivenKind.DynamicResource> kind,
-			ResourceManager? parentKindManager) :
-			base(documentStore)
+			ResourceManager? parentKindManager,
+			ResourceManagerContainer resourceManagers) :
+			base(documentStore, resourceManagers)
 		{
 			_parentKindManager = parentKindManager;
 			TypedKind = kind;

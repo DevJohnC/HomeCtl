@@ -8,15 +8,18 @@ namespace HomeCtl.ApiServer.Kinds
 	class KindManager : ResourceManager<Kind>
 	{
 		private readonly IDocumentStoreFactory _documentStoreFactory;
-		private readonly ResourceManagerAccessor _resourceManagerAccessor;
+		private readonly ResourceManagerContainer _resourceManagerAccessor;
+		private readonly ResourceManagerContainer _resourceManagers;
 
 		public KindManager(IResourceDocumentStore<Kind> documentStore,
 			IDocumentStoreFactory documentStoreFactory,
-			ResourceManagerAccessor resourceManagerAccessor) :
-			base(documentStore)
+			ResourceManagerContainer resourceManagerAccessor,
+			ResourceManagerContainer resourceManagers) :
+			base(documentStore, resourceManagers)
 		{
 			_documentStoreFactory = documentStoreFactory;
 			_resourceManagerAccessor = resourceManagerAccessor;
+			_resourceManagers = resourceManagers;
 
 			AddResource(CoreKinds.Kind);
 			AddResource(CoreKinds.Host);
@@ -64,7 +67,8 @@ namespace HomeCtl.ApiServer.Kinds
 			var manager = new GenericKindManager(
 				_documentStoreFactory.CreateDocumentStore(schemaDrivenKind),
 				schemaDrivenKind,
-				extendsManager
+				extendsManager,
+				_resourceManagers
 				);
 
 			_resourceManagerAccessor.Add(manager);

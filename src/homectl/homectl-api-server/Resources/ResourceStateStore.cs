@@ -8,25 +8,16 @@ using ResourceDocument = HomeCtl.Kinds.Resources.ResourceDocument;
 
 namespace HomeCtl.ApiServer.Resources
 {
-	class ResourceOrchestrator
+	class ResourceStateStore
 	{
-		private readonly ResourceManagerCollection _resourceManagers = new ResourceManagerCollection();
-		private readonly ResourceManagerAccessor _resourceManagerAccessor;
+		private readonly ResourceManagerContainer _resourceManagers;
 		private readonly Dictionary<string, ResourceState> _resourceIdentityIndex = new Dictionary<string, ResourceState>();
 
-		public ResourceOrchestrator(
-			IEnumerable<ResourceManager> coreResourceManagers,
-			ResourceManagerAccessor resourceManagerAccessor,
-			EventBus eventBus
+		public ResourceStateStore(
+			ResourceManagerContainer resourceManagers
 			)
 		{
-			_resourceManagerAccessor = resourceManagerAccessor;
-			_resourceManagers.AddRange(coreResourceManagers);
-			foreach (var resourceManager in _resourceManagers.GetAll())
-				_resourceManagerAccessor.Add(resourceManager);
-
-			eventBus.Subscribe<ResourceManagerAccessorEvents.ResourceManagerAdded>(
-				args => EnsureResourceManagerIsPresent(args.ResourceManager));
+			_resourceManagers = resourceManagers;
 		}
 
 		private bool TryGetIdentity(ResourceDocument resourceDocument, [NotNullWhen(true)] out string? identity)
@@ -37,17 +28,9 @@ namespace HomeCtl.ApiServer.Resources
 
 		public async Task LoadResources()
 		{
-			foreach (var resourceManager in _resourceManagers.GetAll())
+			foreach (var resourceManager in _resourceManagers.Managers)
 			{
 				await resourceManager.Load(this);
-			}
-		}
-
-		private void EnsureResourceManagerIsPresent(ResourceManager resourceManager)
-		{
-			if (!_resourceManagers.TryGetResourceManager(resourceManager.Kind.GetKindDescriptor(), out var _))
-			{
-				_resourceManagers.Add(resourceManager);
 			}
 		}
 
@@ -69,7 +52,7 @@ namespace HomeCtl.ApiServer.Resources
 				return false;
 			}
 
-			return _resourceManagers.TryGetResourceManager(partialResourceDocument.Kind.Value, out kindManager);
+			return _resourceManagers.TryFind(q => q.Kind.GetKindDescriptor().Equals(partialResourceDocument.Kind.Value), out kindManager);
 		}
 
 		private ResourceState CreateDefaultState(string identity, ResourceDocument partialResourceState)
@@ -153,49 +136,6 @@ namespace HomeCtl.ApiServer.Resources
 			CommitResourceState(newState);
 
 			return newState.Manager.Save(newState);
-		}
-
-		private class ResourceManagerCollection
-		{
-			private readonly object _lock = new object();
-
-			private readonly Dictionary<KindDescriptor, ResourceManager> _resourceManagers
-				= new Dictionary<KindDescriptor, ResourceManager>();
-
-			public IEnumerable<ResourceManager> GetAll()
-			{
-				lock (_lock)
-				{
-					return _resourceManagers.Values.ToList();
-				}
-			}
-
-			public void Add(ResourceManager resourceManager)
-			{
-				lock (_lock)
-				{
-					_resourceManagers.Add(resourceManager.Kind.GetKindDescriptor(), resourceManager);
-				}
-			}
-
-			public void AddRange(IEnumerable<ResourceManager> resourceManagers)
-			{
-				lock (_lock)
-				{
-					foreach (var resourceManager in resourceManagers)
-					{
-						_resourceManagers.Add(resourceManager.Kind.GetKindDescriptor(), resourceManager);
-					}
-				}
-			}
-
-			public bool TryGetResourceManager(KindDescriptor kindDescriptor, [NotNullWhen(true)] out ResourceManager? resourceManager)
-			{
-				lock (_lock)
-				{
-					return _resourceManagers.TryGetValue(kindDescriptor, out resourceManager);
-				}
-			}
 		}
 	}
 }

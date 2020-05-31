@@ -18,7 +18,7 @@ namespace HomeCtl.ApiServer.Hosts
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEndpointClientFactory _endpointClientFactory;
 		private readonly IServerIdentityVerifier _serverIdentityVerifier;
-
+		private readonly ResourceStateManager _resourceStateManager;
 		private readonly object _lock = new object();
 		private readonly Dictionary<Guid, HostServer> _hosts =
 			new Dictionary<Guid, HostServer>();
@@ -27,19 +27,21 @@ namespace HomeCtl.ApiServer.Hosts
 
 		public HostManager(ConnectionManager connectionManager, EventBus eventBus,
 			ILoggerFactory loggerFactory, IEndpointClientFactory endpointClientFactory,
-			IServerIdentityVerifier serverIdentityVerifier, IResourceDocumentStore<Host> documentStore) :
-			base(documentStore)
+			IServerIdentityVerifier serverIdentityVerifier, IResourceDocumentStore<Host> documentStore,
+			ResourceStateManager resourceStateManager, ResourceManagerContainer resourceManagers) :
+			base(documentStore, resourceManagers)
 		{
 			_connectionManager = connectionManager;
 			_eventBus = eventBus;
 			_loggerFactory = loggerFactory;
 			_endpointClientFactory = endpointClientFactory;
 			_serverIdentityVerifier = serverIdentityVerifier;
+			_resourceStateManager = resourceStateManager;
 		}
 
-		protected override Task Created(Host resource)
+		protected override async Task Created(Host resource)
 		{
-			//  todo: update state to disconnected and store in the resource store
+			await resource.SetConnectedState(_resourceStateManager, Host.ConnectedState.NotConnected);
 
 			var hostServer = new HostServer(resource,
 				new EndpointConnectionManager(
@@ -48,7 +50,8 @@ namespace HomeCtl.ApiServer.Hosts
 					),
 				_eventBus,
 				_loggerFactory.CreateLogger<HostServer>(),
-				this
+				this,
+				_resourceStateManager
 				);
 
 			lock (_lock)
@@ -57,8 +60,6 @@ namespace HomeCtl.ApiServer.Hosts
 			}
 
 			_connectionManager.CreateConnection(hostServer);
-
-			return Task.CompletedTask;
 		}
 
 		protected override Host? CreateFromDocument(ResourceDocument resourceDocument)

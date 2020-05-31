@@ -19,7 +19,7 @@
 
 		public ResourceMetadata? Metadata { get; set; }
 
-		public ResourceDefinition Definition { get; }
+		public ResourceDefinition Definition { get; set; }
 
 		public ResourceSpec? Spec { get; set; }
 

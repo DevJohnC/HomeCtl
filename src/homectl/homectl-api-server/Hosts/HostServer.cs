@@ -1,4 +1,5 @@
-﻿using HomeCtl.Connection;
+﻿using HomeCtl.ApiServer.Resources;
+using HomeCtl.Connection;
 using HomeCtl.Events;
 using HomeCtl.Kinds;
 using Microsoft.Extensions.Logging;
@@ -10,16 +11,19 @@ namespace HomeCtl.ApiServer.Hosts
 		public HostServer(Host host, 
 			EndpointConnectionManager connectionManager, EventBus eventBus,
 			ILogger<HostServer> logger,
-			HostManager hostManager) :
+			HostManager hostManager,
+			ResourceStateManager resourceStateManager) :
 			base(connectionManager, eventBus, logger)
 		{
 			Host = host;
 			_hostManager = hostManager;
+			_resourceStateManager = resourceStateManager;
 		}
 
 		public Host Host { get; }
 
 		private readonly HostManager _hostManager;
+		private readonly ResourceStateManager _resourceStateManager;
 
 		protected override void SubscribeToEvents()
 		{
@@ -38,9 +42,7 @@ namespace HomeCtl.ApiServer.Hosts
 			if (args.ServerEndpoint.Uri.OriginalString != Host.Endpoint)
 				return;
 
-			//  todo: API to store resource state
-			//Host.State.ConnectedState = Host.ConnectedState.Connected;
-			//await _hostManager.StoreChanges(Host);
+			await Host.SetConnectedState(_resourceStateManager, Host.ConnectedState.Connected);
 		}
 
 		private async void Handle_Disconnected(EndpointConnectionEvents.Disconnected args)
@@ -48,9 +50,7 @@ namespace HomeCtl.ApiServer.Hosts
 			if (args.ServerEndpoint.Uri.OriginalString != Host.Endpoint)
 				return;
 
-			//  todo: API to store resource state
-			//Host.State.ConnectedState = Host.ConnectedState.NotConnected;
-			//await _hostManager.StoreChanges(Host);
+			await Host.SetConnectedState(_resourceStateManager, Host.ConnectedState.NotConnected);
 		}
 	}
 }
